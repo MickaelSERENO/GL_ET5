@@ -1,9 +1,12 @@
+\echo 'Clear the database'
+
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
 -----------
 --Functions
 -----------
+\echo 'implements functions'
 
 CREATE OR REPLACE FUNCTION checkTaskDate(in INTEGER, in DATE) RETURNS BOOLEAN AS $$
 	BEGIN
@@ -11,9 +14,12 @@ CREATE OR REPLACE FUNCTION checkTaskDate(in INTEGER, in DATE) RETURNS BOOLEAN AS
 	END
 	$$ LANGUAGE plpgsql;
 
+\echo 'Implements tables'
+
 --------------------------------------------------
 --Contact tables (contact client, EndUser, Client)
 --------------------------------------------------
+
 CREATE TABLE Contact
 (
 	name    VARCHAR(64),
@@ -25,9 +31,9 @@ CREATE TABLE Contact
 CREATE TABLE EndUser
 (
 	contactEmail VARCHAR(128) NOT NULL,
-	password     VARCHAR(128) NOT NULL,
+	password     VARCHAR(60) NOT NULL,
 	isActive     BOOLEAN      NOT NULL,
-	CHECK(character_length(password) = 128),
+	CHECK(character_length(password) = 60),
 	FOREIGN KEY(contactEmail) REFERENCES Contact(email),
 	PRIMARY KEY(contactEmail)
 );
@@ -56,26 +62,23 @@ CREATE TABLE ClientContact
 -----------------------------------------------------------
 CREATE TABLE Collaborator
 (
-	id        INTEGER,
 	userEmail VARCHAR(128) NOT NULL,
 	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail),
-	PRIMARY KEY(id)	
+	PRIMARY KEY(userEmail)	
 );
 
 CREATE TABLE ProjectManager
 (
-	id        INTEGER,
 	userEmail VARCHAR(128) NOT NULL,
 	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail),
-	PRIMARY KEY(id)	
+	PRIMARY KEY(userEmail)	
 );
 
 CREATE TABLE Administrator
 (
-	id        INTEGER,
 	userEmail VARCHAR(128) NOT NULL,
 	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail),
-	PRIMARY KEY(id)	
+	PRIMARY KEY(userEmail)	
 );
 
 --------------------------------------------
@@ -83,19 +86,18 @@ CREATE TABLE Administrator
 --------------------------------------------
 CREATE TABLE Notification
 (
-	id      INTEGER,
-	theDate DATE NOT NULL,
-	title   TEXT NOT NULL,
+	id      SERIAL  PRIMARY KEY,
+	theDate DATE    NOT NULL,
+	title   TEXT    NOT NULL,
 	message TEXT,
-	read    BOOLEAN NOT NULL,
-	PRIMARY KEY(id)
+	read    BOOLEAN NOT NULL
 );
 
 CREATE TABLE Sender
 (
 	idNotification INTEGER,
 	emailSender    VARCHAR(128),
-	emailReceiver  VARCHAR(128),
+	emailReceiver  VARCHAR(128) NOT NULL,
 	FOREIGN KEY(idNotification) REFERENCES Notification(id),
 	FOREIGN KEY(emailSender)    REFERENCES EndUser(contactEmail),
 	FOREIGN KEY(emailReceiver)  REFERENCES EndUser(contactEmail),
@@ -109,8 +111,8 @@ CREATE TYPE PROJECT_STATUS AS ENUM('NOT_STARTED', 'STARTED', 'CLOSED_VISIBLE', '
 
 CREATE TABLE Project
 (
-	id           INTEGER,
-	managerID    INTEGER      NOT NULL,
+	id           SERIAL       PRIMARY KEY,
+	managerEmail VARCHAR(128) NOT NULL,
 	contactEmail VARCHAR(128) NOT NULL,
 	name         VARCHAR(128) NOT NULL,
 	description  TEXT,
@@ -118,18 +120,17 @@ CREATE TABLE Project
 	endDate      DATE NOT NULL,
 	status       PROJECT_STATUS NOT NULL,
 	CHECK (startDate < endDate),
-	FOREIGN KEY(managerID)    REFERENCES ProjectManager(id),
-	FOREIGN KEY(contactEmail) REFERENCES ClientContact(contactEmail),
-	PRIMARY KEY(id)
+	FOREIGN KEY(managerEmail) REFERENCES ProjectManager(userEmail),
+	FOREIGN KEY(contactEmail) REFERENCES ClientContact(contactEmail)
 );
 
 CREATE TABLE ProjectCollaborator
 (
-	projectID      INTEGER,
-	collaboratorID INTEGER,
-	FOREIGN KEY(projectID)      REFERENCES Project(id),
-	FOREIGN KEY(collaboratorID) REFERENCES Collaborator(id),
-	PRIMARY KEY(projectID, collaboratorID)
+	projectID         INTEGER,
+	collaboratorEmail VARCHAR(128) NOT NULL,
+	FOREIGN KEY(projectID)         REFERENCES Project(id),
+	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail),
+	PRIMARY KEY(projectID, collaboratorEmail)
 );
 
 CREATE TABLE ProjectNotification
@@ -146,13 +147,12 @@ CREATE TABLE ProjectNotification
 ---------------------------------------
 CREATE TABLE AbstractTask
 (
-	id          INTEGER,
+	id          SERIAL       PRIMARY KEY,
 	idProject   INTEGER      NOT NULL,
 	name        VARCHAR(128) NOT NULL,
 	description TEXT,
 	startDate   DATE         NOT NULL,
-	FOREIGN KEY(idProject) REFERENCES Project(id),
-	PRIMARY KEY(id)
+	FOREIGN KEY(idProject) REFERENCES Project(id)
 );
 
 CREATE TABLE TaskOrder
@@ -167,18 +167,20 @@ CREATE TABLE TaskOrder
 
 CREATE TABLE Task
 (
-	id             INTEGER,
-	endDate        DATE,
-	initCharge     INTEGER,
-	computedCharge INTEGER,
-	remaining      INTEGER,
-	chargeConsumed INTEGER,
-	advancement    INTEGER,
+	id                INTEGER,
+	endDate           DATE,
+	initCharge        INTEGER,
+	computedCharge    INTEGER,
+	remaining         INTEGER,
+	chargeConsumed    INTEGER,
+	advancement       INTEGER,
+	collaboratorEmail VARCHAR(128),
 	CHECK(advancement >= 0 AND advancement <= 100),
 	CHECK(chargeConsumed = computedCharge - remaining),
 	CHECK(chargeConsumed >= 0 AND computedCharge >= 0 AND remaining >= 0 AND initCharge >= 0),
 	CHECK(checkTaskDate(id, endDate) = TRUE),
-	FOREIGN KEY(id) REFERENCES AbstractTask(id),
+	FOREIGN KEY(id)                REFERENCES AbstractTask(id),
+	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail),
 	PRIMARY KEY(id)
 );
 
@@ -202,6 +204,8 @@ CREATE TABLE TaskHierarchy
 ----------
 --Triggers
 ----------
+
+\echo 'Implements triggers'
 
 --Trigger functions
 CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskHierarchy$
@@ -228,62 +232,160 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 	END
 	$triggerTaskHierarchy$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION checkEndUser() RETURNS TRIGGER AS $triggerEndUser$ 
+	BEGIN
+		IF (SELECT COUNT(id) FROM Project WHERE Project.managerEmail = NEW.contactEmail AND 
+			(Project.status <> 'CLOSED_VISIBLE' AND Project.status <> 'CLOSED_INVISIBLE') AND 
+			New.isActive = FALSE) <> 0 THEN
+			RAISE EXCEPTION 'The project manager contains an unfinished project';
+		ELSIF (SELECT COUNT(id) FROM Project, ProjectCollaborator WHERE Project.id = ProjectCollaborator.projectID AND 
+			NEW.contactEmail = ProjectCollaborator.collaboratorEmail AND 
+			(Project.status <> 'CLOSED_VISIBLE' AND Project.status <> 'CLOSED_INVISIBLE') AND 
+			New.isActive = FALSE) <> 0 THEN
+			RAISE EXCEPTION 'The collaborator contains an unfinished project';
+		END IF;
+		RETURN New;
+	END
+	$triggerEndUser$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION checkProjectManager() RETURNS TRIGGER AS $triggerProjectManager$ 
 	BEGIN
-		IF (SELECT COUNT(id) FROM Project, EndUser WHERE Project.managerID = NEW.id AND (Project.status <> 'CLOSED_VISIBLE' AND Project.status <> 'CLOSED_INVISIBLE') AND 
-			NEW.userEmail = EndUser.contactEmail AND EndUser.isActive = FALSE) > 0 THEN
-			RAISE EXCEPTION 'The project manager contains an unfinished project';
-		ELSIF (SELECT COUNT(*) FROM ProjectManager WHERE ProjectManager.id = New.id) > 0 THEN
+		IF (SELECT COUNT(*) FROM Collaborator WHERE Collaborator.userEmail = New.userEmail) > 0 THEN
 			RAISE EXCEPTION 'The ProjectManager has the same ID than a Collaborator';
 		END IF;
+		RETURN New;
 	END
 	$triggerProjectManager$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION checkCollaborator() RETURNS TRIGGER AS $triggerCollaborator$ 
 	BEGIN
-		IF (SELECT COUNT(id) FROM Project, ProjectCollaborator, EndUser WHERE Project.id = ProjectCollaborator.projectID AND (Project.status <> 'CLOSED_VISIBLE' AND Project.status <> 'CLOSED_INVISIBLE') AND 
-			ProjectCollaborator.collaboratorID = NEW.id AND NEW.userEmail = EndUser.contactEmail AND EndUser.isActive = FALSE) > 0 THEN
-			RAISE EXCEPTION 'The collaborator contains an unfinished project';
-		ELSIF (SELECT COUNT(*) FROM ProjectManager WHERE id = New.id) > 0 THEN
+		IF (SELECT COUNT(*) FROM ProjectManager WHERE ProjectManager.userEmail = New.userEmail) > 0 THEN
 			RAISE EXCEPTION 'The Collaborator has the same ID than a ProjectManager';
 		END IF;
+		RETURN New;
 	END
 	$triggerCollaborator$ LANGUAGE plpgsql;
+
+--Check Project
+CREATE OR REPLACE FUNCTION checkProject() RETURNS TRIGGER AS $triggerProject$ 
+	BEGIN
+		IF (SELECT COUNT(*) FROM EndUser WHERE contactEmail = New.managerEmail AND isActive = TRUE) = 0 THEN
+			RAISE EXCEPTION 'The manager is not active';
+		END IF;
+		RETURN New;
+	END
+	$triggerProject$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION checkProjectAfterInsert() RETURNS TRIGGER AS $triggerProjectAfterInsert$ 
+	BEGIN
+		--Insert automatically the project manager into the list
+		INSERT INTO ProjectCollaborator VALUES (New.id, New.managerEmail);
+		RETURN New;
+	END
+	$triggerProjectAfterInsert$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION checkTask() RETURNS TRIGGER AS $triggerTask$ 
 	BEGIN
 		IF (SELECT COUNT(*) FROM Marker WHERE id = New.id) > 0 THEN
 			RAISE EXCEPTION 'The Task has the same ID than a marker';
+		ELSIF (SELECT COUNT(*) FROM ProjectCollaborator, AbstractTask 
+		  	   WHERE AbstractTask.id = New.id AND idProject = ProjectCollaborator AND
+		       New.collaboratorEmail = ProjectManager.collaboratorEmail) = 0 THEN
+			RAISE EXCEPTION 'The collaborator is not part of the project collaborator list';	
+		ELSIF (SELECT COUNT(*) FROM Project, AbstractTask WHERE AbstractTask.id = New.id AND AbstractTask.projectID = Project.ID AND AbstractTask.startDate >= Project.startDate AND New.endDate <= Project.endDate) = 0 THEN
+			RAISE EXCEPTION 'The task is not within the project date';
 		END IF;
+		RETURN New;
 	END
 	$triggerTask$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION checkTaskOrder() RETURNS TRIGGER AS $triggerTaskOrder$ 
+	BEGIN
+		IF (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Marker
+		   	WHERE T1.id = New.predecessorID AND T2.id = New.successorID AND T1.idProject = T2.idProject AND
+		    T1.startDate <= T2.startDate AND T1.id = Marker.id) = 0  AND
+		   (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Task
+		   	WHERE T1.id = New.predecessorID AND T2.id = New.successorID AND T1.idProject = T2.idProject AND
+			Task.endDate <= T2.startDate AND T1.id = Task.id) = 0 THEN
+			RAISE EXCEPTION 'The tasks must be in the same project and the date must be correct';
+		END IF;
+		RETURN New;
+	END
+	$triggerTaskOrder$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION checkMarker() RETURNS TRIGGER AS $triggerMarker$ 
 	BEGIN
 		IF (SELECT COUNT(*) FROM Task WHERE id = New.id) > 0 THEN
 			RAISE EXCEPTION 'The Marker has the same ID than a Task';
 		END IF;
+		RETURN New;
 	END
 	$triggerMarker$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION checkProjectCollaborator() RETURNS TRIGGER AS $triggerProjectCollaborator$ 
+	BEGIN
+		IF (SELECT COUNT(*) FROM EndUser, Collaborator WHERE contactEmail = New.collaboratorEmail AND 
+			userEmail = New.collaboratorEmail AND isActive = TRUE) = 0  AND 
+			(SELECT COUNT(*) FROM EndUser, ProjectManager WHERE contactEmail = New.collaboratorEmail AND
+			userEmail = New.collaboratorEmail AND isActive = TRUE) = 0 THEN
+			RAISE EXCEPTION 'The collaborator must be an active project manager or an active collaborator.';
+		END IF;
+		RETURN New;
+	END
+	$triggerProjectCollaborator$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION checkDeleteProjectCollaborator() RETURNS TRIGGER AS $triggerDeleteProjectCollaborator$ 
+	BEGIN
+		IF (SELECT COUNT(*) FROM Project WHERE managerEmail = New.collaboratorEmail AND Project.id = New.projectID) = 1 THEN 
+			RAISE EXCEPTION 'Cannot delete the project manager from the list of the collaborator for this project';
+		END IF;
+		RETURN New;
+	END
+	$triggerDeleteProjectCollaborator$ LANGUAGE plpgsql;
+
+--Check the status of an EndUser
+CREATE TRIGGER triggerEndUser BEFORE UPDATE
+	ON EndUser
+	FOR EACH ROW
+		EXECUTE PROCEDURE checkEndUser();
+
 
 --Check the status of the project manager
-CREATE TRIGGER triggerProjectManager BEFORE UPDATE
+CREATE TRIGGER triggerProjectManager BEFORE INSERT OR UPDATE
 	ON ProjectManager
 	FOR EACH ROW
 		EXECUTE PROCEDURE checkProjectManager();
 
+
 --Check the status of the collaborator
-CREATE TRIGGER triggerCollaborator   BEFORE UPDATE
+CREATE TRIGGER triggerCollaborator   BEFORE INSERT OR UPDATE
 	ON Collaborator
 	FOR EACH ROW
 		EXECUTE PROCEDURE checkCollaborator();
+
+--Check Project
+CREATE TRIGGER triggerProject BEFORE INSERT OR UPDATE
+	ON Project
+	FOR EACH ROW
+		EXECUTE PROCEDURE checkProject();
+
+--Do some treatment after inserting a project
+CREATE TRIGGER triggerProjectAfterInsert AFTER INSERT
+	ON Project
+	FOR EACH ROW
+		EXECUTE PROCEDURE checkProjectAfterInsert();
 
 --Check Tasks
 CREATE TRIGGER triggerTask BEFORE UPDATE OR INSERT
 	ON Task
 	FOR EACH ROW
 		EXECUTE PROCEDURE checkTask();
+
+--Check Task order
+CREATE TRIGGER triggerTaskOrder BEFORE UPDATE OR INSERT
+	ON TaskOrder
+	FOR EACH ROW
+		EXECUTE PROCEDURE checkTaskOrder();
 
 --Check Marker
 CREATE TRIGGER triggerMarker BEFORE UPDATE OR INSERT
@@ -296,3 +398,23 @@ CREATE TRIGGER triggerTaskHierarchy BEFORE UPDATE OR INSERT
 	ON TaskHierarchy
 	FOR EACH ROW
 		EXECUTE PROCEDURE checkTaskHierarchy();
+
+--Check ProjectCollaborator
+CREATE TRIGGER triggerProjectCollaborator BEFORE UPDATE OR INSERT
+	ON ProjectCollaborator
+	FOR EACH ROW
+		EXECUTE PROCEDURE checkProjectCollaborator();
+
+--Check the deletion of the projet collaborator list
+CREATE TRIGGER triggerDeleteProjectCollaborator BEFORE DELETE
+	ON ProjectCollaborator
+	FOR EACH ROW
+		EXECUTE PROCEDURE checkDeleteProjectCollaborator();
+
+\echo 'create an administrator. Password : password'
+
+INSERT INTO Contact VALUES ('Anna', 'Demars', 'administrator@email.com');
+INSERT INTO EndUser VALUES ('administrator@email.com', '$2y$10$ZRffHRCZxBuD545YelpwS.bTFhxFogn7yxfIMuBhBIrZUcXorVKl2', TRUE);
+INSERT INTO Administrator(userEmail) VALUES ('administrator@email.com');
+
+INSERT INTO ProjectManager(userEmail) VALUES ('administrator@email.com');

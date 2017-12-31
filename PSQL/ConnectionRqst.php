@@ -7,7 +7,6 @@
 		public function identValid($email, $pwd, $admin)
 		{
 			$script = "";
-			$pwdHashed = password_hash($pwd, PASSWORD_BCRYPT);
 			if($admin)
 				$script = "SELECT contactEmail, password, isActive FROM EndUser INNER JOIN Administrator ON (EndUser.contactEmail = Administrator.userEmail) WHERE userEmail = '$email' AND isActive = TRUE;";
 			else
@@ -20,7 +19,7 @@
 			if($row == null)
 				return false;
 
-			return password_verify($pwdHashed, $row[1]);
+			return password_verify($pwd, $row[1]);
 		}
 	}
 ?>
