@@ -1,0 +1,29 @@
+.centralPart
+{
+	background-color: #48A8FF;
+	border-radius: 25px;
+	width: 75%;
+	text-align: center;
+}
+
+.centralConnection
+{
+	margin-top:5em;
+	padding-bottom:5em;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.connectionTitle
+{
+	padding-top: 2em;
+}
+
+.topSpace
+{
+	margin-top: 3em;
+}
+
+.descField
+{
+}
