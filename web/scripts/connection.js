@@ -61,4 +61,8 @@ window.onload = function()
 	httpCtx.open("POST", "connection.php", true);
 	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	httpCtx.send("email=&pwd=&isAdmin=");
+
+	var banner = document.getElementById('topBanner');
+	var centralPart = document.getElementById('centralPart');
+	centralPart.style.marginTop = banner.offsetTop + banner.clientHeight + 10 + 'px';
 }

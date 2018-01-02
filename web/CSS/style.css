@@ -1,14 +1,27 @@
-.centralPart
+#topBanner
 {
-	background-color: #48A8FF;
-	border-radius: 25px;
-	width: 75%;
-	text-align: center;
+	top:1em;
+	left:0em;
+	position:fixed;
+	background-color: #328F32;
+	border-radius: 8px;
+	width: 100%;
 }
 
-.centralConnection
+#topBanner p
 {
-	margin-top:5em;
+	margin-left:1em;
+	font-weight: bold;
+	font-size: 150%;
+	color: white;
+}
+
+#centralPart
+{
+	background-color: #48A8FF;
+	border-radius: 8px;
+	width: 95%;
+	text-align: center;
 	padding-bottom:5em;
 	margin-left:auto;
 	margin-right:auto;

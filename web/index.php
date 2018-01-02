@@ -15,7 +15,10 @@
 
 	<body ng-app="myApp">
 		<div ng-controller="formController">
-			<div class="centralPart centralConnection">
+			<div id="topBanner">
+				<p>PoPS2017</p>
+			</div>
+			<div id="centralPart">
 				<h1 class="connectionTitle">Connexion</h1>
 				<div class="container-fluid">
 					<!-- The email input -->
@@ -46,8 +49,10 @@
 					</label>
 				</div>
 
+				<p> <a href="/new-password.php">Mot de passe oublié</a></p>
+
 				<div class="container-fluid">
-					<div class="row topSpace">
+					<div class="row">
 
 						<button class="btn btn-primary col-sm-2 col-sm-offset-5" type="button" ng-click="tryConnection()">
 							Se connecter
