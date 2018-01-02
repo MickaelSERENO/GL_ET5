@@ -37,9 +37,9 @@ myApp.controller('formController', function($scope, $timeout)
 				}
 			}
 		}
-		httpCtx.open("POST", "connection.php", true);
+		httpCtx.open("POST", "identRequest.php", true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-		httpCtx.send("email="+$scope.email+"&pwd="+$scope.pwd+"&isAdmin="+$scope.isAdmin);
+		httpCtx.send("requestID=3&email="+$scope.email+"&pwd="+$scope.pwd+"&isAdmin="+$scope.isAdmin);
 	};
 });
 
@@ -58,9 +58,9 @@ window.onload = function()
 			}
 		}
 	}
-	httpCtx.open("POST", "connection.php", true);
+	httpCtx.open("POST", "identRequest.php", true);
 	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	httpCtx.send("email=&pwd=&isAdmin=");
+	httpCtx.send("requestID=1");
 
 	var banner = document.getElementById('topBanner');
 	var centralPart = document.getElementById('centralPart');
