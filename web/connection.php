@@ -4,7 +4,7 @@
 
 	$rqst = new ConnectionRqst();		
 	if($rqst->identValid($_POST["email"], $_POST["pwd"], $_POST["isAdmin"]))
-		echo("ok");
+		echo(1);
 	else
-		echo("error");
+		echo(0);
 ?>

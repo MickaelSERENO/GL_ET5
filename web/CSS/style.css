@@ -24,6 +24,11 @@
 	margin-top: 3em;
 }
 
+.errorMsg
+{
+	color: red;
+}
+
 .descField
 {
 }
