@@ -53,7 +53,7 @@
 							Se connecter
 						</button>
 
-						<p class="errorMsg col-lg-4 col-md-4 col-sm-4" ng-show="showMsg">Le mot de passe a un format incorrect</p>
+						<p class="errorMsg col-lg-4 col-md-4 col-sm-4" ng-show="showMsg">L'adresse email ou le mot de passe a un format incorrect</p>
 					</div>
 				</div>
 			</div>
