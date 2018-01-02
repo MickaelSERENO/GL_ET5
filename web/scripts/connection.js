@@ -7,6 +7,7 @@ myApp.controller('formController', function($scope, $timeout)
 	$scope.email   = "";
 	$scope.isAdmin = "";
 
+	//Try to be connected via AJAX protocol
 	$scope.tryConnection = function()
 	{
 		var httpCtx = new XMLHttpRequest();
@@ -14,9 +15,10 @@ myApp.controller('formController', function($scope, $timeout)
 		{
 			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
 			{
+				//Error ident
+				//Show the error message
 				if(httpCtx.responseText == '0')
 				{
-					console.log("not logged");
 					$scope.$apply(function()
 								  {
 									  $scope.showMsg = true;
@@ -26,13 +28,37 @@ myApp.controller('formController', function($scope, $timeout)
 										  }, 1000);
 								  });
 				}
-				else
-					console.log("logged");
+
+				//Successful or already logged 
+				//Move to the home page
+				else if(httpCtx.responseText == '1' || httpCtx.responseText == '2')
+				{
+
+				}
 			}
 		}
-		console.log($scope.email);
 		httpCtx.open("POST", "connection.php", true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send("email="+$scope.email+"&pwd="+$scope.pwd+"&isAdmin="+$scope.isAdmin);
 	};
 });
+
+window.onload = function()
+{
+	//Test if we are already logged
+	var httpCtx = new XMLHttpRequest();
+	httpCtx.onreadystatechange = function()
+	{
+		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+		{
+			if(httpCtx.responseText == '2')
+			{
+				//We are already logged. Move to home page
+				console.log("already logged");
+			}
+		}
+	}
+	httpCtx.open("POST", "connection.php", true);
+	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	httpCtx.send("email=&pwd=&isAdmin=");
+}
