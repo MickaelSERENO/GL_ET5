@@ -38,7 +38,7 @@ myApp.controller('formController', function($scope, $timeout)
 				}
 			}
 		}
-		httpCtx.open("POST", "identRequest.php", true);
+		httpCtx.open("POST", "/AJAX/identRequest.php", true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send("requestID=3&email="+$scope.email+"&pwd="+$scope.pwd+"&isAdmin="+$scope.isAdmin);
 	};
@@ -59,7 +59,7 @@ window.onload = function()
 			}
 		}
 	}
-	httpCtx.open("POST", "identRequest.php", true);
+	httpCtx.open("POST", "/AJAX/identRequest.php", true);
 	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	httpCtx.send("requestID=1");
 
