@@ -6,7 +6,9 @@
 	//RequestID
 	$ALREADY_CONNECTED = 1;
 	$EMAIL_EXIST       = 2;
-	$SIGNIN            = 3;
+	$SIGN_IN           = 3;
+
+	error_log($_POST["requestID"]);
 
 	if($_POST["requestID"] == $ALREADY_CONNECTED)
 	{

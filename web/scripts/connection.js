@@ -27,13 +27,14 @@ myApp.controller('formController', function($scope, $timeout)
 											  $scope.showMsg = false;
 										  }, 1000);
 								  });
+					console.log("wrong idents");
 				}
 
 				//Successful or already logged 
 				//Move to the home page
 				else if(httpCtx.responseText == '1' || httpCtx.responseText == '2')
 				{
-
+					console.log("connected");
 				}
 			}
 		}
