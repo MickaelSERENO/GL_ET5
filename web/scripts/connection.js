@@ -46,23 +46,7 @@ myApp.controller('formController', function($scope, $timeout)
 
 window.onload = function()
 {
-	//Test if we are already logged
-	var httpCtx = new XMLHttpRequest();
-	httpCtx.onreadystatechange = function()
-	{
-		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
-		{
-			if(httpCtx.responseText == '2')
-			{
-				//We are already logged. Move to home page
-				console.log("already logged");
-			}
-		}
-	}
-	httpCtx.open("POST", "/AJAX/identRequest.php", true);
-	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	httpCtx.send("requestID=1");
-
+	//Set the central part correctly
 	var banner = document.getElementById('topBanner');
 	var centralPart = document.getElementById('centralPart');
 	centralPart.style.marginTop = banner.offsetTop + banner.clientHeight + 10 + 'px';
