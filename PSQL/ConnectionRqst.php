@@ -4,6 +4,22 @@
 
 	class ConnectionRqst extends PSQLDatabase
 	{
+		public function emailExist($email, $admin)
+		{
+			$script = "";
+			if($admin)
+				$script = "SELECT contactEmail FROM EndUser INNER JOIN Administrator ON (EndUser.contactEmail = Administrator.userEmail) WHERE userEmail = '$email';";
+			else
+				$script = "SELECT contactEmail FROM EndUser INNER JOIN (SELECT userEmail FROM ProjectManager UNION SELECT userEmail FROM Collaborator) AS Col ON (EndUser.contactEmail = Col.userEmail) WHERE userEmail = '$email';";
+
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+
+			if($row == null)
+				return false;
+			return true;
+		}
+
 		//Check if the idents are valid or not
 		public function identValid($email, $pwd, $admin)
 		{
@@ -12,7 +28,7 @@
 				$script = "SELECT contactEmail, password, isActive FROM EndUser INNER JOIN Administrator ON (EndUser.contactEmail = Administrator.userEmail) WHERE userEmail = '$email' AND isActive = TRUE;";
 			else
 
-				$script = "SELECT contactEmail, password, isActive FROM EndUser INNER JOIN (SELECT * FROM ProjectManager UNION SELECT * FROM Collaborator) AS COL ON (EndUser.contactEmail = Col.userEmail) WHERE userEmail = '$email' AND isActive = TRUE;";
+				$script = "SELECT contactEmail, password, isActive FROM EndUser INNER JOIN (SELECT userEmail FROM ProjectManager UNION SELECT userEmail FROM Collaborator) AS Col ON (EndUser.contactEmail = Col.userEmail) WHERE userEmail = '$email' AND isActive = TRUE;";
 
 			$resultScript = pg_query($this->_conn, $script);
 			$row          = pg_fetch_row($resultScript);
@@ -42,6 +58,11 @@
 			}
 
 			return 0; //As collaborator
+		}
+
+		public function sendPasswordNotification($email)
+		{
+
 		}
 	}
 ?>

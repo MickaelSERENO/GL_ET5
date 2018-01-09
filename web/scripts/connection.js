@@ -3,9 +3,7 @@ var myApp = angular.module('myApp', ['ngAnimate', 'ngSanitize', 'ui.bootstrap'])
 myApp.controller('formController', function($scope, $timeout)
 {
 	$scope.showMsg = false;
-	$scope.pwd     = "";
 	$scope.email   = "";
-	$scope.isAdmin = "";
 
 	//Try to be connected via AJAX protocol
 	$scope.tryConnection = function()
@@ -27,14 +25,11 @@ myApp.controller('formController', function($scope, $timeout)
 											  $scope.showMsg = false;
 										  }, 1000);
 								  });
-					console.log("wrong idents");
 				}
 
-				//Successful or already logged 
 				//Move to the home page
 				else if(httpCtx.responseText == '1' || httpCtx.responseText == '2')
 				{
-					console.log("connected");
 				}
 			}
 		}
@@ -46,8 +41,5 @@ myApp.controller('formController', function($scope, $timeout)
 
 window.onload = function()
 {
-	//Set the central part correctly
-	var banner = document.getElementById('topBanner');
-	var centralPart = document.getElementById('centralPart');
-	centralPart.style.marginTop = banner.offsetTop + banner.clientHeight + 10 + 'px';
+	console.log("ok");
 }

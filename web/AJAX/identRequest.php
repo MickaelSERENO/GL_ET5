@@ -1,12 +1,13 @@
 <?php
 	session_start();
-	require_once __DIR__.'/../PSQL/ConnectionRqst.php';
+	require_once __DIR__.'/../../PSQL/ConnectionRqst.php';
 	use ConnectionRqst;
 	
 	//RequestID
 	$ALREADY_CONNECTED = 1;
 	$EMAIL_EXIST       = 2;
 	$SIGN_IN           = 3;
+	$FORGET_PWD        = 4;
 
 	error_log($_POST["requestID"]);
 
@@ -24,7 +25,8 @@
 	//Return
 	else if($_POST["requestID"] == $EMAIL_EXIST)
 	{
-
+		$rsqt = new ConnectionRqst();
+		return $rqst->emailExist($_POST["email"], $_POST["isAdmin"]);
 	}
 
 	else if($_POST["requestID"] == $SIGN_IN)
@@ -62,6 +64,18 @@
 		{
 			echo($IDENT_ERROR);
 			return;
+		}
+	}
+
+	else if($_POST["requestID"] == $FORGET_PWD)
+	{
+		$rsqt = new ConnectionRqst();
+		if(!$rqst->emailExist($_POST["email"], false))
+			echo(0);
+		else
+		{
+			//TODO
+			echo(1);
 		}
 	}
 

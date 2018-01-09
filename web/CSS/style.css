@@ -1,10 +1,9 @@
 #topBanner
 {
-	top:1em;
+	top:0em;
 	left:0em;
-	position:fixed;
+	position:absolute;
 	background-color: #328F32;
-	border-radius: 8px;
 	width: 100%;
 }
 
@@ -20,16 +19,29 @@
 {
 	background-color: #48A8FF;
 	border-radius: 8px;
-	width: 95%;
-	text-align: center;
 	padding-bottom:5em;
 	margin-left:auto;
 	margin-right:auto;
+	padding-top:20px;
+	padding-bottom:20px;
+	margin-top: 2em;
+	overflow-y: scroll; 
+	color: white;
 }
 
-.connectionTitle
+#centralPart p, label, button
 {
-	padding-top: 2em;
+	font-size: 1.325em;
+}
+
+.alignElem
+{
+	text-align: center;
+}
+
+.mainTitle
+{
+	font-size: 2em;
 }
 
 .topSpace
@@ -40,6 +52,8 @@
 .errorMsg
 {
 	color: red;
+	text-align: center;
+	vertical-align: middle;
 }
 
 .descField
