@@ -1,7 +1,6 @@
 <?php
 	session_start();
 	require_once __DIR__.'/../../PSQL/ConnectionRqst.php';
-	use ConnectionRqst;
 	
 	//RequestID
 	$ALREADY_CONNECTED = 1;
@@ -9,7 +8,6 @@
 	$SIGN_IN           = 3;
 	$FORGET_PWD        = 4;
 
-	error_log($_POST["requestID"]);
 
 	if($_POST["requestID"] == $ALREADY_CONNECTED)
 	{
@@ -49,6 +47,7 @@
 
 		//Launch the request to the DB to know if the user exists
 		$rqst = new ConnectionRqst();		
+		error_log("rsqt being sent");
 		if($rqst->identValid($_POST["email"], $_POST["pwd"], $_POST["isAdmin"]))
 		{
 			$_SESSION["email"]   = $_POST["email"];

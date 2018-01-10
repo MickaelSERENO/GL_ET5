@@ -1,6 +1,5 @@
 <?php
 	require_once __DIR__.'/../PSQL/PSQLDatabase.php';
-	use PSQLDatabase;
 
 	class ConnectionRqst extends PSQLDatabase
 	{
