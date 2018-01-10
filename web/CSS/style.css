@@ -59,3 +59,48 @@
 .descField
 {
 }
+
+#gantt
+{
+	overflow-x:auto;
+	overflow-y:auto;
+}
+
+#ganttCanvas
+{
+	width:1600px;
+	height:800px;
+	background-color:red;
+}
+
+#sortingDiv
+{
+}
+
+#infoGantt
+{
+}
+
+#taskTreeView
+{
+	overflow-x:auto;
+	overflow-y:auto;
+}
+
+#taskTreeView ul
+{
+	list-style-type: none;
+}
+
+#taskTreeView li
+{
+	list-style-type: none;
+}
+
+.hLine
+{
+	margin-bottom:0.5em;
+	margin-top:0.5em;
+	width: 100%;
+	border-top: 2px solid black;
+}
