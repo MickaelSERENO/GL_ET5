@@ -1,50 +1,95 @@
-function Task(id, name)
+//Global variables
+var canvas;
+var canvasCtx;
+
+//Task class
+class AbstractTask
 {
-	this.expend   = true;
-	this.id       = id;
-	this.name     = name;
-	this.children = [];
+	constructor()
+	{
+		this.expand       = true;
+		this.id           = id;
+		this.name         = name;
+		this.description  = "";
+		this.predecessors = [];
+		this.successors   = [];
+		this.children     = [];
+		this.counted      = true;
+		this.isJalon      = false;
+		this.startDate    = new Date();
+		this.endDate      = new Date();
+	}
+
+	addChild(task)
+	{
+		this.children.push(task);
+	}
+
+	canReduce()
+	{
+		return this.children.length > 0 && this.expand;
+	}
+
+	canExpand()
+	{
+		return this.children.length > 0 && !this.expand;
+	}
 }
 
-Task.prototype.addChild = function(task)
+class Task extends AbstractTask
 {
-	this.children.push(task);
-};
-
-Task.prototype.canReduce = function()
-{
-	return this.children.length > 0 && this.expend;
-};
-
-Task.prototype.canExpand = function()
-{
-	return this.children.length > 0 && !this.expend;
-};
+	constructor()
+	{
+		super();
+	}
+}
 
 myApp.controller("ganttProjectCtrl", function($scope, $timeout)
 {
+	//Variables
 	$scope.currentSorting = 0;
+	$scope.dispUnstarted  = 0;
 	$scope.sortTask		  = ["date", "nom"];
 
-	$scope.tasks = [new Task(0, "task1"), new Task(1, "task2")];
-	$scope.tasks[0].children = [new Task(2, "task1.1"), new Task(3, "task1.2")];
-	$scope.tasks[1].children = [new Task(4, "task2.1"), new Task(5, "task2.2")];
+	$scope.tasks = [];
 
-	$scope.toggleExpendTask = function(task)
+	//Init canvas
+	canvas    = document.getElementById('ganttCanvas');
+	canvasCtx = canvas.getContext('2d');
+
+	//Toolbar functions
+	$scope.$watch('dispUnstarted', function()
 	{
-		task.task.expend = !task.task.expend;
-	};
-/*
-	$scope.expendAction = function(expend)
+		//TODO
+	});
+
+	$scope.expandTasks = function()
 	{
-		//Expend
-		if(expend)
-		{
-		}
-		//
-		else
-		{
-		}
+		//TODO
 	};
-*/
+
+	$scope.reduceTasks = function()
+	{
+		//TODO
+	};
+
+	//Function for tasks tree view
+	$scope.toggleExpandTask = function(task)
+	{
+		task.task.expand = !task.task.expand;
+	};
+
+	//Load tasks
+	var httpCtx = new XMLHttpRequest();
+	httpCtx.onreadystatechange = function()
+	{
+		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+		{
+			JSON.parse(httpCtx.responseText);
+		}
+	}
+	httpCtx.open("GET", "/AJAX/fetchTasks.php", true);
+	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	httpCtx.send("projectID="+projectID);
+	
 });

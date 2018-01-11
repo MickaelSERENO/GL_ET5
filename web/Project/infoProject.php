@@ -10,6 +10,9 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Projet GL</title>	
+		<script type="text/javascript">
+			var projectID = <?= $_GET['projectID'] ?>; 
+		</script>
 		<script type="text/javascript" src="/scripts/bower_components/xmlhttprequest/XMLHttpRequest.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular/angular.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-animate/angular-animate.js"></script>
@@ -42,17 +45,17 @@
 						<!-- toolbar -->
 						<ul class="list-inline">
 							<li>
-								<button class="btn btn-primary">
+								<button class="btn btn-primary" ng-model="dispUnstarted" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
 									En cours
 								</button>
 							</li>
 							<li>
-								<button class="btn btn-primary">
+								<button class="btn btn-primary" ng-click="expandTasks">
 									Étendre
 								</button>
 							</li>
 							<li>
-								<button class="btn btn-primary">
+								<button class="btn btn-primary" ng-click="reduceTasks">
 									Serrer
 								</button>
 							</li>
