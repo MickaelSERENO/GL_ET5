@@ -126,11 +126,11 @@ CREATE TABLE Project
 
 CREATE TABLE ProjectCollaborator
 (
-	projectID         INTEGER,
+	idProject         INTEGER,
 	collaboratorEmail VARCHAR(128) NOT NULL,
-	FOREIGN KEY(projectID)         REFERENCES Project(id),
+	FOREIGN KEY(idProject)         REFERENCES Project(id),
 	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail),
-	PRIMARY KEY(projectID, collaboratorEmail)
+	PRIMARY KEY(idProject, collaboratorEmail)
 );
 
 CREATE TABLE ProjectNotification
@@ -178,6 +178,7 @@ CREATE TABLE Task
 	CHECK(advancement >= 0 AND advancement <= 100),
 	CHECK(chargeConsumed = computedCharge - remaining),
 	CHECK(chargeConsumed >= 0 AND computedCharge >= 0 AND remaining >= 0 AND initCharge >= 0),
+	CHECK(advancement * computedCharge <= 100*chargeConsumed AND (advancement+1)*computedCharge >= 100*chargeConsumed),
 	CHECK(checkTaskDate(id, endDate) = TRUE),
 	FOREIGN KEY(id)                REFERENCES AbstractTask(id),
 	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail),
@@ -214,15 +215,19 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 		lastID int;
 		lastRow TaskHierarchy%ROWTYPE;
 	BEGIN
+		--Check if they have the same project
+		IF (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2 WHERE T1.id = New.idMother AND T2.id = New.idChild AND T1.idProject = T2.idProject AND T2.startDate >= T1.startDate) = 0 THEN
+			RAISE EXCEPTION 'The two task are not part of the same project or the start date are not compatible';
+		END IF;
 		lastID := NEW.idMother;
 		i      := 0;
 		WHILE i < 2 
 		LOOP	
-			lastRow = (SELECT *  FROM TaskHierarchy WHERE idChild = $1);
-			IF lastRow = NULL THEN
-				RETURN FALSE;
+			SELECT * INTO lastRow FROM TaskHierarchy WHERE idChild = lastID;
+			IF (SELECT COUNT(*) FROM TaskHierarchy WHERE idChild = lastID) = 0 THEN
+				RETURN New;
 			ELSE
-				lastID = lastRow.idMother;
+				lastID := lastRow.idMother;
 				IF lastRow.counted THEN
 					i := i+1;
 				END IF;
@@ -289,10 +294,10 @@ CREATE OR REPLACE FUNCTION checkTask() RETURNS TRIGGER AS $triggerTask$
 		IF (SELECT COUNT(*) FROM Marker WHERE id = New.id) > 0 THEN
 			RAISE EXCEPTION 'The Task has the same ID than a marker';
 		ELSIF (SELECT COUNT(*) FROM ProjectCollaborator, AbstractTask 
-		  	   WHERE AbstractTask.id = New.id AND idProject = ProjectCollaborator AND
-		       New.collaboratorEmail = ProjectManager.collaboratorEmail) = 0 THEN
+		  	   WHERE AbstractTask.id = New.id AND AbstractTask.idProject = ProjectCollaborator.idProject AND
+		       New.collaboratorEmail = ProjectCollaborator.collaboratorEmail) = 0 THEN
 			RAISE EXCEPTION 'The collaborator is not part of the project collaborator list';	
-		ELSIF (SELECT COUNT(*) FROM Project, AbstractTask WHERE AbstractTask.id = New.id AND AbstractTask.projectID = Project.ID AND AbstractTask.startDate >= Project.startDate AND New.endDate <= Project.endDate) = 0 THEN
+		ELSIF (SELECT COUNT(*) FROM Project, AbstractTask WHERE AbstractTask.id = New.id AND AbstractTask.idProject = Project.id AND AbstractTask.startDate >= Project.startDate AND New.endDate <= Project.endDate) = 0 THEN
 			RAISE EXCEPTION 'The task is not within the project date';
 		END IF;
 		RETURN New;
@@ -343,6 +348,60 @@ CREATE OR REPLACE FUNCTION checkDeleteProjectCollaborator() RETURNS TRIGGER AS $
 	END
 	$triggerDeleteProjectCollaborator$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION afterTaskUpdate() RETURNS TRIGGER AS $$
+	BEGIN
+		EXECUTE updateProjectDate((SELECT idProject FROM AbstractTask WHERE AbstractTask.id = New.id));
+		RETURN New;
+	END
+	$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION afterTaskHierarchyUpdate() RETURNS TRIGGER AS $$
+	BEGIN
+		EXECUTE updateProjectDate((SELECT DISTINCT idProject FROM AbstractTask WHERE AbstractTask.id = New.idMother LIMIT 1));
+		RETURN New;
+	END
+	$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION updateProjectDate(in _ID INTEGER) RETURNS VOID AS $$
+	DECLARE
+		r Task%ROWTYPE;
+	BEGIN
+		FOR r IN SELECT Task.* FROM AbstractTask, Task, Project 
+				 WHERE AbstractTask.idProject = Project.id AND Task.ID = AbstractTask.ID AND Task.ID NOT IN (SELECT idChild FROM TaskHierarchy)
+		LOOP
+			PERFORM * FROM updateTaskDate(r);
+		END LOOP;
+	END
+	$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION updateTaskDate(mother Task, out startDate DATE, out endDate DATE) AS $$
+	DECLARE
+		_endDate   Date;
+		_startDate Date;
+		r          int;
+		subTask Task%ROWTYPE;
+	BEGIN
+		endDate    := mother.endDate;
+		startDate  := (SELECT AbstractTask.startDate FROM AbstractTask WHERE mother.id = AbstractTask.id);
+
+		FOR r IN SELECT idChild FROM TaskHierarchy WHERE idMother = mother.id
+		LOOP
+			SELECT * INTO subTask FROM Task WHERE id = r;
+			SELECT TD.endDate, TD.startDate INTO _endDate, _startDate FROM updateTaskDate(subTask) AS TD;
+			IF endDate < _endDate THEN
+				RAISE NOTICE 'Update date FROM % to %', endDate, _endDate;
+				endDate = _endDate;
+			END IF;
+
+			IF startDate > _startDate THEN
+				startDate = _startDate;
+			END IF;
+		END LOOP;
+		UPDATE Task SET endDate = updateTaskDate.endDate WHERE id = mother.id;
+		UPDATE AbstractTask SET startDate = updateTaskDate.startDate WHERE id = mother.id;
+	END
+	$$ LANGUAGE plpgsql;
+	
 --Check the status of an EndUser
 CREATE TRIGGER triggerEndUser BEFORE UPDATE
 	ON EndUser
@@ -374,6 +433,25 @@ CREATE TRIGGER triggerProjectAfterInsert AFTER INSERT
 	ON Project
 	FOR EACH ROW
 		EXECUTE PROCEDURE checkProjectAfterInsert();
+
+--Do some treatment after changing a project
+CREATE TRIGGER triggerAfterTaskUpdate AFTER DELETE OR UPDATE OR INSERT
+	ON Task
+	FOR EACH ROW
+		WHEN (pg_trigger_depth() = 0)
+		EXECUTE PROCEDURE afterTaskUpdate();
+
+CREATE TRIGGER triggerAfterAbstractTaskUpdate AFTER DELETE OR UPDATE OR INSERT
+	ON AbstractTask
+	FOR EACH ROW
+		WHEN (pg_trigger_depth() = 0)
+		EXECUTE PROCEDURE afterTaskUpdate();
+
+CREATE TRIGGER triggerAfterTaskHierarchyUpdate AFTER DELETE OR UPDATE OR INSERT
+	ON TaskHierarchy
+	FOR EACH ROW
+		WHEN (pg_trigger_depth() = 0)
+		EXECUTE PROCEDURE afterTaskHierarchyUpdate();
 
 --Check Tasks
 CREATE TRIGGER triggerTask BEFORE UPDATE OR INSERT
