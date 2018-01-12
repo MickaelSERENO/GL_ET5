@@ -5,19 +5,19 @@ var canvasCtx;
 //Task class
 class AbstractTask
 {
-	constructor()
+	constructor(cpy)
 	{
 		this.expand       = true;
-		this.id           = id;
-		this.name         = name;
-		this.description  = "";
+		this.id           = cpy.id;
+		this.name         = cpy.name;
+		this.description  = cpy.description;
 		this.predecessors = [];
 		this.successors   = [];
 		this.children     = [];
 		this.counted      = true;
-		this.isJalon      = false;
-		this.startDate    = new Date();
-		this.endDate      = new Date();
+		this.isMarker     = cpy.isMarker;
+		this.startDate    = new Date(cpy.startDate);
+		this.endDate      = new Date(cpy.endDate);
 	}
 
 	addChild(task)
@@ -38,9 +38,9 @@ class AbstractTask
 
 class Task extends AbstractTask
 {
-	constructor()
+	constructor(cpy)
 	{
-		super();
+		super(cpy);
 	}
 }
 
@@ -76,6 +76,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout)
 	//Function for tasks tree view
 	$scope.toggleExpandTask = function(task)
 	{
+		console.log("toggle");
 		task.task.expand = !task.task.expand;
 	};
 
@@ -85,11 +86,59 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout)
 	{
 		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
 		{
-			JSON.parse(httpCtx.responseText);
+			$scope.$apply(function()
+			{
+				var tasks = JSON.parse(httpCtx.responseText);
+				console.log(tasks);
+
+				$scope.tasks = [];
+				var allTasks = [];
+
+				//Construct all tasks
+				for(var i=0; i < tasks.tasks.length; i++)
+				{
+					var isMother = true;
+					for(var j=0; j < tasks.children.length; j++)
+					{
+						if(tasks.children[j].idChild === tasks.tasks[i].id)
+						{
+							isMother = false;
+							break;
+						}
+					}
+
+					var currentTask = new Task(tasks.tasks[i]);
+					allTasks.push(currentTask);
+
+					if(isMother)
+						$scope.tasks.push(currentTask);
+				}
+
+				//Construct chldren-tree
+				for(var i=0; i < tasks.children.length; i++)
+					for(var j=0; j < allTasks.length; j++)
+						if(tasks.children[i].idMother === allTasks[j].id)
+							for(var k=0; k < allTasks.length; k++)
+								if(allTasks[k].id === tasks.children[i].idChild)
+									allTasks[j].children.push(allTasks[k]);
+
+				//Fill the successors
+				for(var i=0; i < tasks.successors.length; i++)
+					for(var j=0; j < allTasks.length; j++)
+						if(tasks.successors[i][0] === allTasks[j].id)
+							for(var k=0; k < allTasks.length; k++)
+								if(allTasks[k].id === tasks.successors[i][1])
+								{
+									allTasks[j].successors.push(allTasks[k]);
+									allTasks[k].predecessors.push(allTasks[j]);
+								}
+
+				console.log($scope.tasks);
+			});
 		}
 	}
-	httpCtx.open("GET", "/AJAX/fetchTasks.php", true);
+	httpCtx.open('GET', "/AJAX/fetchTasks.php?projectID="+projectID, true);
 	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	httpCtx.send("projectID="+projectID);
+	httpCtx.send(null);
 	
 });
