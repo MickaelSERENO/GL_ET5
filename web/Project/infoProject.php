@@ -84,13 +84,13 @@
 								<!-- The list of tasks"-->
 								<div id="taskTreeView">
 									<script type="text/ng-template" id="treeViewTasks.html">
-										<div ng-click="toggleExpendTask($parent)" class="taskNode">
+										<div ng-click="toggleExpandTask($parent)" class="taskNode">
 											<span class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>
 											<span class="glyphicon glyphicon-menu-right" ng-show="task.canExpand()"></span>
 											{{task.name}}
 										</div>
 											
-										<ul ng-show="task.expend">
+										<ul ng-show="task.expand">
 											<li ng-repeat="task in task.children" ng-include="'treeViewTasks.html'"></li>
 										</ul>
 									</script>
