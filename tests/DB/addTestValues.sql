@@ -32,8 +32,8 @@ INSERT INTO Task VALUES (5, '2018-05-27', '35', '35', '35', '0',  '0',  'jean.du
 INSERT INTO Task VALUES (6, '2018-06-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
 
 --Add Tasks hierarchy and task order
-INSERT INTO TaskHierarchy VALUES (3, 4);
-INSERT INTO TaskHierarchy VALUES (3, 5);
-INSERT INTO TaskHierarchy VALUES (3, 6);
+INSERT INTO TaskHierarchy VALUES (3, 4, true);
+INSERT INTO TaskHierarchy VALUES (3, 5, true);
+INSERT INTO TaskHierarchy VALUES (3, 6, true);
 INSERT INTO TaskOrder     VALUES (1, 2);
 INSERT INTO TaskOrder     VALUES (2, 3);

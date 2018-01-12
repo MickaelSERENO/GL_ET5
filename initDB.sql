@@ -22,8 +22,8 @@ CREATE OR REPLACE FUNCTION checkTaskDate(in INTEGER, in DATE) RETURNS BOOLEAN AS
 
 CREATE TABLE Contact
 (
-	name    VARCHAR(64),
-	surname VARCHAR(64),
+	name    VARCHAR(64) NOT NULL,
+	surname VARCHAR(64) NOT NULL,
 	email   VARCHAR(128),
 	PRIMARY KEY(email)
 );
@@ -41,7 +41,7 @@ CREATE TABLE EndUser
 CREATE TABLE Client
 (
 	email       VARCHAR(128),
-	name        VARCHAR(64),
+	name        VARCHAR(64) NOT NULL,
 	description TEXT,
 	PRIMARY KEY(email)
 
@@ -89,7 +89,7 @@ CREATE TABLE Notification
 	id      SERIAL  PRIMARY KEY,
 	theDate DATE    NOT NULL,
 	title   TEXT    NOT NULL,
-	message TEXT,
+	message TEXT    NOT NULL,
 	read    BOOLEAN NOT NULL
 );
 
@@ -115,7 +115,7 @@ CREATE TABLE Project
 	managerEmail VARCHAR(128) NOT NULL,
 	contactEmail VARCHAR(128) NOT NULL,
 	name         VARCHAR(128) NOT NULL,
-	description  TEXT,
+	description  TEXT NOT NULL,
 	startDate    DATE NOT NULL,
 	endDate      DATE NOT NULL,
 	status       PROJECT_STATUS NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE AbstractTask
 	id          SERIAL       PRIMARY KEY,
 	idProject   INTEGER      NOT NULL,
 	name        VARCHAR(128) NOT NULL,
-	description TEXT,
+	description TEXT         NOT NULL,
 	startDate   DATE         NOT NULL,
 	FOREIGN KEY(idProject) REFERENCES Project(id)
 );
@@ -168,12 +168,12 @@ CREATE TABLE TaskOrder
 CREATE TABLE Task
 (
 	id                INTEGER,
-	endDate           DATE,
-	initCharge        INTEGER,
-	computedCharge    INTEGER,
-	remaining         INTEGER,
-	chargeConsumed    INTEGER,
-	advancement       INTEGER,
+	endDate           DATE    NOT NULL,
+	initCharge        INTEGER NOT NULL,
+	computedCharge    INTEGER NOT NULL,
+	remaining         INTEGER NOT NULL,
+	chargeConsumed    INTEGER NOT NULL,
+	advancement       INTEGER NOT NULL,
 	collaboratorEmail VARCHAR(128),
 	CHECK(advancement >= 0 AND advancement <= 100),
 	CHECK(chargeConsumed = computedCharge - remaining),
@@ -194,9 +194,9 @@ CREATE TABLE Marker
 
 CREATE TABLE TaskHierarchy
 (
-	idMother INTEGER,
-	idChild  INTEGER,
-	counted  BOOLEAN,
+	idMother INTEGER NOT NULL,
+	idChild  INTEGER NOT NULL,
+	counted  BOOLEAN NOT NULL,
 	FOREIGN KEY(idMother) REFERENCES Task(id),
 	FOREIGN KEY(idChild)  REFERENCES AbstractTask(id),
 	Primary Key(idMother, idChild)

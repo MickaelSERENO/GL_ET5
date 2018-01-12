@@ -36,4 +36,3 @@ INSERT INTO ProjectCollaborator VALUES (1, 'serenomickael@gmail.com');
 
 \echo 'This should fail. Make the collaborator not active anymore but he has still a project'
 UPDATE EndUser SET isActive = False WHERE contactEmail = 'serenomickael@gmail.com';
-
