@@ -20,6 +20,7 @@
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 		<script type="text/javascript" src="/scripts/setup.js"></script>
+		<script type="text/javascript" src="/scripts/globalProject.js"></script>
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
 
@@ -29,19 +30,18 @@
 	</head>
 
 	<body ng-app="myApp">
-		<div>
-			<uib-tabset  active="active">
-
+		<div ng-controller="globalProjectCtrl">
+			<uib-tabset active="activeTab">
 				<!-- Information tab -->
-				<uib-tab index="0" heading="Information">
+				<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
 					<div ng-controller="infoProjectCtrl">
 						A faire part Stacy
 					</div>
 				</uib-tab>
 
 				<!-- Gantt tab -->
-				<uib-tab index="1" heading="Planning">
-					<div ng-controller="ganttProjectCtrl">
+				<uib-tab id="ganttHeader" index="$index+1" heading="Planning" deselect="deselectTab()">
+					<div ng-controller="ganttProjectCtrl" id="ganttDiv">
 						<!-- toolbar -->
 						<ul class="list-inline">
 							<li>
@@ -101,7 +101,7 @@
 							</div>
 
 							<div id="gantt" class="col-xs-9">
-								<canvas id="ganttCanvas">
+								<canvas id="ganttCanvas" width=1600 height=800 ng-click="canvasClick($event)">
 								</canvas>
 							</div>
 						</div>

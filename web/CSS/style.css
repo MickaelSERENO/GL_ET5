@@ -20,6 +20,7 @@
 	background-color: #48A8FF;
 	border-radius: 8px;
 	padding-bottom:5em;
+	width:100%;
 	margin-left:auto;
 	margin-right:auto;
 	padding-top:20px;
@@ -62,15 +63,13 @@
 
 #gantt
 {
+	width:70%;
 	overflow-x:auto;
 	overflow-y:auto;
 }
 
 #ganttCanvas
 {
-	width:1600px;
-	height:800px;
-	background-color:red;
 }
 
 #sortingDiv
@@ -97,10 +96,14 @@
 	list-style-type: none;
 }
 
+.taskNode
+{
+	padding-bottom:1em;
+}
+
 .hLine
 {
 	margin-bottom:0.5em;
 	margin-top:0.5em;
-	width: 100%;
 	border-top: 2px solid black;
 }
