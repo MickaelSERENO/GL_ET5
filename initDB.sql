@@ -145,6 +145,8 @@ CREATE TABLE ProjectNotification
 ---------------------------------------
 --Task tables (AbstractTask, TaskOrder)
 ---------------------------------------
+CREATE TYPE TASK_STATUS AS ENUM('STARTED', 'NOT_STARTED', 'LATE');
+
 CREATE TABLE AbstractTask
 (
 	id          SERIAL       PRIMARY KEY,
@@ -175,6 +177,7 @@ CREATE TABLE Task
 	chargeConsumed    INTEGER NOT NULL,
 	advancement       INTEGER NOT NULL,
 	collaboratorEmail VARCHAR(128),
+	status            TASK_STATUS DEFAULT 'NOT_STARTED',
 	CHECK(advancement >= 0 AND advancement <= 100),
 	CHECK(chargeConsumed = computedCharge - remaining),
 	CHECK(chargeConsumed >= 0 AND computedCharge >= 0 AND remaining >= 0 AND initCharge >= 0),
