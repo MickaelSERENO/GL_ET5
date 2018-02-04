@@ -1,6 +1,10 @@
 <?php
 	require_once __DIR__.'/../PSQL/PSQLDatabase.php';
 
+	$adminRank          = 2;
+	$projectManagerRank = 1;
+	$collaboratorRank   = 0;
+
 	class ConnectionRqst extends PSQLDatabase
 	{
 		public function emailExist($email, $admin)
@@ -53,10 +57,10 @@
 				if($rowPM == null)
 					return -1; //The user is not a collaborator nor a project manager
 
-				return 1; //As project manager
+				return $adminRank; //As project manager
 			}
 
-			return 0; //As collaborator
+			return $collaboratorRank; //As collaborator
 		}
 
 		public function sendPasswordNotification($email)

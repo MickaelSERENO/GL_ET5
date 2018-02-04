@@ -1,10 +1,10 @@
-
-
 var scope;
 var project;
 
 var dateWidth  = 60;
 var dateOffset = 5;
+
+var currentUnit = "week";
 
 class Project
 {
@@ -13,6 +13,7 @@ class Project
 		this.id        = cpy.id;
 		this.startDate = new Date(cpy.startDate);
 		this.endDate   = new Date(cpy.endDate);
+		this.stats     = cpy.stats;
 		console.log(cpy.startDate);
 		console.log(cpy.endDate);
 	}
@@ -53,6 +54,20 @@ class AbstractTask
 		return this.children.length > 0 && !this.expand;
 	}
 
+	reduceAll()
+	{
+		this.expand = false;
+		for(var i=0; i < this.children.length; i++)
+			this.children[i].reduceAll();
+	}
+
+	expandAll()
+	{
+		this.expand = true;
+		for(var i=0; i < this.children.length; i++)
+			this.children[i].expandAll();
+	}
+
 	isShowned()
 	{
 		if(this.mother != null)
@@ -87,34 +102,30 @@ class Task extends AbstractTask
 		this.advancement = cpy.advancement;
 	}
 
-	draw(fontSize)
+	draw(fontSize, unit)
 	{
-		var id       = this.internalID;
-		var taskNode = document.getElementsByClassName('taskNode')[id];
-		var yOffset  = taskNode.offsetTop; 
-		var xOffset  = dateOffset + dateWidth * getNbDay(this.startDate, project.startDate) + dateWidth/2.0;
-		var width    = dateWidth * (getNbDay(this.endDate, this.startDate) - 1);
+		var size = this.getTaskSize(unit);
 
 		if(scope.selectingTask == this)
 		{
 			canvasCtx.fillStyle = "#00FFFF";
-			drawRoundRect(xOffset-5, yOffset-2, width+10, fontSize+4, dateWidth/4);
+			drawRoundRect(size.xOffset-5, size.yOffset-2, size.width+10, size.fontSize+4, dateWidth/4);
 			canvasCtx.fill();
 		}
 
 		canvasCtx.fillStyle   = "gray";
-		drawRoundRect(xOffset, yOffset+2, width, fontSize-4, dateWidth/4);
+		drawRoundRect(size.xOffset, size.yOffset+2, size.width, fontSize-4, dateWidth/4);
 		canvasCtx.fill();
 
 		canvasCtx.fillStyle   = "#00FF00";
-		drawRoundRect(xOffset, yOffset+2, width * this.advancement/100.0, fontSize-4, dateWidth/4);
+		drawRoundRect(size.xOffset, size.yOffset+2, size.width * this.advancement/100.0, fontSize-4, dateWidth/4);
 		canvasCtx.fill();
 
-		this.drawChildren(fontSize);
-		this.drawPredecessors(fontSize);
+		this.drawChildren(fontSize, unit);
+		this.drawPredecessors(fontSize, unit);
 	}
 
-	drawChildren(fontSize)
+	drawChildren(fontSize, unit)
 	{
 		if(!this.expand)
 			return 0;
@@ -123,88 +134,104 @@ class Task extends AbstractTask
 		{
 			var id         = this.internalID;
 			var parentNode = document.getElementsByClassName('taskNode')[id];
-			var taskNode   = document.getElementsByClassName('taskNode')[this.children[i].internalID];
-
-			var yOffset    = taskNode.offsetTop; 
-
-			var x     = dateOffset + dateWidth * getNbDay(this.children[i].startDate, project.startDate) + dateWidth/2.0;
-			var y     = yOffset - 2;
-			var width = dateWidth * getNbDay(this.children[i].endDate, this.children[i].startDate) - dateWidth;
+			var size       = this.children[i].getTaskSize(unit);
 
 			//Draw the rect
-			this.children[i].draw(fontSize);
+			this.children[i].draw(fontSize, unit);
 
 			//Draw the line
 			canvasCtx.beginPath();
             canvasCtx.lineWidth = 3;
 			canvasCtx.strokeStyle = "black";
-			canvasCtx.moveTo(x + width/2, parentNode.offsetTop + fontSize-2);
-			canvasCtx.lineTo(x + width/2, yOffset+2);
+			canvasCtx.moveTo(size.xOffset + size.width/2, parentNode.offsetTop + fontSize-2);
+			canvasCtx.lineTo(size.xOffset + size.width/2, size.yOffset+2);
 			canvasCtx.stroke();
 		}
 	}
 
-	drawPredecessors(fontSize)
+	drawPredecessors(fontSize, unit)
 	{
-		var id       = this.internalID;
-		var taskNode = document.getElementsByClassName('taskNode')[this.internalID];
-		var x        = dateOffset + dateWidth * getNbDay(this.startDate, project.startDate) + dateWidth/2.0;
-		var yOffset  = taskNode.offsetTop;
+		var size      = this.getTaskSize(unit);
+		var lineWidth = dateWidth / 2;
 
         canvasCtx.strokeStyle = "black";
         canvasCtx.lineWidth   = 3;
+
+		if(unit == "week")
+			lineWidth /= 7;
 
 		for(var i = 0; i < this.predecessors.length; i++)
 		{
             if(!this.predecessors[i].isShowned())
                 return;
-			var idPred      = this.predecessors[i].internalID;
-            var predNode    = document.getElementsByClassName('taskNode')[this.predecessors[i].internalID];
-			var xPred       = dateOffset + dateWidth * getNbDay(this.predecessors[i].startDate, project.startDate) + dateWidth/2.0;
-			var yOffsetPred = predNode.offsetTop; 
-			var widthPred   = dateWidth * getNbDay(this.predecessors[i].endDate, this.predecessors[i].startDate) - dateWidth;
+
+			var predSize    = this.predecessors[i].getTaskSize(unit);
 
             //The line
 			canvasCtx.beginPath();
-            canvasCtx.moveTo(xPred + widthPred,                 yOffsetPred + fontSize/2.0);
-            canvasCtx.lineTo(xPred + widthPred + dateWidth / 2, yOffsetPred + fontSize/2.0);
-            canvasCtx.lineTo(xPred + widthPred + dateWidth / 2, yOffset     + fontSize/2.0);
-            canvasCtx.lineTo(x,                                 yOffset     + fontSize/2.0);
+            canvasCtx.moveTo(predSize.xOffset + predSize.width,             predSize.yOffset + fontSize/2.0);
+            canvasCtx.lineTo(predSize.xOffset + predSize.width + lineWidth, predSize.yOffset + fontSize/2.0);
+            canvasCtx.lineTo(predSize.xOffset + predSize.width + lineWidth, size.yOffset     + fontSize/2.0);
+            canvasCtx.lineTo(size.xOffset,                                  size.yOffset     + fontSize/2.0);
 			canvasCtx.stroke();
 
             //The sticky arrow
             canvasCtx.beginPath();
-            canvasCtx.moveTo(x,     yOffset     + fontSize/2.0);
-            canvasCtx.lineTo(x - 5, yOffset     + fontSize/2.0 - 5);
-            canvasCtx.moveTo(x,     yOffset     + fontSize/2.0);
-            canvasCtx.lineTo(x - 5, yOffset     + fontSize/2.0 + 5);
+            canvasCtx.moveTo(size.x,     size.yOffset + fontSize/2.0);
+            canvasCtx.lineTo(size.x - 5, size.yOffset + fontSize/2.0 - 5);
+            canvasCtx.moveTo(size.x,     size.yOffset + fontSize/2.0);
+            canvasCtx.lineTo(size.x - 5, size.yOffset + fontSize/2.0 + 5);
 			canvasCtx.stroke();
 		}
 	}
 
-	getTaskInMousePos(x, y, fontSize)
+	getTaskInMousePos(x, y, fontSize, unit)
 	{
-		var id       = this.internalID;
-		var taskNode = document.getElementsByClassName('taskNode')[id];
-		var yOffset  = taskNode.offsetTop; 
-		var xOffset  = dateOffset + dateWidth * getNbDay(this.startDate, project.startDate);
-		var width    = dateWidth * getNbDay(this.endDate, this.startDate);
+		var size = this.getTaskSize(unit);
 
-		if(x >= xOffset && x <= xOffset + width &&
-		  y  >= yOffset && y <= yOffset + fontSize-4)
+		if(x >= size.xOffset && x <= size.xOffset + width &&
+		   y >= size.yOffset && y <= size.yOffset + fontSize-4)
 			return this;
-		return this.getTaskChildrenInMousePos(x, y, fontSize);
+		return this.getTaskChildrenInMousePos(x, y, fontSize, unit);
 	}
 
-	getTaskChildrenInMousePos(x, y, fontSize)
+	getTaskChildrenInMousePos(x, y, fontSize, unit)
 	{
 		for(var i = 0; i < this.children.length; i++)
 		{
-			var r = this.children[i].getTaskInMousePos(x, y, fontSize);
+			var r = this.children[i].getTaskInMousePos(x, y, fontSize, unit);
 			if(r != null)
 				return r;
 		}
 		return null;
+	}
+
+	getTaskSize(unit)
+	{
+		var id       = this.internalID;
+		var taskNode = document.getElementsByClassName('taskNode')[id];
+		var yOffset  = taskNode.offsetTop; 
+		var xOffset  = 0;
+		var width    = 0;
+
+
+		if(unit == "day")
+		{
+			xOffset  = dateOffset + (dateWidth * getNbDay(this.startDate, project.startDate) + dateWidth/2.0);
+			width    = dateWidth * (getNbDay(this.endDate, this.startDate) - 1);
+		}
+
+		else if(unit == "week")
+		{
+			var projectDate = new Date(project.startDate);
+			projectDate.setDate(projectDate.getDate() - getMondayDiff(project.startDate));
+
+			xOffset  = dateOffset + getNbDay(project.startDate, projectDate)*dateWidth/7 + 
+				       (dateWidth * getNbDay(this.startDate, project.startDate) + dateWidth/2.0)/7;
+			width    = dateWidth * (getNbDay(this.endDate, this.startDate) - 1)/7;
+		}
+
+		return {"yOffset": yOffset, "xOffset": xOffset, "width": width};
 	}
 }
 
@@ -218,6 +245,13 @@ function getNbDay(endDate, startDate)
 function getNbDayProject()
 {
 	return getNbDay(project.endDate, project.startDate);
+}
+
+function getMondayDiff(date)
+{
+	var day  = date.getDay();
+	var diff =  day - 1; // adjust when day is sunday
+	return diff;
 }
 
 function getFontSize()
@@ -262,12 +296,12 @@ function redraw()
 
 	var fontSize = getFontSize();
 
-	drawDate(fontSize);
-	drawTasks(fontSize);
+	drawDate(fontSize, currentUnit);
+	drawTasks(fontSize, currentUnit);
 }
 
 //Draw all the date.
-function drawDate(fontSize)
+function drawDate(fontSize, unit)
 {
 	var currentDate = new Date(project.startDate);
 	var nbDays      = getNbDayProject();
@@ -275,20 +309,31 @@ function drawDate(fontSize)
 	canvasCtx.beginPath();
 	canvasCtx.font        = "10pt Arial";
 	canvasCtx.fillStyle   = "black";
+
+	if(unit == "week")
+	{
+		currentDate.setDate(currentDate.getDate() - getMondayDiff(currentDate));
+		nbDays /= 7;
+	}
+
 	for(var i=0; i < nbDays; i++)
 	{
 		var dateStr = ('00'+currentDate.getDate()).slice(-2) + "/" + ('00' + (currentDate.getMonth()+1)).slice(-2) + "/" + (currentDate.getFullYear()%100);
 		canvasCtx.fillText(dateStr, dateOffset + i*dateWidth, 25);
-		currentDate.setDate(currentDate.getDate() + 1);
+
+		if(unit == "week")
+			currentDate.setDate(currentDate.getDate() + 7);
+		else if(unit == "day")
+			currentDate.setDate(currentDate.getDate() + 1);
 	}
 	canvasCtx.fill();
 }
 
 //Draw tasks
-function drawTasks(fontSize)
+function drawTasks(fontSize, diviser)
 {
 	for(var i=0; i < scope.tasks.length; i++)
-		scope.tasks[i].draw(fontSize);
+		scope.tasks[i].draw(fontSize, diviser);
 }
 
 //Computer the tasks' internal ID, i.e the ID in this page (and not in the database)
@@ -311,8 +356,10 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 
 	//Variables
 	$scope.currentSorting = 0;
+	$scope.currentScale   = 1;
 	$scope.dispUnstarted  = 0;
-	$scope.sortTask		  = ["date", "nom"];
+	$scope.sortTask		  = ["Date", "Nom"];
+	$scope.scale          = ["Jour", "Semaine"];
 
 	$scope.tasks          = [];
 	$scope.selectingTask  = null;
@@ -334,12 +381,33 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 
 	$scope.expandTasks = function()
 	{
-		//TODO
+		for(var i=0; i < $scope.tasks.length; i++)
+			$scope.tasks[i].expandAll();
 	};
 
 	$scope.reduceTasks = function()
 	{
-		//TODO
+		for(var i=0; i < $scope.tasks.length; i++)
+			$scope.tasks[i].reduceAll();
+	};
+
+	$scope.changeSorting = function(id)
+	{
+		$scope.currentSorting = id;
+	};
+
+	$scope.changeScale = function(id)
+	{
+		$scope.currentScale = id;
+		switch(id)
+		{
+			case 0:
+				currentUnit           = "day";
+				break;
+			case 1:
+				currentUnit           = "week";
+				break;
+		}
 	};
 
 	//Function for tasks tree view

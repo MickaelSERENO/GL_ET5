@@ -9,6 +9,7 @@
 		public $startDate;
 		public $endDate;
         public $isMarker;
+		public $stats;
 	}
 
 	class Marker extends AbstractTask
@@ -87,7 +88,7 @@
 
 			//Fetch tasks
 			$script = "SELECT AbstractTask.id, name, description, startDate, 
-					   endDate, initCharge, computedCharge, remaining, chargeConsumed, advancement, collaboratorEmail
+					   endDate, initCharge, computedCharge, remaining, chargeConsumed, advancement, collaboratorEmail, status
 					   FROM AbstractTask INNER JOIN Task ON AbstractTask.id = Task.id
 					   WHERE idProject = $idProject
 					   ORDER BY startDate;";
@@ -107,7 +108,8 @@
 				$task->chargeConsumed    = (int)($row[8]);
 				$task->advancement       = (int)($row[9]);
 				$task->collaboratorEmail = $row[10];
-                $task->isMarker          = false;
+				$task->isMarker          = false;
+				$task->stats             = $row[11];
 
 				array_push($tasks, $task);
 			}
@@ -189,6 +191,20 @@
             $result->successors = $successors;
 
             return $result;
+		}
+
+		public function isCollaborator($email, $projectID)
+		{
+			$script = "SELECT COUNT(*) FROM ProjectCollaborator WHERE idProject='$projectID' AND collaboratorEmail='$email';";
+
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+
+			if($row == null)
+				return false;
+			return true;
+
+
 		}
 	}
 ?>
