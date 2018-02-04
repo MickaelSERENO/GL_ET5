@@ -1,8 +1,9 @@
 var scope;
 var project;
 
-var dateWidth  = 60;
-var dateOffset = 5;
+var dateWidth   = 60;
+var dateOffset  = 5;
+var dateYOffset = 15;
 
 var currentUnit = "week";
 
@@ -14,8 +15,6 @@ class Project
 		this.startDate = new Date(cpy.startDate);
 		this.endDate   = new Date(cpy.endDate);
 		this.stats     = cpy.stats;
-		console.log(cpy.startDate);
-		console.log(cpy.endDate);
 	}
 }
 
@@ -109,7 +108,7 @@ class Task extends AbstractTask
 		if(scope.selectingTask == this)
 		{
 			canvasCtx.fillStyle = "#00FFFF";
-			drawRoundRect(size.xOffset-5, size.yOffset-2, size.width+10, size.fontSize+4, dateWidth/4);
+			drawRoundRect(size.xOffset-5, size.yOffset-2, size.width+10, fontSize+4, dateWidth/4);
 			canvasCtx.fill();
 		}
 
@@ -189,7 +188,7 @@ class Task extends AbstractTask
 	{
 		var size = this.getTaskSize(unit);
 
-		if(x >= size.xOffset && x <= size.xOffset + width &&
+		if(x >= size.xOffset && x <= size.xOffset + size.width &&
 		   y >= size.yOffset && y <= size.yOffset + fontSize-4)
 			return this;
 		return this.getTaskChildrenInMousePos(x, y, fontSize, unit);
@@ -319,7 +318,7 @@ function drawDate(fontSize, unit)
 	for(var i=0; i < nbDays; i++)
 	{
 		var dateStr = ('00'+currentDate.getDate()).slice(-2) + "/" + ('00' + (currentDate.getMonth()+1)).slice(-2) + "/" + (currentDate.getFullYear()%100);
-		canvasCtx.fillText(dateStr, dateOffset + i*dateWidth, 25);
+		canvasCtx.fillText(dateStr, dateOffset + i*dateWidth, dateYOffset);
 
 		if(unit == "week")
 			currentDate.setDate(currentDate.getDate() + 7);
@@ -363,6 +362,8 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 
 	$scope.tasks          = [];
 	$scope.selectingTask  = null;
+
+	$scope.actionDiv      = document.getElementById('actionDiv');
 
 	//Init canvas
 	canvas    = document.getElementById('ganttCanvas');
@@ -423,16 +424,32 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 		if(event.button == 0)
 		{
 			var fontSize = getFontSize();
+			$scope.selectingTask = null;
 			for(var i = 0; i < $scope.tasks.length; i++)
 			{
-				var r = $scope.tasks[i].getTaskInMousePos(event.offsetX, event.offsetY, getFontSize());
+				var r = $scope.tasks[i].getTaskInMousePos(event.offsetX, event.offsetY, getFontSize(), currentUnit);
 				if(r != null)
 				{
-					$scope.selectingTask =  r;
+					$scope.selectingTask = r;
+					//Set the position of the action div
+					console.log($scope.actionDiv.style.left);
+					console.log($scope.actionDiv.style.top);
+					var size = r.getTaskSize(currentUnit);
+					$scope.actionDiv.style.left = -$scope.actionDiv.width/2 + size.xOffset + size.width / 2 + 'px';
+					$scope.actionDiv.style.top  = -$scope.actionDiv.height  + size.yOffset -5 + 'px';
+					console.log($scope.actionDiv.style.left);
+					console.log($scope.actionDiv.style.top);
+
+
 					break;
 				}
 			}
 		}
+	};
+
+	$scope.showActionDiv = function()
+	{
+		return $scope.selectingTask != null;
 	};
 
 	//Load tasks

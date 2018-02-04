@@ -159,6 +159,21 @@
 								<div id="gantt" class="col-xs-9">
 									<canvas id="ganttCanvas" width=1600 height=800 ng-click="canvasClick($event)">
 									</canvas>
+									<div id="actionDiv" ng-show="showActionDiv()">
+										<div class="actionButton">
+											<div style="background-color:blue;width:20px;height:20px"></div>
+										</div>
+										<div class="actionButton">
+											<div style="background-color:blue;width:20px;height:20px"></div>
+										</div>
+										<div class="actionButton">
+											<div style="background-color:blue;width:20px;height:20px"></div>
+										</div>
+										<div class="actionButton">
+											<div style="background-color:blue;width:20px;height:20px"></div>
+										</div>
+										<span style="display:block;clear:both;"></div>
+									</div>
 								</div>
 							</div>
 						</div>

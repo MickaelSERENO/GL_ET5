@@ -69,7 +69,19 @@
 #gantt
 {
 	overflow-x:auto;
-	overflow-y:auto;
+	position:relative;
+}
+
+#actionDiv
+{
+	position:absolute;
+}
+
+.actionButton
+{
+	float:left;
+	margin-left:5px;
+	margin-right:5px;
 }
 
 #ganttCanvas
