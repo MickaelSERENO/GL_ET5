@@ -1,8 +1,14 @@
 <?php
-	session_start();
 	require_once __DIR__.'/../../PSQL/TaskRqst.php';
+	require_once __DIR__.'/../../Libraries/check.php';
 
-	//TODO check if we can access to this project
+	session_start();
+
+	if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
+	{
+		http_response_code(403);
+		die('Forbidden Access');
+	}
 
 	$taskRqst = new TaskRqst();
 	$result = $taskRqst->getTasks((int)($_GET["projectID"]));
