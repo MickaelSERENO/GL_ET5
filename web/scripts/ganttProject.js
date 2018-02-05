@@ -509,7 +509,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 
 	$scope.showActionDiv = function()
 	{
-		return $scope.editionMode && $scope.selectingTask != null;
+		return $scope.selectingTask != null;
 	};
 
 	//The action buttons

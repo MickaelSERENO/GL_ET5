@@ -35,7 +35,7 @@ myApp.controller('formController', function($scope, $timeout)
 		}
 		httpCtx.open("POST", "/AJAX/identRequest.php", true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-		httpCtx.send("requestID=3&email="+$scope.email+"&pwd="+$scope.pwd+"&isAdmin="+$scope.isAdmin);
+		httpCtx.send("requestID=3&email="+$scope.email+"&pwd="+$scope.pwd+"&isAdmin="+($scope.isAdmin ? 1 : 0));
 	};
 });
 

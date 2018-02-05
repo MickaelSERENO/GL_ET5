@@ -8,7 +8,6 @@
 	$SIGN_IN           = 3;
 	$FORGET_PWD        = 4;
 
-
 	if($_POST["requestID"] == $ALREADY_CONNECTED)
 	{
 		if(isset($_SESSION["email"]))
@@ -47,7 +46,6 @@
 
 		//Launch the request to the DB to know if the user exists
 		$rqst = new ConnectionRqst();		
-		error_log("rsqt being sent");
 		if($rqst->identValid($_POST["email"], $_POST["pwd"], $_POST["isAdmin"]))
 		{
 			$_SESSION["email"]   = $_POST["email"];
@@ -55,6 +53,7 @@
 				$_SESSION["rank"] = $rqst->getRank($_POST["email"]);
 			else
 				$_SESSION["rank"] = $ADMIN;
+
 			echo($SUCCESSFUL);
 			return;
 		}

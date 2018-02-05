@@ -1,20 +1,25 @@
 <?php
 	require_once __DIR__.'/../../PSQL/TaskRqst.php';
+	require_once __DIR__.'/../../PSQL/ProjectRqst.php';
 	require_once __DIR__.'/../../Libraries/check.php';
 
 	session_start();
 
 	//Redirect if not signed in
 	if(!isset($_SESSION["email"]))
+	{
 		header('Location: /connection.php');
+	}
 
-	if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
+	else if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
 	{
 		http_response_code(403);
 		die('Forbidden Access');
 	}
 
-	$rank = $_SESSION['rank'];
+	$rank          = $_SESSION['rank'];
+	$projectRqst   = new ProjectRqst();
+	$projectStatus = $projectRqst->getProjectStatus($_GET['projectID']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -80,12 +85,15 @@
 									Serrer
 								</button>
 							</li>
-<?php if($rank == 1 || $rank == 2) : ?>
+<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) && 
+		  $projectStatus != 'CLOSED_INVISIBLE' && $projectStatus != 'CLOSED_VISIBLE') : ?>
 							<li>
 								<button class="btn btn-primary" ng-click="onEditionClick()">
 									{{editionTxt}}
 								</button>
 							</li>
+<?php endif; ?>	
+<?php if($rank == 1 || $rank == 2) : ?>
 							<li>
 								<button class="btn btn-primary" ng-click="onNotificationClick()">
 									Notifications
@@ -153,21 +161,28 @@
 									<canvas id="ganttCanvas" width=1600 height=800 ng-click="canvasClick($event)">
 									</canvas>
 									<div id="actionDiv" ng-style="{'visibility' : showActionDiv() ? 'visible' : 'hidden'}">
+
+<?php if($projectStatus == "STARTED") : ?>
 										<div class="actionButton" ng-click="changeTaskAdv()">
 											<div style="background-color:blue;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton" ng-click="changeTaskDate()">
+<?php endif;?>
+
+<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
+          $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>
+										<div class="actionButton" ng-click="changeTaskDate()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
 											<div style="background-color:red;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton" ng-click="changeTaskCollaborator()">
+										<div class="actionButton" ng-click="changeTaskCollaborator()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
 											<div style="background-color:yellow;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton" ng-click="addSubTask()">
+										<div class="actionButton" ng-click="addSubTask()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
 											<div style="background-color:black;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton" ng-click="addPredecessorTask()">
+										<div class="actionButton" ng-click="addPredecessorTask()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
 											<div style="background-color:green;width:20px;height:20px"></div>
 										</div>
+<?php endif; ?>
 									</div>
 								</div>
 							</div>

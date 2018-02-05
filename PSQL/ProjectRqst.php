@@ -30,7 +30,7 @@
 
 		public function isManager($email, $id)
 		{
-			$script = "SELECT COUNT(*) FROM Project WHERE idProject=$id AND managerEmail='$email';";
+			$script = "SELECT COUNT(*) FROM Project WHERE id=$id AND managerEmail='$email';";
 
 			$resultScript = pg_query($this->_conn, $script);
 			$row          = pg_fetch_row($resultScript);

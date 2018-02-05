@@ -57,10 +57,10 @@
 				if($rowPM == null)
 					return -1; //The user is not a collaborator nor a project manager
 
-				return $adminRank; //As project manager
+				return 1; //As project manager
 			}
 
-			return $collaboratorRank; //As collaborator
+			return 0; //As collaborator
 		}
 
 		public function sendPasswordNotification($email)
