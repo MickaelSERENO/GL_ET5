@@ -192,19 +192,5 @@
 
             return $result;
 		}
-
-		public function isCollaborator($email, $projectID)
-		{
-			$script = "SELECT COUNT(*) FROM ProjectCollaborator WHERE idProject='$projectID' AND collaboratorEmail='$email';";
-
-			$resultScript = pg_query($this->_conn, $script);
-			$row          = pg_fetch_row($resultScript);
-
-			if($row == null)
-				return false;
-			return true;
-
-
-		}
 	}
 ?>

@@ -13,6 +13,8 @@
 		http_response_code(403);
 		die('Forbidden Access');
 	}
+
+	$rank = $_SESSION['rank'];
 ?>
 <!DOCTYPE html>
 <html>

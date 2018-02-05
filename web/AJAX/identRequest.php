@@ -73,7 +73,7 @@
 			echo(0);
 		else
 		{
-			//TODO
+			//TODO send notification
 			echo(1);
 		}
 	}

@@ -1,5 +1,5 @@
 <?php
-	require_once __DIR__.'/../PSQL/TaskRqst.php';
+	require_once __DIR__.'/../PSQL/ProjectRqst.php';
 
 	function canAccessProjet($id)
 	{
@@ -11,11 +11,24 @@
 		$rank = $_SESSION["rank"];
 		if($rank != 2) //If not admin
 		{
-			$taskRqst = new TaskRqst();
+			$projectRqst = new ProjectRqst();
+
+			//Get the status of the project
+			$status = $projectRqst->getProjectStatus($id);
 
 			//Is it a collaborator of this project ?
-			if(!$taskRqst->isCollaborator($_SESSION["email"], $id))
-				return false;
+			if($status != "CLOSED_INVISIBLED")
+			{
+				if(!$projectRqst->isCollaborator($_SESSION["email"], $id))
+					return false;
+			}
+
+			//Check the special case of invisible project
+			else
+			{
+				if(!$projectRqst->isManager($_SESSION["email"], $id))
+					return false;
+			}
 		}
 
 		return true;
