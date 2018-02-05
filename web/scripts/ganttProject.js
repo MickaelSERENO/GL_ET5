@@ -91,6 +91,36 @@ class AbstractTask
 	getTaskInMousePos(x, y, fontSize)
 	{
 	}
+
+    hideUnstarted(currentDate)
+    {
+        //Update the visibility component of this task
+        var id       = this.internalID;
+        var taskNode = document.getElementsByClassName('taskNode')[id];
+        if(!this.hasStarted(currentDate))
+            taskNode.style.visibility = "hidden";
+        else
+            taskNode.style.visibility = "visible";
+
+        //Do it for each children
+		for(var i = 0; i < this.children.length; i++)
+            this.children[i].hideUnstarted(currentDate);
+    }
+
+    showAll()
+    {
+        var id       = this.internalID;
+        var taskNode = document.getElementsByClassName('taskNode')[id];
+        taskNode.style.visibility = "visible";
+        //Do it for each children
+		for(var i = 0; i < this.children.length; i++)
+            this.children[i].showAll();
+    }
+
+    hasStarted(currentDate)
+    {
+        return currentDate >= this.startDate;
+    }
 }
 
 class Task extends AbstractTask
@@ -103,6 +133,10 @@ class Task extends AbstractTask
 
 	draw(fontSize, unit)
 	{
+        var task = document.getElementsByClassName('taskNode')[this.internalID];
+        if(task.style.visibility == "hidden")
+            return;
+
 		var size = this.getTaskSize(unit);
 
 		if(scope.selectingTask == this)
@@ -356,14 +390,18 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 	//Variables
 	$scope.currentSorting = 0;
 	$scope.currentScale   = 1;
-	$scope.dispUnstarted  = 0;
-	$scope.sortTask		  = ["Date", "Nom"];
+	$scope.dispUnstarted  = true;
+	$scope.editionMode    = false;
+	$scope.sortTask       = ["Date", "Nom"];
 	$scope.scale          = ["Jour", "Semaine"];
 
 	$scope.tasks          = [];
 	$scope.selectingTask  = null;
 
 	$scope.actionDiv      = document.getElementById('actionDiv');
+
+    $scope.editionTxt     = "Mode édition";
+    $scope.unstartedTxt   = "En cours";
 
 	//Init canvas
 	canvas    = document.getElementById('ganttCanvas');
@@ -375,10 +413,26 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 	});
 
 	//Toolbar functions
-	$scope.$watch('dispUnstarted', function()
+	$scope.closeProject = function()
 	{
 		//TODO
-	});
+	};
+
+    $scope.unstartedClick = function()
+    {
+        $scope.dispUnstarted = !$scope.dispUnstarted;
+        $scope.unstartedTxt  = ($scope.dispUnstarted) ? "En cours" : "Toutes";
+
+        if($scope.dispUnstarted)
+            for(var i = 0; i < $scope.tasks.length; i++)
+                $scope.tasks[i].showAll();
+        else
+        {
+            var date = new Date();
+            for(var i = 0; i < $scope.tasks.length; i++)
+                $scope.tasks[i].hideUnstarted(date);
+        }
+    };
 
 	$scope.expandTasks = function()
 	{
@@ -391,6 +445,17 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 		for(var i=0; i < $scope.tasks.length; i++)
 			$scope.tasks[i].reduceAll();
 	};
+
+	$scope.onNotificationClick = function()
+	{
+		//TODO
+	};
+
+    $scope.onEditionClick = function()
+    {
+        $scope.editionMode = !$scope.editionMode;
+        $scope.editionTxt  = ($scope.editionMode) ? "Quitter Edition" : "Mode Edition";
+    };
 
 	$scope.changeSorting = function(id)
 	{
@@ -432,14 +497,9 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 				{
 					$scope.selectingTask = r;
 					//Set the position of the action div
-					console.log($scope.actionDiv.style.left);
-					console.log($scope.actionDiv.style.top);
 					var size = r.getTaskSize(currentUnit);
-					$scope.actionDiv.style.left = -$scope.actionDiv.width/2 + size.xOffset + size.width / 2 + 'px';
-					$scope.actionDiv.style.top  = -$scope.actionDiv.height  + size.yOffset -5 + 'px';
-					console.log($scope.actionDiv.style.left);
-					console.log($scope.actionDiv.style.top);
-
+					$scope.actionDiv.style.left = -$scope.actionDiv.offsetWidth/2 + size.xOffset + size.width / 2 + "px";
+					$scope.actionDiv.style.top  = -$scope.actionDiv.offsetHeight  + size.yOffset -5 + "px";
 
 					break;
 				}
@@ -449,7 +509,28 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 
 	$scope.showActionDiv = function()
 	{
-		return $scope.selectingTask != null;
+		return $scope.editionMode && $scope.selectingTask != null;
+	};
+
+	//The action buttons
+	$scope.changeTaskAdv = function()
+	{
+	};
+
+	$scope.changeTaskDate = function()
+	{
+	};
+
+	$scope.changeTaskCollaborator = function()
+	{
+	};
+
+	$scope.addSubTask = function()
+	{
+	};
+
+	$scope.addPredecessorTask = function()
+	{
 	};
 
 	//Load tasks

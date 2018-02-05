@@ -69,17 +69,19 @@
 #gantt
 {
 	overflow-x:auto;
-	position:relative;
 }
 
 #actionDiv
 {
 	position:absolute;
+	visibility:hidden;
+	display:flex;
+	top:0px;
+	left:0px;
 }
 
 .actionButton
 {
-	float:left;
 	margin-left:5px;
 	margin-right:5px;
 }

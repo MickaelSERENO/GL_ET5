@@ -1,8 +1,7 @@
 <?php
 	require_once __DIR__.'/../PSQL/TaskRqst.php';
-	session_start();
 
-	bool function canAccessProjet($id)
+	function canAccessProjet($id)
 	{
 		//Check if the user is connected
 		if(!isset($_SESSION["email"]))
@@ -16,7 +15,7 @@
 
 			//Is it a collaborator of this project ?
 			if(!$taskRqst->isCollaborator($_SESSION["email"], $id))
-				return false
+				return false;
 		}
 
 		return true;

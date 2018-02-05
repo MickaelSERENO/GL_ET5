@@ -1,26 +1,17 @@
 <?php
 	require_once __DIR__.'/../../PSQL/TaskRqst.php';
+	require_once __DIR__.'/../../Libraries/check.php';
 
 	session_start();
 
 	//Redirect if not signed in
 	if(!isset($_SESSION["email"]))
-	{
 		header('Location: /connection.php');
-	}
 
-	//Check the rank of this user
-	$rank = $_SESSION["rank"];
-	if($rank != 2) //If not admin
+	if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
 	{
-		$taskRqst = new TaskRqst();
-
-		//Is it a collaborator of this project ?
-		if(!$taskRqst->isCollaborator($_SESSION["email"], $_GET["projectID"]))
-		{
-			http_response_code(403);
-			die('Forbidden Access');
-		}
+		http_response_code(403);
+		die('Forbidden Access');
 	}
 ?>
 <!DOCTYPE html>
@@ -73,8 +64,8 @@
 <?php endif; ?>	
 							
 							<li>
-								<button class="btn btn-primary" ng-model="dispUnstarted" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
-									En cours
+								<button class="btn btn-primary" ng-click="unstartedClick()">
+									{{unstartedTxt}}
 								</button>
 							</li>
 							<li>
@@ -89,12 +80,12 @@
 							</li>
 <?php if($rank == 1 || $rank == 2) : ?>
 							<li>
-								<button class="btn btn-primary" ng-click="editionMode()">
-									Mode édition
+								<button class="btn btn-primary" ng-click="onEditionClick()">
+									{{editionTxt}}
 								</button>
 							</li>
 							<li>
-								<button class="btn btn-primary" ng-click="notification()">
+								<button class="btn btn-primary" ng-click="onNotificationClick()">
 									Notifications
 								</button>
 							</li>
@@ -159,20 +150,22 @@
 								<div id="gantt" class="col-xs-9">
 									<canvas id="ganttCanvas" width=1600 height=800 ng-click="canvasClick($event)">
 									</canvas>
-									<div id="actionDiv" ng-show="showActionDiv()">
-										<div class="actionButton">
+									<div id="actionDiv" ng-style="{'visibility' : showActionDiv() ? 'visible' : 'hidden'}">
+										<div class="actionButton" ng-click="changeTaskAdv()">
 											<div style="background-color:blue;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton">
-											<div style="background-color:blue;width:20px;height:20px"></div>
+										<div class="actionButton" ng-click="changeTaskDate()">
+											<div style="background-color:red;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton">
-											<div style="background-color:blue;width:20px;height:20px"></div>
+										<div class="actionButton" ng-click="changeTaskCollaborator()">
+											<div style="background-color:yellow;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton">
-											<div style="background-color:blue;width:20px;height:20px"></div>
+										<div class="actionButton" ng-click="addSubTask()">
+											<div style="background-color:black;width:20px;height:20px"></div>
 										</div>
-										<span style="display:block;clear:both;"></div>
+										<div class="actionButton" ng-click="addPredecessorTask()">
+											<div style="background-color:green;width:20px;height:20px"></div>
+										</div>
 									</div>
 								</div>
 							</div>
