@@ -8,12 +8,27 @@
 			//Check if the project is already closed (need this because of notification)
 			$status = $this->getProjectStatus($idProject);
 			if($status == 'CLOSED_INVISIBLED' || $status == 'CLOSED_VISIBLE')
-				return;
+				return false;
 
-			$script = "UPDATE TABLE Project SET status = 'CLOSE_INVISIBLED' WHERE id = $idProject;"; 
+			$script = "UPDATE Project SET status = 'CLOSED_INVISIBLE' WHERE id = $idProject;"; 
 			$resultScript = pg_query($this->_conn, $script);
 
 			//TODO send notifications
+			return true;
+		}
+
+		public function openProject($idProject, $isAdmin)
+		{
+			//Check if the project is already closed (need this because of notification)
+			$status = $this->getProjectStatus($idProject);
+			if($status == 'STARTED')
+				return false;
+
+			$script = "UPDATE Project SET status = 'STARTED' WHERE id = $idProject;"; 
+			$resultScript = pg_query($this->_conn, $script);
+
+			//TODO send notifications
+			return true;
 		}
 
 		public function isCollaborator($email, $projectID)

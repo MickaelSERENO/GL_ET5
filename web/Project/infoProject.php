@@ -65,7 +65,7 @@
 <?php if($rank == 1 || $rank == 2) : ?>
 							<li>
 								<button class="btn btn-primary" ng-click="closeProject()">
-									Clôturer
+									{{closeTxt}}
 								</button>
 							</li>
 <?php endif; ?>	

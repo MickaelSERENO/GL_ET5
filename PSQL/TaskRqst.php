@@ -45,6 +45,11 @@
 		public $id;
 		public $startDate;
 		public $endDate;
+		public $name;
+		public $description;
+		public $managerEmail;
+		public $contactEmail;
+		public $status;
 	}
 
     class FetchTask

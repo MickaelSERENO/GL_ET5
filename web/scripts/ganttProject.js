@@ -14,7 +14,7 @@ class Project
 		this.id        = cpy.id;
 		this.startDate = new Date(cpy.startDate);
 		this.endDate   = new Date(cpy.endDate);
-		this.stats     = cpy.stats;
+		this.stats     = cpy.status;
 	}
 }
 
@@ -403,6 +403,9 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
     $scope.editionTxt     = "Mode édition";
     $scope.unstartedTxt   = "En cours";
 
+	$scope.closeStatus    = 0;
+	$scope.closeTxt       = "Clôturer";
+
 	//Init canvas
 	canvas    = document.getElementById('ganttCanvas');
 	canvasCtx = canvas.getContext('2d');
@@ -415,7 +418,54 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 	//Toolbar functions
 	$scope.closeProject = function()
 	{
-		//TODO
+		var httpCtx = new XMLHttpRequest();
+
+		//Close
+		if($scope.closeStatus == 0)
+		{
+			httpCtx.onreadystatechange = function()
+			{
+				if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+				{
+					if(httpCtx.responseText != '1')
+						alert("An unknown error occured");
+					else
+					{
+						$scope.$apply(function()
+						{
+							$scope.closeStatus = 1;
+							$scope.closeTxt    = "Ré-Ouvrir";
+						});
+					}
+				}
+			}
+			httpCtx.open('GET', "/AJAX/closeProject.php?projectID="+projectID+'&requestID=0', true);
+		}
+
+		//Open
+		else
+		{
+			httpCtx.onreadystatechange = function()
+			{
+				if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+				{
+					if(httpCtx.responseText != '1')
+						alert("An unknown error occured");
+					else
+					{
+						$scope.$apply(function()
+						{
+							$scope.closeStatus = 0;
+							$scope.closeTxt    = "Clôturer";
+						});
+					}
+				}
+			}
+			httpCtx.open('GET', "/AJAX/closeProject.php?projectID="+projectID+'&requestID=1', true);
+		}
+
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 	};
 
     $scope.unstartedClick = function()
@@ -542,7 +592,14 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 			$scope.$apply(function()
 			{
 				var tasks = JSON.parse(httpCtx.responseText);
+
+				//Handle project
 				project   = new Project(tasks.project);
+				if(project.stats == "CLOSED_INVISIBLE" || project.stats == "CLOSED_VISIBLE")
+				{
+					$scope.closeStatus = 1;
+					$scope.closeTxt    = "Ré-ouvrir";
+				}
 
 				$scope.tasks = [];
 				var allTasks = [];
