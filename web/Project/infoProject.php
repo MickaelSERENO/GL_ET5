@@ -40,10 +40,12 @@
 		<script type="text/javascript" src="/scripts/globalProject.js"></script>
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
+		<script type="text/javascript" src="/scripts/ganttModal.js"></script>
 
 
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
+		<link rel="stylesheet" type="text/css" href="/CSS/ganttStyle.css">
 	</head>
 
 	<body ng-app="myApp">
@@ -59,6 +61,30 @@
 				<!-- Gantt tab -->
 				<uib-tab id="ganttHeader" index="$index+1" heading="Planning" deselect="deselectTab()">
 					<div ng-controller="ganttProjectCtrl" id="ganttDiv">
+						<script type="text/ng-template" id="modalColl.html">
+							<div class="modal-header">
+								<h3 class="modal-title">Changement de collaborateur</h3>
+							</div>
+							<div class="modal-body">
+								<div>
+									<div class="alignedDiv">
+										Collaborateur : 
+									</div>
+									<div class="btn-group alignedDiv topSpace" uib-dropdown dropdown-append-to-body>
+										<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+											{{currentCollTxt()}}<span class="caret sortList"></span>
+										</button>
+										<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+											<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators(c.id)"><a href="">{{c.name}}</a></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+								<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+							</div>
+						</script>
 						<!-- toolbar -->
 						<ul class="list-inline smallTopSpace">
 
@@ -87,7 +113,7 @@
 							</li>
 <?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) && 
 		  $projectStatus != 'CLOSED_INVISIBLE' && $projectStatus != 'CLOSED_VISIBLE') : ?>
-							<li>
+							<li ng-hide="projectClosed()">
 								<button class="btn btn-primary" ng-click="onEditionClick()">
 									{{editionTxt}}
 								</button>
@@ -144,7 +170,9 @@
 											<div class="taskNode">
 												<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>
 												<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-right" ng-show="task.canExpand()"></span>
-												{{task.name}}
+												<div class="taskBackground">
+													{{task.name}}
+												</div>
 											</div>
 												
 											<ul ng-show="task.expand">
@@ -160,10 +188,10 @@
 								<div id="gantt" class="col-xs-9">
 									<canvas id="ganttCanvas" width=1600 height=800 ng-click="canvasClick($event)">
 									</canvas>
-									<div id="actionDiv" ng-style="{'visibility' : showActionDiv() ? 'visible' : 'hidden'}">
+									<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 
 <?php if($projectStatus == "STARTED") : ?>
-										<div class="actionButton" ng-click="changeTaskAdv()">
+										<div class="actionButton" ng-click="changeTaskAdv()" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 											<div style="background-color:blue;width:20px;height:20px"></div>
 										</div>
 <?php endif;?>
@@ -173,7 +201,7 @@
 										<div class="actionButton" ng-click="changeTaskDate()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
 											<div style="background-color:red;width:20px;height:20px"></div>
 										</div>
-										<div class="actionButton" ng-click="changeTaskCollaborator()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
+										<div class="actionButton" ng-click="openCollModal()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
 											<div style="background-color:yellow;width:20px;height:20px"></div>
 										</div>
 										<div class="actionButton" ng-click="addSubTask()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">

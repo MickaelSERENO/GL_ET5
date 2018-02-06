@@ -66,64 +66,22 @@
 {
 }
 
-#gantt
-{
-	overflow-x:auto;
-}
-
-#actionDiv
-{
-	position:absolute;
-	visibility:hidden;
-	display:flex;
-	top:0px;
-	left:0px;
-}
-
-.actionButton
-{
-	margin-left:5px;
-	margin-right:5px;
-}
-
-#ganttCanvas
-{
-}
-
-#sortingDiv
-{
-}
-
-#scaleDiv
-
-#infoGantt
-{
-}
-
-#taskTreeView
-{
-	overflow-x:auto;
-	overflow-y:auto;
-}
-
-#taskTreeView ul
-{
-	list-style-type: none;
-}
-
-#taskTreeView li
-{
-	list-style-type: none;
-}
-
-.taskNode
-{
-	padding-bottom:1em;
-}
-
 .hLine
 {
 	margin-bottom:0.5em;
 	margin-top:0.5em;
 	border-top: 2px solid black;
+}
+
+.alignedDiv
+{
+	position: relative;
+	left: 50%;
+	transform: translateX(-50%);
+	text-align:center;
+}
+
+.dropdown-menu
+{
+	z-index:9999;
 }

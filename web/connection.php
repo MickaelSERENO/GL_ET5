@@ -36,7 +36,7 @@
 								<p>Identifiant</p>
 							</div>
 							<div class="col-sm-6">
-							  <input type="text" class="form-control" ng-model="email">
+							  <input type="text" class="form-control" ng-model="email" my-enter="tryConnection()">
 							</div>
 						</div>	
 
@@ -46,7 +46,7 @@
 								<p>Mot de passe</p>
 							</div>
 							<div class="col-sm-6">
-							  <input type="password" class="form-control" ng-model="pwd">
+							  <input type="password" class="form-control" ng-model="pwd" my-enter="tryConnection()">
 							</div>
 						</div>	
 					</div>

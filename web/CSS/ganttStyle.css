@@ -1,0 +1,63 @@
+#infoGantt
+{
+}
+
+#ganttCanvas
+{
+}
+
+#taskTreeView
+{
+	overflow-x:auto;
+	overflow-y:auto;
+}
+
+#taskTreeView ul
+{
+	list-style-type: none;
+}
+
+#taskTreeView li
+{
+	list-style-type: none;
+}
+
+#actionDiv
+{
+	position:absolute;
+	visibility:hidden;
+	display:flex;
+	top:0px;
+	left:0px;
+}
+
+#gantt
+{
+	overflow-x:auto;
+}
+
+#sortingDiv
+{
+}
+
+.taskNode
+{
+	padding-bottom:1em;
+	display:flex;
+}
+
+.actionButton
+{
+	margin-left:5px;
+	margin-right:5px;
+}
+
+.taskBackground
+{
+	width:100%;
+	height:100%;
+	background-color:transparent;
+	border-radius: 15px;
+	padding-left:5px;
+	padding-right:5px;
+}

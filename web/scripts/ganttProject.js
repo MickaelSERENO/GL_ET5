@@ -7,6 +7,8 @@ var dateYOffset = 15;
 
 var currentUnit = "week";
 
+var SELECT_TASK_COLOR = "#00FFFF";
+
 class Project
 {
 	constructor(cpy)
@@ -383,7 +385,7 @@ function computeInternalId()
 
 }
 
-myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
+myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $interval)
 {
 	scope = $scope;
 
@@ -526,6 +528,11 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 		}
 	};
 
+	$scope.projectClosed = function()
+	{
+		return project == null || $scope.closeStatus == 1;
+	};
+
 	//Function for tasks tree view
 	$scope.toggleExpandTask = function(task)
 	{
@@ -538,14 +545,20 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 		//Left click
 		if(event.button == 0)
 		{
-			var fontSize = getFontSize();
+			//Reset selecting task
+			if($scope.selectingTask != null)
+				document.getElementsByClassName('taskNode')[$scope.selectingTask.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = "transparent";
 			$scope.selectingTask = null;
+
+			var fontSize = getFontSize();
 			for(var i = 0; i < $scope.tasks.length; i++)
 			{
 				var r = $scope.tasks[i].getTaskInMousePos(event.offsetX, event.offsetY, getFontSize(), currentUnit);
 				if(r != null)
 				{
 					$scope.selectingTask = r;
+					document.getElementsByClassName('taskNode')[$scope.selectingTask.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = SELECT_TASK_COLOR;
+
 					//Set the position of the action div
 					var size = r.getTaskSize(currentUnit);
 					$scope.actionDiv.style.left = -$scope.actionDiv.offsetWidth/2 + size.xOffset + size.width / 2 + "px";
@@ -559,7 +572,8 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 
 	$scope.showActionDiv = function()
 	{
-		return $scope.selectingTask != null;
+					
+		return $scope.selectingTask != null && $scope.selectingTask instanceof(Task) && $scope.selectingTask.children.length == 0;
 	};
 
 	//The action buttons
@@ -652,6 +666,34 @@ myApp.controller("ganttProjectCtrl", function($scope, $timeout, $interval)
 	httpCtx.open('GET', "/AJAX/fetchTasks.php?projectID="+projectID, true);
 	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	httpCtx.send(null);
+
+
+	//Modals
+	var $ctrl = this;
+	$scope.openCollModal = function()
+	{
+		$scope.opts = 
+		{
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "modalColl.html",
+			controller : "CollaboratorModal",
+			controllerAs : "$ctrl",
+			resolve : {items : function() {return $ctrl;}}
+		};
+
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function() //ok
+			{
+
+			}, 
+			function() //cancel
+			{
+			});
+	};
 
 	$interval(function()
 	{
