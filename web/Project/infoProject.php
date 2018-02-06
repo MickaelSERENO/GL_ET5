@@ -42,7 +42,6 @@
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttModal.js"></script>
 
-
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/ganttStyle.css">
@@ -75,7 +74,7 @@
 											{{currentCollTxt()}}<span class="caret sortList"></span>
 										</button>
 										<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-											<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators(c.id)"><a href="">{{c.name}}</a></li>
+											<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}}</a></li>
 										</ul>
 									</div>
 								</div>
