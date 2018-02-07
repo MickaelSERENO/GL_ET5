@@ -53,7 +53,57 @@
 				<!-- Information tab -->
 				<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
 					<div ng-controller="infoProjectCtrl">
-						A faire part Stacy
+						<div class="infoProject">
+							<h3>Titre projet</h3>
+							<div class="container-fluid">
+								<div class="row">
+									<div class="descriptionProject col-md-8">
+										<div class="row">
+											<div class="col-md-6">
+												<div class="flexDiv">
+													<div> Client : </div>
+													<div> NomClient </div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<p> Contact client : </p> <p> NomContactClient </p>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-6">
+												<p> Responsable de projet: </p>
+											</div>
+											<div class="col-md-6">
+												<p> NomResponsable </p>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-6">
+												<p> Début : </p> <p> 00/00/00 </p>
+											</div>
+											<div class="col-md-6">
+												<p> Fin : </p> <p> 00/00/00 </p>
+											</div>
+										</div>
+										<div class="row">
+											<p> Description : </p>
+										</div>
+										<div class="row">
+											<p> Ici une description. </p>
+										</div>
+									</div>
+									<div class="collabProject col-md-4">
+										<p> Collaborateur </p>
+										<div class="listCollabProject">
+											<!-- list collab -->
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<!-- bouton -->
+						</div>
 					</div>
 				</uib-tab>
 
