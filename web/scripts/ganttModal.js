@@ -51,3 +51,18 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 		$uibModalInstance.dismiss();
 	};
 });
+
+myApp.controller("DateModal", function($scope, $uibModalInstance, task)
+{
+	$scope.task = task;
+
+	$scope.ok= function()
+	{
+		$uibModalInstance.close();
+	};
+
+	$scope.cancel = function()
+	{
+		$uibModalInstance.dismiss();
+	};
+});

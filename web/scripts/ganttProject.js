@@ -700,7 +700,6 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 
 	//Modals
-	var $ctrl = this;
 
 	//The collaborator modal
 	$scope.openCollModal = function()
@@ -752,6 +751,34 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
 	};
+
+	//The date modal
+	$scope.openDateModal = function()
+	{
+		$scope.opts = 
+		{
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "modalDate.html",
+			controller : "DateModal",
+			controllerAs : "$ctrl",
+			resolve : {task    : function() {return $scope.taskSelected;}
+					  }
+		};
+
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function() //ok
+			{
+
+			}, 
+			function() //cancel
+			{
+			});
+	};
+	
 
 	$interval(function()
 	{
