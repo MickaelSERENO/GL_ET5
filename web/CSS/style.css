@@ -95,3 +95,20 @@
 {
 	z-index:9999;
 }
+
+.flexDiv
+{
+	display:flex;
+	align-items:center;
+}
+
+.dateWidth
+{
+	margin-left:0.5em;
+	width:120px;
+}
+
+.buttonDate
+{
+	margin-left: 1em;
+}
