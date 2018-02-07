@@ -52,13 +52,58 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 	};
 });
 
-myApp.controller("DateModal", function($scope, $uibModalInstance, task)
+myApp.controller("DateModal", function($scope, $uibModalInstance, task, minDate, maxDate)
 {
-	$scope.task = task;
+	$scope.task        = Object.assign({}, task);
+	$scope.dateFormat  = "dd/MM/yyyy";
+	$scope.dateOptions = 
+		{
+			formatYear: 'yy',
+			maxDate: maxDate,
+			minDate: minDate,
+			startingDay: 1
+		};
+
+	console.log(maxDate);
+	console.log(minDate);
+
+	$scope.popupStart = {opened : false};
+	$scope.popupEnd   = {opened : false};
+
+	$scope.openEnd = function()
+	{
+		$scope.popupEnd.opened = true;
+	};
+
+
+	$scope.openStart = function()
+	{
+		$scope.popupStart.opened = true;
+	};
 
 	$scope.ok= function()
 	{
-		$uibModalInstance.close();
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			//Check for errors
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					$uibModalInstance.close();
+				}
+				else
+				{
+					$uibModalInstance.dismiss();
+				}
+			}
+		}
+		var startTime = $scope.task.startDate.getTime() - $scope.task.startDate.getTimezoneOffset()*60*1000; 
+		var endTime   = $scope.task.endDate.getTime()   - $scope.task.endDate.getTimezoneOffset()*60*1000; 
+		httpCtx.open('POST', "/AJAX/timeTask.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&startDate="+startTime+"&endDate="+endTime, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 	};
 
 	$scope.cancel = function()

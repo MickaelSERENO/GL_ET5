@@ -41,6 +41,7 @@
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttModal.js"></script>
+		<script type="text/javascript" src="/scripts/taskModal.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
@@ -62,6 +63,9 @@
 					<div ng-controller="ganttProjectCtrl" id="ganttDiv">
 
 						<!-- Pop ups -->
+						<!-- Task popup -->
+						<?php include('../../Libraries/TaskPopUp.php'); ?>
+
 						<!-- Collaborator -->
 						<script type="text/ng-template" id="modalColl.html">
 							<div class="modal-header">
@@ -94,17 +98,32 @@
 								<h3 class="modal-title">Changement de date</h3>
 							</div>
 							<div class="modal-body">
-								<div class="container-fluid">
-									<div class="row alignedDiv">
-										<div class="col-xs-6">
-											Début : {{task.startDate | date:'dd-MM-yyyy'}}
-										</div>
+								<ng-form name="myForm" novalidate>
+									<div class="container-fluid">
+										<div class="row alignedDiv">
+											<div class="col-xs-6">
+												Début :
+												<p class="input-group">
+													<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="task.startDate" is-open="popupStart.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+													<span class="input-group-btn">
+														<button type="button" class="btn btn-default" ng-click="openStart()"><i class="glyphicon glyphicon-calendar"></i></button>
+													</span>
+												</p>
+											</div>
 
-										<div class="col-xs-6">
-											Fin : {{task.endDate | date:'dd-MM-yyyy'}}
+											<div class="col-xs-6">
+												Fin :
+												<p class="input-group">
+													<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="task.endDate" is-open="popupEnd.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+													<span class="input-group-btn">
+														<button type="button" class="btn btn-default" ng-click="openEnd()"><i class="glyphicon glyphicon-calendar"></i></button>
+													</span>
+												</p>
+											</div>
+											</div>
 										</div>
 									</div>
-								</div>
+								</ng-form>
 							</div>
 							<div class="modal-footer">
 								<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
@@ -221,7 +240,7 @@
 									<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 
 <?php if($projectStatus == "STARTED") : ?>
-										<div class="actionButton" ng-click="changeTaskAdv()" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
+										<div class="actionButton" ng-click="openTaskAdv()" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 											<div style="background-color:blue;width:20px;height:20px"></div>
 										</div>
 <?php endif;?>
