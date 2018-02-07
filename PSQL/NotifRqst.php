@@ -6,27 +6,30 @@
 		public $id;
 		public $theDate;
 		public $title;
-        public $message;
+        	public $message;
 		public $read;
 	}
 
 	class NotifRqst extends PSQLDatabase
 	{
-		public function getUnreadNotifs($emailReceiver)
+		public function getNotifs($emailReceiver, $unread)
 		{
 			$notifs = array();
 			//Fetch notifs
-			$script = "SELECT * FROM information_schema.tables";
 			$script = "SELECT notification.id, thedate, title, message, read
 					   FROM notification INNER JOIN Sender ON Notification.id = Sender.idnotification
-					   WHERE emailReceiver = '$emailReceiver'
-							AND NOT read
-					   ORDER BY theDate;";
+					   WHERE emailReceiver = '$emailReceiver'";
+			if($unread)
+			{
+				$script = $script." AND NOT read";
+			}
+			$script = $script." ORDER BY theDate;";				
+					   
 			 
 			$resultScript = pg_query($this->_conn, $script);
 			while($row = pg_fetch_row($resultScript))
 			{
-				$notif			 = new Notif();
+				$notif		 = new Notif();
 				$notif->id       = (int)($row[0]);
 				$notif->theDate	 = $row[1];
 				$notif->title	 = $row[2];
@@ -36,7 +39,7 @@
 				array_push($notifs, $notif);
 			}
 
-            return $notifs;
+          	  return $notifs;
 		}
 	}
 ?>
