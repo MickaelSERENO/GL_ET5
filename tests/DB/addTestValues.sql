@@ -37,3 +37,13 @@ INSERT INTO TaskHierarchy VALUES (3, 5, true);
 INSERT INTO TaskHierarchy VALUES (3, 6, true);
 INSERT INTO TaskOrder     VALUES (1, 2);
 INSERT INTO TaskOrder     VALUES (2, 3);
+
+
+--Add Notifications 
+INSERT INTO notification VALUES (1, '2018-06-02','Test 1', 'lalala', false);
+INSERT INTO notification VALUES (2, '2018-06-04','Test 2', 'lololo', true);
+INSERT INTO notification VALUES (3, '2018-06-06','Test 3', 'lilili', true);
+
+INSERT INTO sender VALUES (1, 'stacy.gromat@email.com', 'jean.dupont@email.com');
+INSERT INTO sender VALUES (2, 'stacy.gromat@email.com', 'jean.dupont@email.com');
+INSERT INTO sender VALUES (3, 'stacy.gromat@email.com', 'jean.dupont@email.com');
