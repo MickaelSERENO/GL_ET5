@@ -52,6 +52,7 @@ class AbstractTask
 		this.isMarker     = cpy.isMarker;
 		this.startDate    = new Date(cpy.startDate);
 		this.endDate      = new Date(cpy.endDate);
+		console.log("end : " + this.endDate);
 	}
 
 	//Add a child
@@ -159,6 +160,25 @@ class Task extends AbstractTask
 		super(cpy);
 		this.advancement       = cpy.advancement;
 		this.collaboratorEmail = cpy.collaboratorEmail;
+	}
+
+	minDate()
+	{
+		var minDate = project.startDate;
+		for(var i=0; i < this.predecessors.length; i++)
+			if(this.predecessors[i].endDate.getTime() > minDate.getTime())
+				minDate = this.predecessors[i].endDate;
+		return minDate;
+	}
+
+
+	maxDate()
+	{
+		var maxDate = project.endDate;
+		for(var i=0; i < this.successors.length; i++)
+			if(this.successors[i].startDate.getTime() < maxDate.getTime())
+				maxDate = this.successors[i].startDate;
+		return maxDate;
 	}
 
 	//Draw the task and its children.
@@ -755,6 +775,9 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	//The date modal
 	$scope.openDateModal = function()
 	{
+		var minDate = $scope.taskSelected.minDate();
+		var maxDate = $scope.taskSelected.maxDate();
+
 		$scope.opts = 
 		{
 			backdrop : true,
@@ -764,7 +787,10 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			templateUrl : "modalDate.html",
 			controller : "DateModal",
 			controllerAs : "$ctrl",
-			resolve : {task    : function() {return $scope.taskSelected;}
+			resolve : {task    : function() {return $scope.taskSelected;},
+					   project : function() {return project;},
+					   minDate : function() {return minDate;},
+					   maxDate : function() {return maxDate;}
 					  }
 		};
 
