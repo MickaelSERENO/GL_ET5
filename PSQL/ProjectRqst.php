@@ -7,6 +7,28 @@
 		public $surname;
 		public $email;
 	}
+	
+	class Project
+	{
+		public $id;
+		public $startDate;
+		public $endDate;
+		public $name;
+		public $description;
+		public $managerEmail;
+		public $contactEmail;
+		public $status;
+	}
+	
+	class ProjectInfo extends Project
+	{
+		public $clientName;
+		public $managerLastName;
+		public $managerFirstName;
+		public $contactLastName;
+		public $contactFirstName;
+		public $listCollab;
+	}
 
 	class ProjectRqst extends PSQLDatabase
 	{
@@ -149,6 +171,63 @@
 
 			$script       = "UPDATE Task SET endDate = '$endFormat' WHERE id = $idTask;";
 			$resultScript = pg_query($this->_conn, $script);
+		}
+		
+		public function getInfoProject($idProject)
+		{
+			$colls = array();
+			
+			
+			$project = new ProjectInfo();
+			
+			$script = "SELECT id, managerEmail, contactEmail, name, description, startDate, endDate, status
+						FROM Project WHERE Project.id = $idProject;";
+			$scriptProject = "SELECT name, description, startDate, endDate, managerEmail, contactEmail
+						FROM Project WHERE Project.id = $idProject;";
+			$resultScriptProject = pg_query($this->_conn, $scriptProject);
+			$rowProject = pg_fetch_row($resultScriptProject);
+			
+			if($rowProject != null)
+			{
+				$project->name = $rowProject[0];
+				$project->description = $rowProject[1];
+				$project->startDate = DateTime::createFromFormat("Y-m-d H:i:s", $rowProject[2] + " 00:00:00", new DateTimeZone("UTC"));
+				$project->endDate = DateTime::createFromFormat("Y-m-d H:i:s", $rowProject[3] + " 00:00:00", new DateTimeZone("UTC"));
+				$project->managerEmail = $rowProject[4];
+				$project->contactEmail = $rowProject[5];
+			}
+			
+			$scriptManager = "SELECT surname, name FROM Contact WHERE Contact.email = '$project->managerEmail'";
+			$resultScriptManager = pg_query($this->_conn, $scriptManager);
+			$rowManager = pg_fetch_row($resultScriptManager);
+			if($rowManager != null)
+			{
+				$project->managerLastName = $rowManager[0];
+				$project->managerFirstName = $rowManager[1];
+			}
+			
+			$scriptContactClient = "SELECT surname, name FROM Contact WHERE Contact.email = '$project->contactEmail'";
+			$resultScriptContactClient = pg_query($this->_conn, $scriptContactClient);
+			$rowContactClient = pg_fetch_row($resultScriptContactClient);
+			if($rowContactClient != null)
+			{
+				$project->contactLastName = $rowContactClient[0];
+				$project->contactFirstName = $rowContactClient[1];
+			}
+			
+			$scriptClient = "SELECT Client.name FROM ClientContact, Client 
+						WHERE Client.email = ClientContact.clientEmail AND ClientContact.contactEmail = '$project->contactEmail'";
+			$resultScriptClient = pg_query($this->_conn, $scriptClient);
+			$rowClient = pg_fetch_row($resultScriptClient);
+			if($rowClient != null)
+			{
+				$project->clientName = $rowClient[0];
+			}
+			
+			
+			//$project->$listCollab;
+			
+			return $project;
 		}
 	}
 ?>

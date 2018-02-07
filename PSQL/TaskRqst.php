@@ -1,5 +1,6 @@
 <?php
 	require_once __DIR__.'/PSQLDatabase.php';
+	require_once __DIR__.'/ProjectRqst.php';
 	
 	class AbstractTask
 	{
@@ -39,18 +40,6 @@
             $this->isCounted = (bool)$isC;
         }
     }
-
-	class Project
-	{
-		public $id;
-		public $startDate;
-		public $endDate;
-		public $name;
-		public $description;
-		public $managerEmail;
-		public $contactEmail;
-		public $status;
-	}
 
     class FetchTask
     {
