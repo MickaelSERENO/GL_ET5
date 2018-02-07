@@ -44,6 +44,7 @@
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttModal.js"></script>
+		<script type="text/javascript" src="/scripts/taskModal.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
@@ -126,6 +127,9 @@
 					<div ng-controller="ganttProjectCtrl" id="ganttDiv">
 
 						<!-- Pop ups -->
+						<!-- Task popup -->
+						<?php include('../../Libraries/TaskPopUp.php'); ?>
+
 						<!-- Collaborator -->
 						<script type="text/ng-template" id="modalColl.html">
 							<div class="modal-header">
@@ -300,7 +304,7 @@
 									<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 
 <?php if($projectStatus == "STARTED") : ?>
-										<div class="actionButton" ng-click="changeTaskAdv()" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
+										<div class="actionButton" ng-click="openTaskAdv()" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 											<div style="background-color:blue;width:20px;height:20px"></div>
 										</div>
 <?php endif;?>

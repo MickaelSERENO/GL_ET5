@@ -804,6 +804,32 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			{
 			});
 	};
+
+	$scope.openTaskAdv = function()
+	{
+		$scope.opts = 
+		{
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "modalTask.html",
+			controller : "TaskModal",
+			controllerAs : "$ctrl",
+			resolve : {task    : function() {return $scope.taskSelected;}
+					  }
+		};
+
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function() //ok
+			{
+
+			}, 
+			function() //cancel
+			{
+			});
+	};
 	
 
 	$interval(function()
