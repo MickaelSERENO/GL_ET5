@@ -61,3 +61,24 @@
 	padding-left:5px;
 	padding-right:5px;
 }
+
+#ganttBody > div > .nav-tabs > li
+{
+	width: 50%;
+}
+
+#ganttBody > div > .nav-tabs > li > a
+{
+	color : #FFFFFF;
+	background-color : #C0C0C0;
+	margin: -2px 0 0 0;
+	margin-right:0px;
+	width:100%;
+}
+
+#ganttBody > div > .nav-tabs > li.active > a
+{
+	color : #FFFFFF;
+	background-color : #000000;
+	margin: -2px 0 0 0;
+}

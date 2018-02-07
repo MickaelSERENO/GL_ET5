@@ -48,7 +48,7 @@
 	</head>
 
 	<body ng-app="myApp">
-		<div ng-controller="globalProjectCtrl">
+		<div ng-controller="globalProjectCtrl" id="ganttBody">
 			<uib-tabset active="activeTab">
 				<!-- Information tab -->
 				<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
@@ -165,6 +165,10 @@
 
 									<!-- The list of tasks"-->
 									<div id="taskTreeView">
+										<button type="button" class="btn btn-primary alignedDiv smallBottomSpace">
+											Add
+										</button>
+
 										<script type="text/ng-template" id="treeViewTasks.html">
 											<div class="taskNode">
 												<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>

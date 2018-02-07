@@ -55,6 +55,16 @@
 	margin-top: 0.5em;
 }
 
+.bottomSpace
+{
+	margin-bottom: 3em;
+}
+
+.smallBottomSpace
+{
+	margin-bottom: 0.5em;
+}
+
 .errorMsg
 {
 	color: red;
