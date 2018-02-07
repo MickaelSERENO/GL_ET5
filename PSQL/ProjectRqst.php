@@ -1,6 +1,13 @@
 <?php
 	require_once __DIR__.'/../PSQL/PSQLDatabase.php';
 
+	class EndUser
+	{
+		public $name;
+		public $surname;
+		public $email;
+	}
+
 	class ProjectRqst extends PSQLDatabase
 	{
 		public function closeProject($idProject, $isAdmin)
@@ -64,6 +71,35 @@
 			if($row == null)
 				return null;
 			return $row[0];
+		}
+
+		public function getCollaborators($idProject)
+		{
+			$result = array();
+
+			$script       = "SELECT name, surname, email 
+							 FROM Contact, EndUser, ProjectCollaborator 
+							 WHERE Contact.email = EndUser.contactEmail AND Contact.email = ProjectCollaborator.collaboratorEmail AND ProjectCollaborator.idProject = $idProject;"; 
+			$resultScript = pg_query($this->_conn, $script);
+
+			while($row = pg_fetch_row($resultScript))
+			{
+				$endUser          = new EndUser();
+				$endUser->name    = $row[0];
+				$endUser->surname = $row[1];
+				$endUser->email   = $row[2];
+				array_push($result, $endUser);
+			}
+
+			return $result;
+		}
+
+		public function setCollaborator($idTask, $collEmail)
+		{
+			$script       = "UPDATE Task SET collaboratorEmail = '$collEmail' WHERE Task.id = $idTask";
+			$resultScript = pg_query($this->_conn, $script);
+
+			return true;
 		}
 	}
 ?>

@@ -42,14 +42,13 @@
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttModal.js"></script>
 
-
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/ganttStyle.css">
 	</head>
 
 	<body ng-app="myApp">
-		<div ng-controller="globalProjectCtrl">
+		<div ng-controller="globalProjectCtrl" id="ganttBody">
 			<uib-tabset active="activeTab">
 				<!-- Information tab -->
 				<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
@@ -61,6 +60,9 @@
 				<!-- Gantt tab -->
 				<uib-tab id="ganttHeader" index="$index+1" heading="Planning" deselect="deselectTab()">
 					<div ng-controller="ganttProjectCtrl" id="ganttDiv">
+
+						<!-- Pop ups -->
+						<!-- Collaborator -->
 						<script type="text/ng-template" id="modalColl.html">
 							<div class="modal-header">
 								<h3 class="modal-title">Changement de collaborateur</h3>
@@ -75,8 +77,32 @@
 											{{currentCollTxt()}}<span class="caret sortList"></span>
 										</button>
 										<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-											<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators(c.id)"><a href="">{{c.name}}</a></li>
+											<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}}</a></li>
 										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+								<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+							</div>
+						</script>
+
+						<!--Date-->
+						<script type="text/ng-template" id="modalDate.html">
+							<div class="modal-header">
+								<h3 class="modal-title">Changement de date</h3>
+							</div>
+							<div class="modal-body">
+								<div class="container-fluid">
+									<div class="row alignedDiv">
+										<div class="col-xs-6">
+											Début : {{task.startDate | date:'dd-MM-yyyy'}}
+										</div>
+
+										<div class="col-xs-6">
+											Fin : {{task.endDate | date:'dd-MM-yyyy'}}
+										</div>
 									</div>
 								</div>
 							</div>
@@ -166,6 +192,10 @@
 
 									<!-- The list of tasks"-->
 									<div id="taskTreeView">
+										<button type="button" class="btn btn-primary alignedDiv smallBottomSpace">
+											Add
+										</button>
+
 										<script type="text/ng-template" id="treeViewTasks.html">
 											<div class="taskNode">
 												<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>
@@ -198,7 +228,7 @@
 
 <?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
           $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>
-										<div class="actionButton" ng-click="changeTaskDate()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
+										<div class="actionButton" ng-click="openDateModal()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
 											<div style="background-color:red;width:20px;height:20px"></div>
 										</div>
 										<div class="actionButton" ng-click="openCollModal()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">

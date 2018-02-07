@@ -1,16 +1,29 @@
 var scope;
 var project;
+var currentUnit = "week";
 
 var dateWidth   = 60;
 var dateOffset  = 5;
 var dateYOffset = 15;
 
-var currentUnit = "week";
 
 var SELECT_TASK_COLOR = "#00FFFF";
 
+//The end user class
+class EndUser
+{
+	constructor(cpy)
+	{
+		this.name    = cpy.name;
+		this.surname = cpy.surname;
+		this.email   = cpy.email;
+	}
+}
+
+//The class project
 class Project
 {
+	//Constructor. cpy : the json result from AJAX request
 	constructor(cpy)
 	{
 		this.id        = cpy.id;
@@ -23,6 +36,7 @@ class Project
 //Task class
 class AbstractTask
 {
+	//Constructor. cpy : the json result from AJAX request
 	constructor(cpy)
 	{
 		this.expand       = true;
@@ -40,21 +54,25 @@ class AbstractTask
 		this.endDate      = new Date(cpy.endDate);
 	}
 
+	//Add a child
 	addChild(task)
 	{
 		this.children.push(task);
 	}
 
+	//Tell if this task can draw a reduce symbol or not
 	canReduce()
 	{
 		return this.children.length > 0 && this.expand;
 	}
 
+	//Tell if this task can draw an expand symbol or not
 	canExpand()
 	{
 		return this.children.length > 0 && !this.expand;
 	}
 
+	//Reduce the task and its children
 	reduceAll()
 	{
 		this.expand = false;
@@ -62,6 +80,7 @@ class AbstractTask
 			this.children[i].reduceAll();
 	}
 
+	//Expand the task and its children
 	expandAll()
 	{
 		this.expand = true;
@@ -69,19 +88,22 @@ class AbstractTask
 			this.children[i].expandAll();
 	}
 
-	isShowned()
+	//Tell if this task is currently shown on the screen or not
+	isShown()
 	{
 		if(this.mother != null)
-			return (this.mother.expand && this.mother.isShowned());
+			return (this.mother.expand && this.mother.isShown());
 		return true;
 	}
 
+	//Compute the internal id (the row ID) following that the task may has children (compute also their ID)
 	computeInternalId(id)
 	{
 		this.internalID = id;
 		return 1 + this.computeChildrenInternalId(id+1);
 	}
 
+	//compyte the children ID and their children
 	computeChildrenInternalId(id)
 	{
 		var nbChildren = 0;
@@ -90,10 +112,12 @@ class AbstractTask
 		return nbChildren;
 	}
 
+	//Abstract function the know which task is under (x, y) coordinate
 	getTaskInMousePos(x, y, fontSize)
 	{
 	}
 
+	//Hide unstarted task (and recursively unstarted children)
     hideUnstarted(currentDate)
     {
         //Update the visibility component of this task
@@ -109,6 +133,7 @@ class AbstractTask
             this.children[i].hideUnstarted(currentDate);
     }
 
+	//Show the task and its children
     showAll()
     {
         var id       = this.internalID;
@@ -119,6 +144,7 @@ class AbstractTask
             this.children[i].showAll();
     }
 
+	//Tell if the task has started or not
     hasStarted(currentDate)
     {
         return currentDate >= this.startDate;
@@ -127,12 +153,15 @@ class AbstractTask
 
 class Task extends AbstractTask
 {
+	//Contructor. cpy : json object from AJAX request
 	constructor(cpy)
 	{
 		super(cpy);
-		this.advancement = cpy.advancement;
+		this.advancement       = cpy.advancement;
+		this.collaboratorEmail = cpy.collaboratorEmail;
 	}
 
+	//Draw the task and its children.
 	draw(fontSize, unit)
 	{
         var task = document.getElementsByClassName('taskNode')[this.internalID];
@@ -141,7 +170,7 @@ class Task extends AbstractTask
 
 		var size = this.getTaskSize(unit);
 
-		if(scope.selectingTask == this)
+		if(scope.taskSelected == this)
 		{
 			canvasCtx.fillStyle = "#00FFFF";
 			drawRoundRect(size.xOffset-5, size.yOffset-2, size.width+10, fontSize+4, dateWidth/4);
@@ -160,6 +189,7 @@ class Task extends AbstractTask
 		this.drawPredecessors(fontSize, unit);
 	}
 
+	//Recursive function used to draw the children recursively
 	drawChildren(fontSize, unit)
 	{
 		if(!this.expand)
@@ -184,6 +214,7 @@ class Task extends AbstractTask
 		}
 	}
 
+	//Draw the predecessors's arrow
 	drawPredecessors(fontSize, unit)
 	{
 		var size      = this.getTaskSize(unit);
@@ -197,7 +228,7 @@ class Task extends AbstractTask
 
 		for(var i = 0; i < this.predecessors.length; i++)
 		{
-            if(!this.predecessors[i].isShowned())
+            if(!this.predecessors[i].isShown())
                 return;
 
 			var predSize    = this.predecessors[i].getTaskSize(unit);
@@ -398,7 +429,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.scale          = ["Jour", "Semaine"];
 
 	$scope.tasks          = [];
-	$scope.selectingTask  = null;
+	$scope.taskSelected  = null;
 
 	$scope.actionDiv      = document.getElementById('actionDiv');
 
@@ -546,9 +577,9 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		if(event.button == 0)
 		{
 			//Reset selecting task
-			if($scope.selectingTask != null)
-				document.getElementsByClassName('taskNode')[$scope.selectingTask.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = "transparent";
-			$scope.selectingTask = null;
+			if($scope.taskSelected != null)
+				document.getElementsByClassName('taskNode')[$scope.taskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = "transparent";
+			$scope.taskSelected = null;
 
 			var fontSize = getFontSize();
 			for(var i = 0; i < $scope.tasks.length; i++)
@@ -556,8 +587,8 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 				var r = $scope.tasks[i].getTaskInMousePos(event.offsetX, event.offsetY, getFontSize(), currentUnit);
 				if(r != null)
 				{
-					$scope.selectingTask = r;
-					document.getElementsByClassName('taskNode')[$scope.selectingTask.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = SELECT_TASK_COLOR;
+					$scope.taskSelected = r;
+					document.getElementsByClassName('taskNode')[$scope.taskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = SELECT_TASK_COLOR;
 
 					//Set the position of the action div
 					var size = r.getTaskSize(currentUnit);
@@ -573,7 +604,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.showActionDiv = function()
 	{
 					
-		return $scope.selectingTask != null && $scope.selectingTask instanceof(Task) && $scope.selectingTask.children.length == 0;
+		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0;
 	};
 
 	//The action buttons
@@ -669,8 +700,60 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 
 	//Modals
-	var $ctrl = this;
+
+	//The collaborator modal
 	$scope.openCollModal = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					//Parse the json result (fetch collaborators)
+					var jsonColls = JSON.parse(httpCtx.responseText);
+					var colls     = new Array();
+					for(var i=0; i < jsonColls.length; i++)
+					{
+						var endUser = new EndUser(jsonColls[i]);
+						colls.push(endUser);
+					}
+
+					$scope.opts = 
+					{
+						backdrop : true,
+						backdropClick : true,
+						dialogFade : false,
+						keyboard : true,
+						templateUrl : "modalColl.html",
+						controller : "CollaboratorModal",
+						controllerAs : "$ctrl",
+						resolve : {colls   : function() {return colls;},
+								   project : function() {return project;},
+								   task    : function() {return $scope.taskSelected;}
+								  }
+					};
+
+					var modalInstance = $uibModal.open($scope.opts);
+					modalInstance.result.then(
+						function() //ok
+						{
+
+						}, 
+						function() //cancel
+						{
+						});
+				}
+			}
+		}
+		httpCtx.open('GET', "/AJAX/projectColls.php?projectID="+projectID+"&requestID=0", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	};
+
+	//The date modal
+	$scope.openDateModal = function()
 	{
 		$scope.opts = 
 		{
@@ -678,10 +761,11 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			backdropClick : true,
 			dialogFade : false,
 			keyboard : true,
-			templateUrl : "modalColl.html",
-			controller : "CollaboratorModal",
+			templateUrl : "modalDate.html",
+			controller : "DateModal",
 			controllerAs : "$ctrl",
-			resolve : {items : function() {return $ctrl;}}
+			resolve : {task    : function() {return $scope.taskSelected;}
+					  }
 		};
 
 		var modalInstance = $uibModal.open($scope.opts);
@@ -694,6 +778,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			{
 			});
 	};
+	
 
 	$interval(function()
 	{
