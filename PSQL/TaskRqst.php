@@ -273,11 +273,14 @@
 								 INSERT INTO TaskHierarchy VALUES($idTask, $rowInsert[0], false);
 								 ";
 				$resultScript = pg_query($this->_conn, $script);
+
+				//TODO notification changement of collaborators
 			}
 			else
 			{
 				$script = "UPDATE Task SET collaboratorEmail = $collEmail WHERE Task.id = $idTask;";
 				$resultScript = pg_query($this->_conn, $script);
+				//TODO assignement of a collaborator
 			}
 
 
