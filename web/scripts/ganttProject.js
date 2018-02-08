@@ -788,7 +788,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.showActionDiv = function()
 	{
 					
-		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0;
+		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0 && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail));
 	};
 
 	//Load tasks

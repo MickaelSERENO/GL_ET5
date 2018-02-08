@@ -143,7 +143,7 @@ myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 				}
 			}
 		}
-		httpCtx.open('POST', "/AJAX/advTask.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&advancement="+$scope.task.advancement+"&chargeConsumed="+$scope.task.chargeConsumed+"&remaining="+$scope.task.remaining, true);
+		httpCtx.open('POST', "/AJAX/advTask.php?projectID="+projectID+"&requestID=0&taskID=" + $scope.task.id + "&advancement="+$scope.task.advancement+"&chargeConsumed="+$scope.task.chargeConsumed+"&remaining="+$scope.task.remaining, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
 	};

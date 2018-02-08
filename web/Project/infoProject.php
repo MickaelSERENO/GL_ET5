@@ -32,6 +32,7 @@
 		<script type="text/javascript">
 			var projectID = <?= $_GET["projectID"] ?>; 
 			var rank      = <?= $_SESSION["rank"] ?>;
+			var email     = <?= "'".$_SESSION["email"]."'" ?>;
 		</script>
 		<script type="text/javascript" src="/scripts/bower_components/xmlhttprequest/XMLHttpRequest.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular/angular.js"></script>
