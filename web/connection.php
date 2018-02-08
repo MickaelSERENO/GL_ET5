@@ -19,6 +19,8 @@
 		<script type="text/javascript" src="/scripts/connection.js"></script>
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="CSS/style.css">
+		<link rel="stylesheet" type="text/css" href="CSS/styleConnect.css">
+		
 	</head>
 
 	<body ng-app="myApp">

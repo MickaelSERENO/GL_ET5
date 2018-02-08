@@ -45,6 +45,8 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 
 	$scope.dateCorrect = function()
 	{
+		if($scope.middleDate == undefined)
+			return false;
 		var middleTime = $scope.middleDate.getTime() - $scope.middleDate.getTimezoneOffset()*60*1000; 
 	
 		return middleTime <= $scope.endTime && middleTime >= $scope.startTime;
