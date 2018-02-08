@@ -174,9 +174,6 @@
 		
 		public function getInfoProject($idProject)
 		{
-			$colls = array();
-			
-			
 			$project = new ProjectInfo();
 			
 			$script = "SELECT id, managerEmail, contactEmail, name, description, startDate, endDate, status
@@ -224,7 +221,18 @@
 			}
 			
 			
-			//$project->$listCollab;
+			$project->listCollab = array();
+			
+			$scriptCollab = "SELECT Contact.name, Contact.surname FROM Contact, ProjectCollaborator
+						WHERE ProjectCollaborator.idProject = $idProject AND ProjectCollaborator.collaboratorEmail = Contact.email";
+			$resultScriptCollab = pg_query($this->_conn, $scriptCollab);
+			while($rowCollab = pg_fetch_row($resultScriptCollab))
+			{
+				$collab = new EndUser();
+				$collab->name = $rowCollab[0];
+				$collab->surname = $rowCollab[1];
+				array_push($project->listCollab, $collab);
+			}
 			
 			return $project;
 		}

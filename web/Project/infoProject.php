@@ -62,7 +62,7 @@
 							<div class="container-fluid">
 								<div class="row">
 									<div class="descriptionProject col-md-8">
-										<div class="row">
+										<div class="row smallTopSpace">
 											<div class="col-md-6">
 												<div class="flexDiv">
 													<div> Client : </div>
@@ -76,13 +76,13 @@
 												</div>
 											</div>
 										</div>
-										<div class="row">
+										<div class="row smallTopSpace">
 											<div class="col-md-12 flexDiv">
 												<div> Responsable de projet : </div>
 												<div> &nbsp; <?= $projectInfo->managerFirstName ?> <?= $projectInfo->managerLastName ?> </div>
 											</div>
 										</div>
-										<div class="row">
+										<div class="row smallTopSpace">
 											<div class="col-md-6">
 												<div class="flexDiv">
 													<div> Début : </div>
@@ -96,12 +96,12 @@
 												</div>
 											</div>
 										</div>
-										<div class="row">
+										<div class="row smallTopSpace">
 											<div class="col-md-12">
 												<div> Description : </div>
 											</div>
 										</div>
-										<div class="row">
+										<div class="row smallTopSpace">
 											<div class="col-md-12">
 												<div> &nbsp; &nbsp; &nbsp; <?= $projectInfo->description ?> </div>
 											</div>
@@ -109,8 +109,14 @@
 									</div>
 									<div class="collabProject col-md-4">
 										<p> Collaborateurs : </p>
+										
 										<div class="listCollabProject">
-											<!-- list collab -->
+											<?php
+											foreach($projectInfo->listCollab as $collab)
+											{
+												echo "<div>".$collab->name." ".$collab->surname."</div>";
+											}
+											?>
 										</div>
 									</div>
 								</div>
