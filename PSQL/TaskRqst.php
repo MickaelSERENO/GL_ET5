@@ -186,5 +186,45 @@
 
             return $result;
 		}
+
+		public function canAccessTask($idTask, $email, $rank)
+		{
+			if($rank == 2) //Admin
+				return true;
+
+			else if($rank == 1)
+			{
+				$script       = "SELECT COUNT(*) FROM Project, AbstractTask, Task 
+						   WHERE Project.id = AbstractTask.idProject AND AbstractTask.id = $idTask AND Task.id = $idTask AND Task.collaboratorEmail = '$email';";
+				$resultScript = pg_query($this->_conn, $script);
+				$row          = pg_fetch_row($resultScript);
+				if($row != null)
+					return true;
+			}
+
+			else if($rank == 0)
+			{
+				$script = "SELECT COUNT(*) FROM Task WHERE Task.id = $idTask AND Task.collaboratorEmail = '$email';";
+				$resultScript = pg_query($this->_conn, $script);
+				$row          = pg_fetch_row($resultScript);
+				if($row != null)
+					return true;
+			}
+
+			return false;
+		}
+
+		public function setTaskAdvancement($idTask, $email, $rank, $adv, $chargeConsumed, $remaining)
+		{
+			if(!$this->canAccessTask($idTask, $email, $rank))
+				return false;
+
+			$script = "UPDATE Task SET advancement = $adv, chargeConsumed = $chargeConsumed, remaining = $remaining WHERE id = $idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+
+			//Send Notif
+
+			return true;
+		}
 	}
 ?>

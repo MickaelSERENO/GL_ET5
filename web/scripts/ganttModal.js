@@ -128,7 +128,24 @@ myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 
 	$scope.ok = function()
 	{
-		$uibModalInstance.close();
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					$uibModalInstance.close();
+				}
+				else
+				{
+					$uibModalInstance.dismiss();
+				}
+			}
+		}
+		httpCtx.open('POST', "/AJAX/advTask.php?projectID="+projectID+"&requestID=0&taskID=" + $scope.task.id + "&advancement="+$scope.task.advancement+"&chargeConsumed="+$scope.task.chargeConsumed+"&remaining="+$scope.task.remaining, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 	};
 
 	$scope.cancel = function()

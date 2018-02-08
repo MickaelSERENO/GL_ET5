@@ -52,7 +52,6 @@ class AbstractTask
 		this.isMarker     = cpy.isMarker;
 		this.startDate    = new Date(cpy.startDate);
 		this.endDate      = new Date(cpy.endDate);
-		console.log("end : " + this.endDate);
 	}
 
 	//Add a child
@@ -170,6 +169,75 @@ class AbstractTask
 
 			this.mother.updateParentTime();
 		}
+	}
+
+	sortByDate(asc)
+	{
+		var tasks = [];
+		for(var i =0; i < this.children.length; i++)
+		{
+			var found = false;
+			for(var j = 0; j < i; j++)
+			{
+				if(asc)
+				{
+					if(tasks[j].startDate.getTime() > this.children[i].startDate.getTime())
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+
+				else
+				{
+					if(tasks[j].startDate.getTime() < this.children[i].startDate.getTime())
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+			}
+			if(!found)
+				tasks.push(this.children[i]);
+			this.children[i].sortByDate(asc);
+		}
+		this.children = tasks;
+	}
+
+	sortByName(asc)
+	{
+		var tasks = [];
+		for(var i =0; i < this.children.length; i++)
+		{
+			var found = false;
+			for(var j = 0; j < i; j++)
+			{
+				if(asc)
+				{
+					if(tasks[j].name > this.children[i].name)
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+				else
+				{
+					if(tasks[j].name < this.children[i].name)
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+			}
+			if(!found)
+				tasks.push(this.children[i]);
+			this.children[i].sortByName(asc);
+		}
+		this.children = tasks;
 	}
 }
 
@@ -451,14 +519,9 @@ function drawTasks(fontSize, diviser)
 function computeInternalId()
 {
 	var currentID = 0;
-	console.log(scope.tasks.length);
 
 	for(var i=0; i < scope.tasks.length; i++)
-	{
-		console.log(i);
 		currentID = currentID + scope.tasks[i].computeInternalId(currentID);
-	}
-
 }
 
 myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $interval)
@@ -467,6 +530,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 	//Variables
 	$scope.currentSorting = 0;
+	$scope.asc            = true;
 	$scope.currentScale   = 1;
 	$scope.dispUnstarted  = true;
 	$scope.editionMode    = false;
@@ -585,9 +649,84 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
         $scope.editionTxt  = ($scope.editionMode) ? "Quitter Edition" : "Mode Edition";
     };
 
+	$scope.changeAsc     = function()
+	{
+		$scope.asc = !$scope.asc;
+		$scope.changeSorting($scope.currentSorting);
+	}
+
 	$scope.changeSorting = function(id)
 	{
 		$scope.currentSorting = id;
+		switch(id)
+		{
+			case 0: //By date
+				var tasks = [];
+				for(var i =0; i < $scope.tasks.length; i++)
+				{
+					var found = false;
+					for(var j = 0; j < i; j++)
+					{
+						if($scope.asc)
+						{
+							if(tasks[j].startDate.getTime() > $scope.tasks[i].startDate.getTime())
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+						else
+						{
+							if(tasks[j].startDate.getTime() < $scope.tasks[i].startDate.getTime())
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+					}
+					if(!found)
+						tasks.push($scope.tasks[i]);
+					$scope.tasks[i].sortByDate($scope.asc);
+				}
+				$scope.tasks = tasks;
+				
+				break;
+			case 1: //By name
+				var tasks = [];
+				for(var i =0; i < $scope.tasks.length; i++)
+				{
+					var found = false;
+					for(var j = 0; j < i; j++)
+					{
+						if($scope.asc)
+						{
+							if(tasks[j].name > $scope.tasks[i].name)
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+						else
+						{
+							if(tasks[j].name < $scope.tasks[i].name)
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+					}
+					if(!found)
+						tasks.push($scope.tasks[i]);
+					$scope.tasks[i].sortByName($scope.asc);
+				}
+				$scope.tasks = tasks;
+				break;
+		}
+		computeInternalId();
 	};
 
 	$scope.changeScale = function(id)
@@ -649,28 +788,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.showActionDiv = function()
 	{
 					
-		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0;
-	};
-
-	//The action buttons
-	$scope.changeTaskAdv = function()
-	{
-	};
-
-	$scope.changeTaskDate = function()
-	{
-	};
-
-	$scope.changeTaskCollaborator = function()
-	{
-	};
-
-	$scope.addSubTask = function()
-	{
-	};
-
-	$scope.addPredecessorTask = function()
-	{
+		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0 && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail));
 	};
 
 	//Load tasks
@@ -735,7 +853,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 									allTasks[j].successors.push(allTasks[k]);
 									allTasks[k].predecessors.push(allTasks[j]);
 								}
-				computeInternalId();
+				$scope.changeSorting(0);
 			});
 		}
 	}
@@ -848,7 +966,6 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		modalInstance.result.then(
 			function(result) //ok
 			{
-				console.log(result);
 				$scope.taskSelected.startDate = new Date(result.startTime);
 				$scope.taskSelected.endDate   = new Date(result.endTime);
 
@@ -892,7 +1009,6 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		$scope.canvasClick(event);
 		$scope.openTask($scope.taskSelected);
 	}
-	
 
 	$interval(function()
 	{
