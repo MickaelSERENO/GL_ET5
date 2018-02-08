@@ -289,6 +289,8 @@
 													<li role="menuitem" ng-click="changeSorting(1)"><a href="">Nom</a></li>
 												</ul>
 											</div>
+
+											<button type="button" class="btn btn-primary" ng-click="changeAsc()">{{asc ? "Az" : "Za"}}</button>
 										</div>
 
 										<div id="scaleDiv" class="col-xs-6">

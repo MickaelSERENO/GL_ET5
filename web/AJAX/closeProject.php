@@ -22,7 +22,7 @@
 			if($projectRqst->closeProject($_GET['projectID'], true))
 				echo '1';
 		}
-		else if($projectRqst->isManager($_GET['projectID']))
+		else if($projectRqst->isManager($_SESSION['email'], $_GET['projectID']))
 		{
 			if($projectRqst->closeProject($_GET['projectID'], false))
 				echo '1';
@@ -41,7 +41,7 @@
 			if($projectRqst->openProject($_GET['projectID'], true))
 				echo '1';
 		}
-		else if($projectRqst->isManager($_GET['projectID']))
+		else if($projectRqst->isManager($_SESSION['email'], $_GET['projectID']))
 		{
 			if($projectRqst->openProject($_GET['projectID'], false))
 				echo '1';
