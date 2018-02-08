@@ -8,6 +8,8 @@
 		public $title;
         	public $message;
 		public $read;
+		public $send;
+		
 	}
 
 	class NotifRqst extends PSQLDatabase
@@ -16,9 +18,10 @@
 		{
 			$notifs = array();
 			//Fetch notifs
-			$script = "SELECT notification.id, thedate, title, message, read
-					   FROM notification INNER JOIN Sender ON Notification.id = Sender.idnotification
-					   WHERE emailReceiver = '$emailReceiver'";
+			$script = "SELECT notification.id, thedate, title, message, read, emailsender
+					   FROM notification, Sender
+					   WHERE 
+						Notification.id = Sender.idnotification AND emailReceiver = '$emailReceiver'";
 			if($unread)
 			{
 				$script = $script." AND NOT read";
@@ -35,6 +38,8 @@
 				$notif->title	 = $row[2];
 				$notif->message	 = $row[3];
 				$notif->read	 = (boolean)($row[4]);
+				$notif->send	 = $row[5];
+				
 
 				array_push($notifs, $notif);
 			}
