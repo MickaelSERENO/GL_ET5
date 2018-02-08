@@ -7,7 +7,7 @@ var dateOffset  = 5;
 var dateYOffset = 15;
 
 
-var SELECT_TASK_COLOR = "#00FFFF";
+var SELECT_TASK_COLOR = "#0858CC";
 
 //The end user class
 class EndUser
@@ -352,14 +352,6 @@ class Task extends AbstractTask
             canvasCtx.lineTo(predSize.xOffset + predSize.width + lineWidth, predSize.yOffset + fontSize/2.0);
             canvasCtx.lineTo(predSize.xOffset + predSize.width + lineWidth, size.yOffset     + fontSize/2.0);
             canvasCtx.lineTo(size.xOffset,                                  size.yOffset     + fontSize/2.0);
-			canvasCtx.stroke();
-
-            //The sticky arrow
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(size.x,     size.yOffset + fontSize/2.0);
-            canvasCtx.lineTo(size.x - 5, size.yOffset + fontSize/2.0 - 5);
-            canvasCtx.moveTo(size.x,     size.yOffset + fontSize/2.0);
-            canvasCtx.lineTo(size.x - 5, size.yOffset + fontSize/2.0 + 5);
 			canvasCtx.stroke();
 		}
 	}
@@ -788,7 +780,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.showActionDiv = function()
 	{
 					
-		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0 && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail));
+		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0 && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail)) && $scope.taskSelected.isShown();
 	};
 
 	//Load tasks

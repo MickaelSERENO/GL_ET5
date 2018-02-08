@@ -70,7 +70,7 @@
 #ganttBody > div > .nav-tabs > li > a
 {
 	color : #FFFFFF;
-	background-color : #C0C0C0;
+	background-color : #0858CC;
 	margin: -2px 0 0 0;
 	margin-right:0px;
 	width:100%;
@@ -79,7 +79,7 @@
 #ganttBody > div > .nav-tabs > li.active > a
 {
 	color : #FFFFFF;
-	background-color : #000000;
+	background-color : #48A8FF;
 	margin: -2px 0 0 0;
 }
 
