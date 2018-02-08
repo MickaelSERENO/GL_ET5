@@ -20,6 +20,9 @@
 	$rank          = $_SESSION['rank'];
 	$projectRqst   = new ProjectRqst();
 	$projectStatus = $projectRqst->getProjectStatus($_GET['projectID']);
+	
+	$projectInfo = $projectRqst->getInfoProject($_GET['projectID']);
+	$blankSpace = " ";
 ?>
 <!DOCTYPE html>
 <html>
@@ -54,7 +57,68 @@
 				<!-- Information tab -->
 				<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
 					<div ng-controller="infoProjectCtrl">
-						A faire part Stacy
+						<div class="infoProject">
+							<h3> <?= $projectInfo->name ?> </h3>
+							<div class="container-fluid">
+								<div class="row">
+									<div class="descriptionProject col-md-8">
+										<div class="row">
+											<div class="col-md-6">
+												<div class="flexDiv">
+													<div> Client : </div>
+													<div> &nbsp; <?= $projectInfo->clientName ?> </div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="flexDiv">
+													<div> Contact client : </div>
+													<div> &nbsp; <?= $projectInfo->contactFirstName ?> <?= $projectInfo->contactLastName ?> </div>
+												</div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12 flexDiv">
+												<div> Responsable de projet : </div>
+												<div> &nbsp; <?= $projectInfo->managerFirstName ?> <?= $projectInfo->managerLastName ?> </div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-6">
+												<div class="flexDiv">
+													<div> Début : </div>
+													<div> &nbsp;  </div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="flexDiv">
+													<div> Fin : </div>
+													<div> &nbsp;  </div>
+												</div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12">
+												<div> Description : </div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-12">
+												<div> &nbsp; &nbsp; &nbsp; <?= $projectInfo->description ?> </div>
+											</div>
+										</div>
+									</div>
+									<div class="collabProject col-md-4">
+										<p> Collaborateurs : </p>
+										<div class="listCollabProject">
+											<!-- list collab -->
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<!-- bouton -->
+						</div>
 					</div>
 				</uib-tab>
 

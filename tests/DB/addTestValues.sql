@@ -10,11 +10,11 @@ INSERT INTO ProjectManager VALUES ('stacy.gromat@email.com');
 
 --Add a Client
 INSERT INTO Client VALUES ('contact@woodcorp.com', 'Woodcorp');
-INSERT INTO Contact VALUES ('Legro', 'Karine', 'karine.legros@woodcorp.com');
+INSERT INTO Contact VALUES ('Karine', 'Legro', 'karine.legros@woodcorp.com');
 INSERT INTO ClientContact VALUES ('karine.legros@woodcorp.com', 'contact@woodcorp.com', '0627202562');
 
 --Add a Project
-INSERT INTO Project(managerEmail, contactEmail, name, description, startDate, endDate, status) VALUES ('stacy.gromat@email.com', 'karine.legros@woodcorp.com', 'Logiciel d''inventaire', 'La société woodcorp a besoin qu''on fasse un logiciel d''inventaire pour pouvoir mieux gérer son inventaire', '2017-12-27', '2018-12-27', 'STARTED');
+INSERT INTO Project(managerEmail, contactEmail, name, description, startDate, endDate, status) VALUES ('stacy.gromat@email.com', 'karine.legros@woodcorp.com', 'Logiciel d''inventaire', 'Création d''un logiciel d''inventaire pour Woodcorp pour mieux gérer son matériel', '2017-12-27', '2018-12-27', 'STARTED');
 INSERT INTO ProjectCollaborator VALUES(1, 'jean.dupont@email.com');
 
 --Add Tasks
