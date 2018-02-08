@@ -150,6 +150,27 @@ class AbstractTask
     {
         return currentDate >= this.startDate;
     }
+
+	updateParentTime()
+	{
+		if(this.mother)
+		{
+			var start = new Date(this.startDate);
+			var end   = new Date(this.endDate);
+			for(var i=0; i < this.mother.children.length; i++)
+			{
+				if(start.getTime() > this.mother.children[i].startTime.getTime())
+					start = this.mother.children[i].startTime;
+				if(end.getTime() < this.mother.children[i].endTime.getTime())
+					end = this.mother.children[i].endTime;
+			}
+
+			this.startDate = start;
+			this.endDate   = end;
+
+			this.mother.updateParentTime();
+		}
+	}
 }
 
 class Task extends AbstractTask
@@ -160,6 +181,10 @@ class Task extends AbstractTask
 		super(cpy);
 		this.advancement       = cpy.advancement;
 		this.collaboratorEmail = cpy.collaboratorEmail;
+		this.initCharge        = cpy.initCharge;
+		this.computedCharge    = cpy.computedCharge;
+		this.chargeConsumed    = cpy.chargeConsumed;
+		this.remaining         = cpy.remaining;
 	}
 
 	minDate()
@@ -720,6 +745,31 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 
 	//Modals
+	//open task advancement
+	$scope.openTaskAdv = function()
+	{
+		$scope.opts = 
+		{
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "modalAdv.html",
+			controller : "AdvModal",
+			controllerAs : "$ctrl",
+			resolve : {task    : function() {return $scope.taskSelected;}
+					  }
+		};
+
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function() //ok
+			{
+			}, 
+			function() //cancel
+			{
+			});
+	};
 
 	//The collaborator modal
 	$scope.openCollModal = function()
@@ -796,17 +846,24 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 		var modalInstance = $uibModal.open($scope.opts);
 		modalInstance.result.then(
-			function() //ok
+			function(result) //ok
 			{
+				console.log(result);
+				$scope.taskSelected.startDate = new Date(result.startTime);
+				$scope.taskSelected.endDate   = new Date(result.endTime);
 
+				$scope.taskSelected.updateParentTime();
 			}, 
 			function() //cancel
 			{
 			});
 	};
 
-	$scope.openTaskAdv = function()
+	$scope.openTask = function(task)
 	{
+		if(task == null)
+			return;
+
 		$scope.opts = 
 		{
 			backdrop : true,
@@ -816,7 +873,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			templateUrl : "modalTask.html",
 			controller : "TaskModal",
 			controllerAs : "$ctrl",
-			resolve : {task    : function() {return $scope.taskSelected;}
+			resolve : {task    : function() {return task;}
 					  }
 		};
 
@@ -824,12 +881,17 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		modalInstance.result.then(
 			function() //ok
 			{
-
 			}, 
 			function() //cancel
 			{
 			});
 	};
+
+	$scope.openCanvasTaskModal = function(event)
+	{
+		$scope.canvasClick(event);
+		$scope.openTask($scope.taskSelected);
+	}
 	
 
 	$interval(function()

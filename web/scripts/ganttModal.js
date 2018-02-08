@@ -81,9 +81,11 @@ myApp.controller("DateModal", function($scope, $uibModalInstance, task, minDate,
 		$scope.popupStart.opened = true;
 	};
 
-	$scope.ok= function()
+	$scope.ok = function()
 	{
 		var httpCtx = new XMLHttpRequest();
+		var startTime = $scope.task.startDate.getTime() - $scope.task.startDate.getTimezoneOffset()*60*1000; 
+		var endTime   = $scope.task.endDate.getTime()   - $scope.task.endDate.getTimezoneOffset()*60*1000; 
 		httpCtx.onreadystatechange = function()
 		{
 			//Check for errors
@@ -91,7 +93,7 @@ myApp.controller("DateModal", function($scope, $uibModalInstance, task, minDate,
 			{
 				if(httpCtx.responseText != '-1')
 				{
-					$uibModalInstance.close();
+					$uibModalInstance.close({startTime : startTime, endTime : endTime});
 				}
 				else
 				{
@@ -99,11 +101,34 @@ myApp.controller("DateModal", function($scope, $uibModalInstance, task, minDate,
 				}
 			}
 		}
-		var startTime = $scope.task.startDate.getTime() - $scope.task.startDate.getTimezoneOffset()*60*1000; 
-		var endTime   = $scope.task.endDate.getTime()   - $scope.task.endDate.getTimezoneOffset()*60*1000; 
 		httpCtx.open('POST', "/AJAX/timeTask.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&startDate="+startTime+"&endDate="+endTime, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
+	};
+
+	$scope.cancel = function()
+	{
+		$uibModalInstance.dismiss();
+	};
+});
+
+myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
+{
+	$scope.task = Object.assign({}, task);
+
+	$scope.$watch('task.chargeConsumed', function(newValue)
+	{
+		if(newValue > $scope.task.initCharge)
+			$scope.task.chargeConsumed = $scope.task.initCharge;
+		else if (newValue < 0)
+			$scope.task.chargeConsumed = 0;
+		$scope.task.remaining   = $scope.task.computedCharge - $scope.task.chargeConsumed;
+		$scope.task.advancement = parseInt(100 * $scope.task.chargeConsumed / $scope.task.computedCharge);
+	});
+
+	$scope.ok = function()
+	{
+		$uibModalInstance.close();
 	};
 
 	$scope.cancel = function()

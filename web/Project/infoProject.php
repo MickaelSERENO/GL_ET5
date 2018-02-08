@@ -66,6 +66,40 @@
 						<!-- Task popup -->
 						<?php include('../../Libraries/TaskPopUp.php'); ?>
 
+						<!-- Advancement -->
+						<script type="text/ng-template" id="modalAdv.html">
+							<div class="modal-header">
+								<h3 class="modal-title">Saisir Avancement</h3>
+							</div>
+							<div class="modal-body">
+								<div class="container-fluid">
+									<div class="row">
+										<div class="col-xs-4">Charge consommée : </div>
+										<input class="col-xs-2" type="number" id="advInput" ng-model="task.chargeConsumed"/>
+										<div class="col-xs-2"> jour(s) </div>
+									</div>
+
+									<div class="row topSpace">
+										<div class="col-xs-4">Avancement : </div>
+										<div class="col-xs-2">{{task.advancement}} %</div>
+										<div class="col-xs-4">
+											<uib-progressbar value="task.advancement" id="advProgressbar"><span style="color:white; white-space:nowrap;">{{task.advancement}} %</span></uib-progressbar>
+										</div>
+									</div>
+
+									<div class="row topSpace">
+										<div class="col-xs-4">Reste à faire: </div>
+										<div class="col-xs-2">{{task.remaining}}</div>
+										<div class="col-xs-2"> jour(s) </div>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+								<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+							</div>
+						</script>
+
 						<!-- Collaborator -->
 						<script type="text/ng-template" id="modalColl.html">
 							<div class="modal-header">
@@ -219,7 +253,7 @@
 											<div class="taskNode">
 												<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>
 												<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-right" ng-show="task.canExpand()"></span>
-												<div class="taskBackground">
+												<div class="taskBackground" ng-dblclick="openTask(task)">
 													{{task.name}}
 												</div>
 											</div>
@@ -235,7 +269,7 @@
 								</div>
 
 								<div id="gantt" class="col-xs-9">
-									<canvas id="ganttCanvas" width=1600 height=800 ng-click="canvasClick($event)">
+									<canvas id="ganttCanvas" width=1600 height=800 ng-dblclick="openCanvasTaskModal($event)" ng-click="canvasClick($event)">
 									</canvas>
 									<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 

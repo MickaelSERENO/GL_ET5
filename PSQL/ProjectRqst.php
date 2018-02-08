@@ -134,8 +134,7 @@
 			if($row[0] != "")
 				$start = DateTime::createFromFormat("Y-m-d H:i:s", $row[0] + " 00:00:00", new DateTimeZone("UTC"));
 
-			error_log($start->getTimestamp());
-			error_log($end->getTimestamp());
+			//TODO notif
 			return $startDate->getTimestamp() >= $start->getTimestamp() && $endDate->getTimestamp() <= $end->getTimestamp();
 		}
 
