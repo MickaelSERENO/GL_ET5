@@ -296,10 +296,12 @@ CREATE OR REPLACE FUNCTION checkTask() RETURNS TRIGGER AS $triggerTask$
 	BEGIN
 		IF (SELECT COUNT(*) FROM Marker WHERE id = New.id) > 0 THEN
 			RAISE EXCEPTION 'The Task has the same ID than a marker';
+
 		ELSIF (SELECT COUNT(*) FROM ProjectCollaborator, AbstractTask 
 		  	   WHERE AbstractTask.id = New.id AND AbstractTask.idProject = ProjectCollaborator.idProject AND
 		       New.collaboratorEmail = ProjectCollaborator.collaboratorEmail) = 0 THEN
-			RAISE EXCEPTION 'The collaborator is not part of the project collaborator list';	
+			RAISE EXCEPTION 'The collaborator % is not part of the project collaborator list', New.collaboratorEmail;	
+
 		ELSIF (SELECT COUNT(*) FROM Project, AbstractTask WHERE AbstractTask.id = New.id AND AbstractTask.idProject = Project.id AND AbstractTask.startDate >= Project.startDate AND New.endDate <= Project.endDate) = 0 THEN
 			RAISE EXCEPTION 'The task is not within the project date';
 		END IF;

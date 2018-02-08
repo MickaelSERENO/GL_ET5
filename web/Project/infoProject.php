@@ -171,23 +171,42 @@
 								<h3 class="modal-title">Changement de collaborateur</h3>
 							</div>
 							<div class="modal-body">
-								<div>
-									<div class="alignedDiv">
-										Collaborateur : 
+								<div class="container-fluid">
+									<div class="row btn-group topSpace" uib-dropdown dropdown-append-to-body>
+										<div class="col-sm-6">
+											Collaborateur :
+										</div>
+										<div class="col-sm-6">
+											<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+												{{currentCollTxt()}}<span class="caret sortList"></span>
+											</button>
+											<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+												<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}}</a></li>
+											</ul>
+										</div>
 									</div>
-									<div class="btn-group alignedDiv topSpace" uib-dropdown dropdown-append-to-body>
-										<button type="button" class="btn btn-primary" uib-dropdown-toggle>
-											{{currentCollTxt()}}<span class="caret sortList"></span>
-										</button>
-										<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-											<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}}</a></li>
-										</ul>
+
+									<div class="row topSpace">
+										<div class="col-sm-6">Date d'effet : </div>
+										<p class="input-group class-sm-4">
+											<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="middleDate" is-open="popupDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+											<span class="input-group-btn">
+												<button type="button" class="btn btn-default" ng-click="openDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+											</span>
+										</p>
 									</div>
 								</div>
 							</div>
 							<div class="modal-footer">
-								<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
-								<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+								<div class="container-fluid">
+									<div class="row">
+										<div class="errorMsg col-sm-7" ng-style="{'visibility' : !dateCorrect() ? 'visible' : 'hidden'}">La date n'est pas comprise dans les dates de la tâche</div>
+										<div class="col-sm-5">
+											<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+											<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+										</div>
+									</div>
+								</div>
 							</div>
 						</script>
 

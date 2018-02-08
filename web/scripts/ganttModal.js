@@ -3,6 +3,26 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 	$scope.collaborators      = [new EndUser({name : "\"Vide\"", surname : "", email : ""})].concat(colls);
 	$scope.currentColl        = 0;
 	$scope.task               = task;
+	$scope.middleDate         = new Date(parseInt(task.startDate.getTime() + (task.endDate.getTime() - task.startDate.getTime())*task.advancement / 100));
+
+	$scope.dateFormat  = "dd/MM/yyyy";
+	$scope.dateOptions = 
+		{
+			formatYear: 'yy',
+			maxDate: task.endDate,
+			minDate: task.startDate,
+			startingDay: 1
+		};
+
+	$scope.startTime = $scope.task.startDate.getTime() - $scope.task.startDate.getTimezoneOffset()*60*1000; 
+	$scope.endTime   = $scope.task.endDate.getTime()   - $scope.task.endDate.getTimezoneOffset()*60*1000; 
+
+	$scope.popupDate = {opened : false};
+
+	$scope.openDate = function()
+	{
+		$scope.popupDate.opened = true;
+	};
 
 	for(var i=0; i < colls.length; i++)
 	{
@@ -23,8 +43,18 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 		return $scope.collaborators[$scope.currentColl].name + " " + $scope.collaborators[$scope.currentColl].surname;
 	};
 
+	$scope.dateCorrect = function()
+	{
+		var middleTime = $scope.middleDate.getTime() - $scope.middleDate.getTimezoneOffset()*60*1000; 
+	
+		return middleTime <= $scope.endTime && middleTime >= $scope.startTime;
+	};
+
 	$scope.ok = function()
 	{
+		if(!dateCorrect())
+			return;
+
 		var httpCtx = new XMLHttpRequest();
 		httpCtx.onreadystatechange = function()
 		{
@@ -41,7 +71,7 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 				}
 			}
 		}
-		httpCtx.open('GET', "/AJAX/projectColls.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&collEmail=" + $scope.collaborators[$scope.currentColl].email, true);
+		httpCtx.open('GET', "/AJAX/projectColls.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&collEmail=" + $scope.collaborators[$scope.currentColl].email+"&middleDate="+$scope.middleDate.getTime()/1000, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
 	};
