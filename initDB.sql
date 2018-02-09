@@ -145,7 +145,7 @@ CREATE TABLE ProjectNotification
 ---------------------------------------
 --Task tables (AbstractTask, TaskOrder)
 ---------------------------------------
-CREATE TYPE TASK_STATUS AS ENUM('STARTED', 'NOT_STARTED', 'LATE');
+CREATE TYPE TASK_STATUS AS ENUM('STARTED', 'NOT_STARTED', 'LATE_STARTED', 'LATE_UNSTARTED');
 
 CREATE TABLE AbstractTask
 (
@@ -230,6 +230,10 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 			IF (SELECT COUNT(*) FROM TaskHierarchy WHERE idChild = lastID) = 0 THEN
 				RETURN New;
 			ELSE
+				--test task order relationship
+				IF (SELECT COUNT(*) FROM TaskOrder WHERE (successorID = lastID AND predecessorID = New.idChild) OR (successorID = New.idChild AND predecessorID = lastID)) = 0 THEN
+					RAISE EXCEPTION 'The two task cannot have an order relationship';
+				END IF;
 				lastID := lastRow.idMother;
 				IF lastRow.counted THEN
 					i := i+1;
@@ -297,7 +301,7 @@ CREATE OR REPLACE FUNCTION checkTask() RETURNS TRIGGER AS $triggerTask$
 		IF (SELECT COUNT(*) FROM Marker WHERE id = New.id) > 0 THEN
 			RAISE EXCEPTION 'The Task has the same ID than a marker';
 
-		ELSIF (SELECT COUNT(*) FROM ProjectCollaborator, AbstractTask 
+		ELSIF NEW.collaboratorEmail != NULL AND (SELECT COUNT(*) FROM ProjectCollaborator, AbstractTask 
 		  	   WHERE AbstractTask.id = New.id AND AbstractTask.idProject = ProjectCollaborator.idProject AND
 		       New.collaboratorEmail = ProjectCollaborator.collaboratorEmail) = 0 THEN
 			RAISE EXCEPTION 'The collaborator % is not part of the project collaborator list', New.collaboratorEmail;	

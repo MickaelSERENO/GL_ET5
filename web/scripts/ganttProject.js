@@ -783,76 +783,79 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0 && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail)) && $scope.taskSelected.isShown();
 	};
 
-	//Load tasks
-	var httpCtx = new XMLHttpRequest();
-	httpCtx.onreadystatechange = function()
+	$scope.updateTask = function()
 	{
-		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+		//Load tasks
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
 		{
-			$scope.$apply(function()
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
 			{
-				var tasks = JSON.parse(httpCtx.responseText);
-
-				//Handle project
-				project   = new Project(tasks.project);
-				if(project.stats == "CLOSED_INVISIBLE" || project.stats == "CLOSED_VISIBLE")
+				$scope.$apply(function()
 				{
-					$scope.closeStatus = 1;
-					$scope.closeTxt    = "Ré-ouvrir";
-				}
+					var tasks = JSON.parse(httpCtx.responseText);
 
-				$scope.tasks = [];
-				var allTasks = [];
-
-				//Construct all tasks
-				for(var i=0; i < tasks.tasks.length; i++)
-				{
-					var isMother = true;
-					for(var j=0; j < tasks.children.length; j++)
+					//Handle project
+					project   = new Project(tasks.project);
+					if(project.stats == "CLOSED_INVISIBLE" || project.stats == "CLOSED_VISIBLE")
 					{
-						if(tasks.children[j].idChild === tasks.tasks[i].id)
-						{
-							isMother = false;
-							break;
-						}
+						$scope.closeStatus = 1;
+						$scope.closeTxt    = "Ré-ouvrir";
 					}
 
-					var currentTask = new Task(tasks.tasks[i]);
-					allTasks.push(currentTask);
+					$scope.tasks = [];
+					var allTasks = [];
 
-					if(isMother)
-						$scope.tasks.push(currentTask);
-				}
+					//Construct all tasks
+					for(var i=0; i < tasks.tasks.length; i++)
+					{
+						var isMother = true;
+						for(var j=0; j < tasks.children.length; j++)
+						{
+							if(tasks.children[j].idChild === tasks.tasks[i].id)
+							{
+								isMother = false;
+								break;
+							}
+						}
 
-				//Construct chldren-tree
-				for(var i=0; i < tasks.children.length; i++)
-					for(var j=0; j < allTasks.length; j++)
-						if(tasks.children[i].idMother === allTasks[j].id)
-							for(var k=0; k < allTasks.length; k++)
-								if(allTasks[k].id === tasks.children[i].idChild)
-								{
-									allTasks[j].children.push(allTasks[k]);
-									allTasks[k].mother = allTasks[j];
-								}
+						var currentTask = new Task(tasks.tasks[i]);
+						allTasks.push(currentTask);
 
-				//Fill the successors
-				for(var i=0; i < tasks.successors.length; i++)
-					for(var j=0; j < allTasks.length; j++)
-						if(tasks.successors[i][0] === allTasks[j].id)
-							for(var k=0; k < allTasks.length; k++)
-								if(allTasks[k].id === tasks.successors[i][1])
-								{
-									allTasks[j].successors.push(allTasks[k]);
-									allTasks[k].predecessors.push(allTasks[j]);
-								}
-				$scope.changeSorting(0);
-			});
+						if(isMother)
+							$scope.tasks.push(currentTask);
+					}
+
+					//Construct chldren-tree
+					for(var i=0; i < tasks.children.length; i++)
+						for(var j=0; j < allTasks.length; j++)
+							if(tasks.children[i].idMother === allTasks[j].id)
+								for(var k=0; k < allTasks.length; k++)
+									if(allTasks[k].id === tasks.children[i].idChild)
+									{
+										allTasks[j].children.push(allTasks[k]);
+										allTasks[k].mother = allTasks[j];
+									}
+
+					//Fill the successors
+					for(var i=0; i < tasks.successors.length; i++)
+						for(var j=0; j < allTasks.length; j++)
+							if(tasks.successors[i][0] === allTasks[j].id)
+								for(var k=0; k < allTasks.length; k++)
+									if(allTasks[k].id === tasks.successors[i][1])
+									{
+										allTasks[j].successors.push(allTasks[k]);
+										allTasks[k].predecessors.push(allTasks[j]);
+									}
+					$scope.changeSorting(0);
+				});
+			}
 		}
+		httpCtx.open('GET', "/AJAX/fetchTasks.php?projectID="+projectID, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 	}
-	httpCtx.open('GET', "/AJAX/fetchTasks.php?projectID="+projectID, true);
-	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	httpCtx.send(null);
-
+	$scope.updateTask();
 
 	//Modals
 	//open task advancement
@@ -873,8 +876,11 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 		var modalInstance = $uibModal.open($scope.opts);
 		modalInstance.result.then(
-			function() //ok
+			function(taskCpy) //ok
 			{
+				$scope.taskSelected.advancement    = taskCpy.advancement;
+				$scope.taskSelected.remaining      = taskCpy.remaining;
+				$scope.taskSelected.computedCharge = taskCpy.computedCharge;
 			}, 
 			function() //cancel
 			{
@@ -919,7 +925,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 					modalInstance.result.then(
 						function() //ok
 						{
-
+							$scope.updateTask();
 						}, 
 						function() //cancel
 						{
@@ -988,9 +994,9 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 		var modalInstance = $uibModal.open($scope.opts);
 		modalInstance.result.then(
-			function() //ok
+			function()
 			{
-			}, 
+			},
 			function() //cancel
 			{
 			});

@@ -221,6 +221,8 @@
 		public function setCollaborator($idTask, $collEmail, $middleTimestamp)
 		{
 			$task         = $this->getTask($idTask);
+			if($collEmail == $task->collaboratorEmail)
+				return;
 
 			$middleDate   = new DateTime();
 			$middleDate->setTimestamp((int)($middleTimestamp));
@@ -229,22 +231,26 @@
 				return;
 
 			$colName      = "";
-			$scriptCol    = "SELECT name, surname FROM Contact WHERE email = '$collEmail';";
 
-			$collEmail    = $collEmail == "" ? "null" : "'".$collEmail."'";
+			//New coll
+			$scriptCol    = "SELECT name, surname FROM Contact WHERE email = '$collEmail';";
+			$collEmail    = $collEmail == "" ? "NULL" : "'".$collEmail."'";
 			$resultScript = pg_query($this->_conn, $scriptCol);
-			$row          = pg_fetch_row($resultScript);
+			$rowNew       = pg_fetch_row($resultScript);
+
+			//Old coll
+			$scriptCol    = "SELECT name, surname FROM Contact WHERE email = '$task->collaboratorEmail';";
+			$resultScript = pg_query($this->_conn, $scriptCol);
+			$rowOld       = pg_fetch_row($resultScript);
 
 			$script       = "";
-			if($row != null)
+
+			if($task->computedCharge > 0 && $rowOld != null)
 			{
-				$desc1        = $task->description.". Parte 1 réalisée par $colName.";
+				$desc1        = $task->description.". Parte 1 réalisée par $rowOld[0] $rowOld[1].";
 				$name1        = $task->name . ". Partie 1.";
 				$desc2        = $task->description.". Parte 2.";
 				$name2        = $task->name . ". Partie 2.";
-
-
-				$colName = $row[1] . " " . $row[0];
 
 				//Add old task
 				$script       = "
@@ -259,7 +265,6 @@
 								 INSERT INTO TaskHierarchy VALUES($idTask, $rowInsert[0], false);";
 				$resultScript = pg_query($this->_conn, $script);
 
-
 				//Add new task
 				$initCharge     = $task->initCharge     - $task->chargeConsumed;
 				$computedCharge = $task->computedCharge - $task->chargeConsumed;
@@ -272,6 +277,7 @@
 								 VALUES($rowInsert[0], '$task->endDate', $initCharge, $computedCharge, $computedCharge, 0, 0, $collEmail, 'STARTED');
 								 INSERT INTO TaskHierarchy VALUES($idTask, $rowInsert[0], false);
 								 ";
+				error_log($script);
 				$resultScript = pg_query($this->_conn, $script);
 
 				//TODO notification changement of collaborators

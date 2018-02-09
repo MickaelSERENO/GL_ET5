@@ -24,9 +24,14 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 		$scope.popupDate.opened = true;
 	};
 
-	for(var i=0; i < colls.length; i++)
+	$scope.canShowDate = function()
 	{
-		if(task.collaboratorEmail == colls[i].email)
+		return $scope.task.collaboratorEmail != null;
+	};
+
+	for(var i=0; i < $scope.collaborators.length; i++)
+	{
+		if(task.collaboratorEmail === $scope.collaborators[i].email)
 		{
 			$scope.currentColl = i;
 			break;
@@ -54,7 +59,7 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 
 	$scope.ok = function()
 	{
-		if(!dateCorrect())
+		if(!$scope.dateCorrect())
 			return;
 
 		var httpCtx = new XMLHttpRequest();
@@ -167,7 +172,7 @@ myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 			{
 				if(httpCtx.responseText != '-1')
 				{
-					$uibModalInstance.close();
+					$uibModalInstance.close($scope.task);
 				}
 				else
 				{

@@ -9,6 +9,7 @@
 	if(!isset($_SESSION["email"]))
 	{
 		header('Location: /connection.php');
+		return;
 	}
 
 	else if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
@@ -183,22 +184,22 @@
 								<div class="modal-body">
 									<div class="container-fluid">
 										<div class="row btn-group topSpace" uib-dropdown dropdown-append-to-body>
-											<div class="col-sm-6">
+											<div class="col-xs-6">
 												Collaborateur :
 											</div>
-											<div class="col-sm-6">
+											<div class="col-xs-6">
 												<button type="button" class="btn btn-primary" uib-dropdown-toggle>
 													{{currentCollTxt()}}<span class="caret sortList"></span>
 												</button>
 												<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-													<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}}</a></li>
+													<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}} {{c.surname}}</a></li>
 												</ul>
 											</div>
 										</div>
 
-										<div class="row topSpace">
-											<div class="col-sm-6">Date d'effet : </div>
-											<p class="input-group class-sm-4">
+										<div class="row topSpace" ng-show="canShowDate()">
+											<div class="col-xs-6">Date d'effet : </div>
+											<p class="input-group class-xs-4">
 												<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="middleDate" is-open="popupDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
 												<span class="input-group-btn">
 													<button type="button" class="btn btn-default" ng-click="openDate()"><i class="glyphicon glyphicon-calendar"></i></button>
