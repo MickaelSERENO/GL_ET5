@@ -70,7 +70,7 @@
 #ganttBody > div > .nav-tabs > li > a
 {
 	color : #FFFFFF;
-	background-color : #C0C0C0;
+	background-color : #0858CC;
 	margin: -2px 0 0 0;
 	margin-right:0px;
 	width:100%;
@@ -79,11 +79,40 @@
 #ganttBody > div > .nav-tabs > li.active > a
 {
 	color : #FFFFFF;
-	background-color : #000000;
+	background-color : #48A8FF;
 	margin: -2px 0 0 0;
 }
 
 .ui-datepicker .btn-group .btn-danger.btn
 {
     display: none;
+}
+
+#advInput::-webkit-inner-spin-button, 
+#advInput::-webkit-outer-spin-button
+{
+	-webkit-appearance: none;
+    -moz-appearance:    none;
+	appearance:         none;
+}
+
+#advInput
+{
+	text-align:center;
+	width: 5em;
+	margin-left:1em;
+	margin-right:1em;
+	border-radius:10px;
+}
+
+.leftRightMargin
+{
+	margin-left:1em;
+	margin-right:1em;
+}
+
+#advProgressbar
+{
+	width:50%;
+	margin-bottom:0;
 }

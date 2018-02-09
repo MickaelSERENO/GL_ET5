@@ -1,5 +1,5 @@
 <?php
-	require_once __DIR__.'/../../PSQL/ProjectRqst.php';
+	require_once __DIR__.'/../../PSQL/TaskRqst.php';
 	require_once __DIR__.'/../../Libraries/check.php';
 
 	session_start();
@@ -10,7 +10,7 @@
 		die('Forbidden Access');
 	}
 
-	$projectRqst = new ProjectRqst();
+	$taskRqst = new TaskRqst();
 
 	if($_GET['requestID'] == 0) //Verify date
 	{
@@ -19,7 +19,7 @@
 		$endDate   = new DateTime();
 		$endDate->setTimestamp((int)($_GET['endDate'])/1000 + 1);
 
-		if($projectRqst->isTaskDateValide($_GET['taskID'], $startDate, $endDate))
+		if($taskRqst->isTaskDateValide($_GET['taskID'], $startDate, $endDate))
 			echo '1';
 		else
 			echo '-1';
@@ -33,12 +33,12 @@
 		$endDate   = new DateTime();
 		$endDate->setTimestamp((int)($_GET['endDate'])/1000 + 1);
 
-		if(!$projectRqst->isTaskDateValide($_GET['taskID'], $startDate, $endDate))
+		if(!$taskRqst->isTaskDateValide($_GET['taskID'], $startDate, $endDate))
 		{
 			echo '-1';
 			return;
 		}
-		$projectRqst->setTaskDate($_GET['taskID'], $startDate, $endDate);
+		$taskRqst->setTaskDate($_GET['taskID'], $startDate, $endDate);
 		echo '1';
 		return;
 	}

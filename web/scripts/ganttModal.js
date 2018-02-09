@@ -3,6 +3,26 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 	$scope.collaborators      = [new EndUser({name : "\"Vide\"", surname : "", email : ""})].concat(colls);
 	$scope.currentColl        = 0;
 	$scope.task               = task;
+	$scope.middleDate         = new Date(parseInt(task.startDate.getTime() + (task.endDate.getTime() - task.startDate.getTime())*task.advancement / 100));
+
+	$scope.dateFormat  = "dd/MM/yyyy";
+	$scope.dateOptions = 
+		{
+			formatYear: 'yy',
+			maxDate: task.endDate,
+			minDate: task.startDate,
+			startingDay: 1
+		};
+
+	$scope.startTime = $scope.task.startDate.getTime() - $scope.task.startDate.getTimezoneOffset()*60*1000; 
+	$scope.endTime   = $scope.task.endDate.getTime()   - $scope.task.endDate.getTimezoneOffset()*60*1000; 
+
+	$scope.popupDate = {opened : false};
+
+	$scope.openDate = function()
+	{
+		$scope.popupDate.opened = true;
+	};
 
 	for(var i=0; i < colls.length; i++)
 	{
@@ -23,8 +43,20 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 		return $scope.collaborators[$scope.currentColl].name + " " + $scope.collaborators[$scope.currentColl].surname;
 	};
 
+	$scope.dateCorrect = function()
+	{
+		if($scope.middleDate == undefined)
+			return false;
+		var middleTime = $scope.middleDate.getTime() - $scope.middleDate.getTimezoneOffset()*60*1000; 
+	
+		return middleTime <= $scope.endTime && middleTime >= $scope.startTime;
+	};
+
 	$scope.ok = function()
 	{
+		if(!dateCorrect())
+			return;
+
 		var httpCtx = new XMLHttpRequest();
 		httpCtx.onreadystatechange = function()
 		{
@@ -41,7 +73,7 @@ myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls,
 				}
 			}
 		}
-		httpCtx.open('GET', "/AJAX/projectColls.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&collEmail=" + $scope.collaborators[$scope.currentColl].email, true);
+		httpCtx.open('GET', "/AJAX/projectColls.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&collEmail=" + $scope.collaborators[$scope.currentColl].email+"&middleDate="+$scope.middleDate.getTime()/1000, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
 	};
@@ -81,12 +113,56 @@ myApp.controller("DateModal", function($scope, $uibModalInstance, task, minDate,
 		$scope.popupStart.opened = true;
 	};
 
-	$scope.ok= function()
+	$scope.ok = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		var startTime = $scope.task.startDate.getTime() - $scope.task.startDate.getTimezoneOffset()*60*1000; 
+		var endTime   = $scope.task.endDate.getTime()   - $scope.task.endDate.getTimezoneOffset()*60*1000; 
+		httpCtx.onreadystatechange = function()
+		{
+			//Check for errors
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					$uibModalInstance.close({startTime : startTime, endTime : endTime});
+				}
+				else
+				{
+					$uibModalInstance.dismiss();
+				}
+			}
+		}
+		httpCtx.open('POST', "/AJAX/timeTask.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&startDate="+startTime+"&endDate="+endTime, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	};
+
+	$scope.cancel = function()
+	{
+		$uibModalInstance.dismiss();
+	};
+});
+
+myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
+{
+	$scope.task = Object.assign({}, task);
+
+	$scope.$watch('task.chargeConsumed', function(newValue)
+	{
+		if(newValue > $scope.task.initCharge)
+			$scope.task.chargeConsumed = $scope.task.initCharge;
+		else if (newValue < 0)
+			$scope.task.chargeConsumed = 0;
+		$scope.task.remaining   = $scope.task.computedCharge - $scope.task.chargeConsumed;
+		$scope.task.advancement = parseInt(100 * $scope.task.chargeConsumed / $scope.task.computedCharge);
+	});
+
+	$scope.ok = function()
 	{
 		var httpCtx = new XMLHttpRequest();
 		httpCtx.onreadystatechange = function()
 		{
-			//Check for errors
 			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
 			{
 				if(httpCtx.responseText != '-1')
@@ -99,9 +175,7 @@ myApp.controller("DateModal", function($scope, $uibModalInstance, task, minDate,
 				}
 			}
 		}
-		var startTime = $scope.task.startDate.getTime() - $scope.task.startDate.getTimezoneOffset()*60*1000; 
-		var endTime   = $scope.task.endDate.getTime()   - $scope.task.endDate.getTimezoneOffset()*60*1000; 
-		httpCtx.open('POST', "/AJAX/timeTask.php?projectID="+projectID+"&requestID=1&taskID=" + $scope.task.id + "&startDate="+startTime+"&endDate="+endTime, true);
+		httpCtx.open('POST', "/AJAX/advTask.php?projectID="+projectID+"&requestID=0&taskID=" + $scope.task.id + "&advancement="+$scope.task.advancement+"&chargeConsumed="+$scope.task.chargeConsumed+"&remaining="+$scope.task.remaining, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
 	};

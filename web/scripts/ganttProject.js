@@ -7,7 +7,7 @@ var dateOffset  = 5;
 var dateYOffset = 15;
 
 
-var SELECT_TASK_COLOR = "#00FFFF";
+var SELECT_TASK_COLOR = "#0858CC";
 
 //The end user class
 class EndUser
@@ -52,7 +52,6 @@ class AbstractTask
 		this.isMarker     = cpy.isMarker;
 		this.startDate    = new Date(cpy.startDate);
 		this.endDate      = new Date(cpy.endDate);
-		console.log("end : " + this.endDate);
 	}
 
 	//Add a child
@@ -150,6 +149,96 @@ class AbstractTask
     {
         return currentDate >= this.startDate;
     }
+
+	updateParentTime()
+	{
+		if(this.mother)
+		{
+			var start = new Date(this.startDate);
+			var end   = new Date(this.endDate);
+			for(var i=0; i < this.mother.children.length; i++)
+			{
+				if(start.getTime() > this.mother.children[i].startTime.getTime())
+					start = this.mother.children[i].startTime;
+				if(end.getTime() < this.mother.children[i].endTime.getTime())
+					end = this.mother.children[i].endTime;
+			}
+
+			this.startDate = start;
+			this.endDate   = end;
+
+			this.mother.updateParentTime();
+		}
+	}
+
+	sortByDate(asc)
+	{
+		var tasks = [];
+		for(var i =0; i < this.children.length; i++)
+		{
+			var found = false;
+			for(var j = 0; j < i; j++)
+			{
+				if(asc)
+				{
+					if(tasks[j].startDate.getTime() > this.children[i].startDate.getTime())
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+
+				else
+				{
+					if(tasks[j].startDate.getTime() < this.children[i].startDate.getTime())
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+			}
+			if(!found)
+				tasks.push(this.children[i]);
+			this.children[i].sortByDate(asc);
+		}
+		this.children = tasks;
+	}
+
+	sortByName(asc)
+	{
+		var tasks = [];
+		for(var i =0; i < this.children.length; i++)
+		{
+			var found = false;
+			for(var j = 0; j < i; j++)
+			{
+				if(asc)
+				{
+					if(tasks[j].name > this.children[i].name)
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+				else
+				{
+					if(tasks[j].name < this.children[i].name)
+					{
+						found = true;
+						tasks.splice(j, 0, this.children[i]);
+						break;
+					}
+				}
+			}
+			if(!found)
+				tasks.push(this.children[i]);
+			this.children[i].sortByName(asc);
+		}
+		this.children = tasks;
+	}
 }
 
 class Task extends AbstractTask
@@ -160,6 +249,10 @@ class Task extends AbstractTask
 		super(cpy);
 		this.advancement       = cpy.advancement;
 		this.collaboratorEmail = cpy.collaboratorEmail;
+		this.initCharge        = cpy.initCharge;
+		this.computedCharge    = cpy.computedCharge;
+		this.chargeConsumed    = cpy.chargeConsumed;
+		this.remaining         = cpy.remaining;
 	}
 
 	minDate()
@@ -259,14 +352,6 @@ class Task extends AbstractTask
             canvasCtx.lineTo(predSize.xOffset + predSize.width + lineWidth, predSize.yOffset + fontSize/2.0);
             canvasCtx.lineTo(predSize.xOffset + predSize.width + lineWidth, size.yOffset     + fontSize/2.0);
             canvasCtx.lineTo(size.xOffset,                                  size.yOffset     + fontSize/2.0);
-			canvasCtx.stroke();
-
-            //The sticky arrow
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(size.x,     size.yOffset + fontSize/2.0);
-            canvasCtx.lineTo(size.x - 5, size.yOffset + fontSize/2.0 - 5);
-            canvasCtx.moveTo(size.x,     size.yOffset + fontSize/2.0);
-            canvasCtx.lineTo(size.x - 5, size.yOffset + fontSize/2.0 + 5);
 			canvasCtx.stroke();
 		}
 	}
@@ -426,14 +511,9 @@ function drawTasks(fontSize, diviser)
 function computeInternalId()
 {
 	var currentID = 0;
-	console.log(scope.tasks.length);
 
 	for(var i=0; i < scope.tasks.length; i++)
-	{
-		console.log(i);
 		currentID = currentID + scope.tasks[i].computeInternalId(currentID);
-	}
-
 }
 
 myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $interval)
@@ -442,6 +522,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 	//Variables
 	$scope.currentSorting = 0;
+	$scope.asc            = true;
 	$scope.currentScale   = 1;
 	$scope.dispUnstarted  = true;
 	$scope.editionMode    = false;
@@ -560,9 +641,84 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
         $scope.editionTxt  = ($scope.editionMode) ? "Quitter Edition" : "Mode Edition";
     };
 
+	$scope.changeAsc     = function()
+	{
+		$scope.asc = !$scope.asc;
+		$scope.changeSorting($scope.currentSorting);
+	}
+
 	$scope.changeSorting = function(id)
 	{
 		$scope.currentSorting = id;
+		switch(id)
+		{
+			case 0: //By date
+				var tasks = [];
+				for(var i =0; i < $scope.tasks.length; i++)
+				{
+					var found = false;
+					for(var j = 0; j < i; j++)
+					{
+						if($scope.asc)
+						{
+							if(tasks[j].startDate.getTime() > $scope.tasks[i].startDate.getTime())
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+						else
+						{
+							if(tasks[j].startDate.getTime() < $scope.tasks[i].startDate.getTime())
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+					}
+					if(!found)
+						tasks.push($scope.tasks[i]);
+					$scope.tasks[i].sortByDate($scope.asc);
+				}
+				$scope.tasks = tasks;
+				
+				break;
+			case 1: //By name
+				var tasks = [];
+				for(var i =0; i < $scope.tasks.length; i++)
+				{
+					var found = false;
+					for(var j = 0; j < i; j++)
+					{
+						if($scope.asc)
+						{
+							if(tasks[j].name > $scope.tasks[i].name)
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+						else
+						{
+							if(tasks[j].name < $scope.tasks[i].name)
+							{
+								found = true;
+								tasks.splice(j, 0, $scope.tasks[i]);
+								break;
+							}
+						}
+					}
+					if(!found)
+						tasks.push($scope.tasks[i]);
+					$scope.tasks[i].sortByName($scope.asc);
+				}
+				$scope.tasks = tasks;
+				break;
+		}
+		computeInternalId();
 	};
 
 	$scope.changeScale = function(id)
@@ -624,28 +780,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.showActionDiv = function()
 	{
 					
-		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0;
-	};
-
-	//The action buttons
-	$scope.changeTaskAdv = function()
-	{
-	};
-
-	$scope.changeTaskDate = function()
-	{
-	};
-
-	$scope.changeTaskCollaborator = function()
-	{
-	};
-
-	$scope.addSubTask = function()
-	{
-	};
-
-	$scope.addPredecessorTask = function()
-	{
+		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0 && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail)) && $scope.taskSelected.isShown();
 	};
 
 	//Load tasks
@@ -710,7 +845,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 									allTasks[j].successors.push(allTasks[k]);
 									allTasks[k].predecessors.push(allTasks[j]);
 								}
-				computeInternalId();
+				$scope.changeSorting(0);
 			});
 		}
 	}
@@ -720,6 +855,31 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 
 	//Modals
+	//open task advancement
+	$scope.openTaskAdv = function()
+	{
+		$scope.opts = 
+		{
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "modalAdv.html",
+			controller : "AdvModal",
+			controllerAs : "$ctrl",
+			resolve : {task    : function() {return $scope.taskSelected;}
+					  }
+		};
+
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function() //ok
+			{
+			}, 
+			function() //cancel
+			{
+			});
+	};
 
 	//The collaborator modal
 	$scope.openCollModal = function()
@@ -796,17 +956,23 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 
 		var modalInstance = $uibModal.open($scope.opts);
 		modalInstance.result.then(
-			function() //ok
+			function(result) //ok
 			{
+				$scope.taskSelected.startDate = new Date(result.startTime);
+				$scope.taskSelected.endDate   = new Date(result.endTime);
 
+				$scope.taskSelected.updateParentTime();
 			}, 
 			function() //cancel
 			{
 			});
 	};
 
-	$scope.openTaskAdv = function()
+	$scope.openTask = function(task)
 	{
+		if(task == null)
+			return;
+
 		$scope.opts = 
 		{
 			backdrop : true,
@@ -816,7 +982,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			templateUrl : "modalTask.html",
 			controller : "TaskModal",
 			controllerAs : "$ctrl",
-			resolve : {task    : function() {return $scope.taskSelected;}
+			resolve : {task    : function() {return task;}
 					  }
 		};
 
@@ -824,13 +990,17 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		modalInstance.result.then(
 			function() //ok
 			{
-
 			}, 
 			function() //cancel
 			{
 			});
 	};
-	
+
+	$scope.openCanvasTaskModal = function(event)
+	{
+		$scope.canvasClick(event);
+		$scope.openTask($scope.taskSelected);
+	}
 
 	$interval(function()
 	{

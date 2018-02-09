@@ -1,4 +1,5 @@
 <?php
+	require_once __DIR__.'/../../PSQL/TaskRqst.php';
 	require_once __DIR__.'/../../PSQL/ProjectRqst.php';
 	require_once __DIR__.'/../../Libraries/check.php';
 
@@ -10,6 +11,7 @@
 		die('Forbidden Access');
 	}
 
+	$taskRqst    = new TaskRqst();
 	$projectRqst = new ProjectRqst();
 
 	if($_GET['requestID'] == 0) //Fetch all collaborators
@@ -20,10 +22,12 @@
 
 	else if($_GET['requestID'] == 1) //Set collaborator
 	{
-		if($projectRqst->setCollaborator((int)($_GET['taskID']), $_GET['collEmail']))
+		error_log($_GET['middleDate']);
+		if($taskRqst->setCollaborator((int)($_GET['taskID']), $_GET['collEmail'], (int)($_GET['middleDate'])))
 			echo '1';
 		else
 			echo '-1';
+		return;
 	}
 
 	else
