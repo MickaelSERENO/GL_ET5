@@ -43,8 +43,7 @@
 
 				array_push($notifs, $notif);
 			}
-
-          	  return $notifs;
+            return $notifs;
 		}
 	}
 ?>

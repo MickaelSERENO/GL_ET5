@@ -717,5 +717,35 @@
 
 			//TODO Maybe send notification
 		}
+
+		public function getTasksOfUser($email, $started)
+		{
+			$tasks	= array();
+			$script	= "SELECT 
+							abstracttask.name, 
+							task.enddate, 
+							task.advancement, 
+							project.name 
+						FROM abstracttask 
+							JOIN task ON abstracttask.id = task.id
+							JOIN project ON project.id = abstracttask.idproject
+						WHERE collaboratoremail = '$email'";
+			if($started)
+			{
+				$script = $script . " AND task.status != 'NOT_STARTED'";
+			}
+			$script = $script . "ORDER BY idproject, enddate";
+			$resultScript = pg_query($this->_conn, $script);
+			while($row = pg_fetch_row($resultScript))
+			{
+				$task				= new Task();
+				$task->name			= $row[0];
+				$task->endDate		= $row[1];
+				$task->advancement	= $row[2];
+
+				array_push($tasks, $task);
+			}
+			return $tasks;
+		}
 	}
 ?>
