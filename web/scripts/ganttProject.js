@@ -877,6 +877,16 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		}
 	};
 
+	$scope.canAddPredecessor = function(pred, succ)
+	{
+		return canAddPredecessor(pred, succ);
+	}
+
+	$scope.canAddTask = function(child, mother)
+	{
+		return canAddTask(child, mother);
+	}
+
 	$scope.showActionDiv = function()
 	{
 		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail)) && $scope.taskSelected.isShown();
@@ -1129,10 +1139,23 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
         }
 	};
 
+	$scope.levelHierarchy = function(task)
+	{
+		return levelHierarchy(task);
+	}
+
 	$scope.openChild = function()
 	{
-        if($scope.secondTaskSelected != null)
+        if($scope.secondTaskSelected != null && canAddTask($scope.secondTaskSelected, $scope.taskSelected))
         {
+			var httpCtx = new XMLHttpRequest();
+			httpCtx.onreadystatechange = function()
+			{
+				$scope.updateTask();
+			}
+			httpCtx.open('GET', "/AJAX/childTask.php?projectID="+projectID+"&requestID=0&idChild=" + $scope.secondTaskSelected.id + "&idMother=" + $scope.taskSelected.id, true);
+			httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			httpCtx.send(null);
         }
         else
         {
@@ -1162,8 +1185,6 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
                 });
         }
 	};
-
-
 
 	$scope.openTask = function(task)
 	{

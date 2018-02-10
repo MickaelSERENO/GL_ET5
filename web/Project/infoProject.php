@@ -438,10 +438,10 @@
 											<div class="actionButton" ng-click="openCollModal()">
 												<div style="background-color:yellow;width:20px;height:20px" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true"></div>
 											</div>
-											<div class="actionButton" ng-click="openChild()" ng-show="taskSelected != null && editionMode == true">
+											<div class="actionButton" ng-click="openChild()" ng-show="taskSelected != null && editionMode == true && levelHierarchy(taskSelected) <= 2 && (secondTaskSelected == null || canAddTask(secondTaskSelected, taskSelected))">
 												<div style="background-color:black;width:20px;height:20px"></div>
 											</div>
-											<div class="actionButton" ng-click="openSuccessor()" ng-show="taskSelected != null && editionMode == true">
+											<div class="actionButton" ng-click="openSuccessor()" ng-show="taskSelected != null && editionMode == true && (secondTaskSelected == null || canAddPredecessor(secondTaskSelected, taskSelected))">
 												<div style="background-color:green;width:20px;height:20px"></div>
 											</div>
 	<?php endif; ?>

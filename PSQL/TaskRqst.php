@@ -531,10 +531,11 @@
 
 			//Check if they are compatible
 			if($mother == $child)
-			{
-				error_log("mother == child");
 				return false;
-			}
+
+			if(!$this->checkLevel($mother))
+				return false;
+
 			if($this->hierarchyRelationship($child, $mother))
 			{
 				if($mother->mother != $child->mother)
@@ -543,9 +544,9 @@
 					return false;
 				}
 			}
-			else if($mother->mother != null)
+			else if($child->mother != null)
 			{
-				error_log("issue mother != null");
+				error_log("issue mother != null. id : $idMother");
 				return false;
 			}
 
@@ -553,18 +554,12 @@
 			while($motherMother != null)
 			{
 				if($this->orderRelationship($child, $motherMother))
-				{
-					error_log("issue order relationship");
 					return false;
-				}
 				$motherMother = $motherMother->mother;
 			}
 
 			if($this->datePredecessor($child, $mother))
-			{
-				error_log("issue date predecessors");
 				return false;
-			}
 
 			return true;
 		}
@@ -591,7 +586,28 @@
 			for($i = 0; $i < count($currentTask->successors); $i++)
 				if($this->orderSuccessors($currentTask->successors[$i], $comparison))
 					return true;
+
+			$mother = $comparison;
+			while($mother != null)
+			{
+				for($j = 0; $j < count($currentTask->children); $j++)
+					if($this->orderSuccessors($currentTask->children[$j], $mother) && $mother != $currentTask->children[$j])
+						return true;
+				$mother = $mother->mother;
+			}
 			return false;
+		}
+
+		private function checkLevel($origin)
+		{
+			$i = 0;
+			$mother = $origin;
+			while($mother != null)
+			{
+				$i++;
+				$mother = $mother->mother;
+			}
+			return $i <= 2;
 		}
 
 		private function orderPredecessors($currentTask, $comparison)
@@ -602,6 +618,15 @@
 			for($i = 0; $i < count($currentTask->predecessors); $i++)
 				if($this->orderSuccessors($currentTask->predecessors[$i], $comparison))
 					return true;
+
+			$mother = $comparison;
+			while($mother != null)
+			{
+				for($j = 0; $j < count($currentTask->children); $j++)
+					if($this->orderPredecessors($currentTask->children[$j], $mother) && $mother != $currentTask->children[$j])
+						return true;
+				$mother = $mother->mother;
+			}
 			return false;
 		}
 

@@ -191,29 +191,37 @@ myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 	};
 });
 
+function orderRelationShip(pred, succ)
+{
+	if(pred == succ)
+		return true;
+	for(var i = 0; i < pred.children.length; i++)
+		if(orderRelationShip(pred.children[i], succ))
+			return true;
+	return false;
+};
+
+function canAddPredecessor(pred, succ)
+{
+	if(pred == succ)
+		return false;
+
+	//The date must be correct
+	if(pred.endDate.getTime() <= succ.startDate.getTime() && !orderRelationShip(pred, succ))
+		return true;
+
+	return false;
+}
+
 myApp.controller("SuccessorModal", function($scope, $uibModalInstance, tasks, task)
 {
 	$scope.task = task;
 	$scope.fullTasks     = [];
 	$scope.currentTaskID = 0;
 
-	$scope.orderRelationShip = function(currentTask)
-	{
-		if(currentTask == task)
-			return true;
-		for(var i = 0; i < currentTask.children.length; i++)
-			if($scope.orderRelationShip(currentTask.children[i]))
-				return true;
-		return false;
-	};
-
 	$scope.addToTask = function(currentTask)
 	{
-		if(currentTask == task)
-			return;
-
-		//The date must be correct
-		if(currentTask.endDate.getTime() <= task.startDate.getTime() && !$scope.orderRelationShip(currentTask))
+		if(canAddPredecessor(currentTask, task))
 			$scope.fullTasks.push(currentTask);
 
 		for(var i=0; i < currentTask.children.length; i++)
@@ -264,124 +272,164 @@ myApp.controller("SuccessorModal", function($scope, $uibModalInstance, tasks, ta
 	};
 });
 
+function orderSuccessor(currentTask, comparison)
+{
+	if(currentTask.id == 1)
+		console.log("ok");
+	if(currentTask == comparison)
+		return true;
+
+	for(var i = 0; i < currentTask.successors.length; i++)
+		if(orderSuccessor(currentTask.successors[i], comparison))
+			return true;
+
+	var mother = comparison;
+	while(mother != null)
+	{
+		for(var j = 0; j < currentTask.children.length; j++)
+			if(orderSuccessor(currentTask.children[j], mother) && mother != currentTask.children[j])
+				return true;
+		mother = mother.mother;
+	}
+
+	return false;
+}
+
+function orderPredecessor(currentTask, comparison)
+{
+	if(currentTask == comparison)
+		return true;
+
+	for(var i = 0; i < currentTask.predecessors.length; i++)
+		if(orderPredecessor(currentTask.predecessors[i], comparison))
+			return true;
+
+	var mother = comparison;
+	while(mother != null)
+	{
+		for(var j = 0; j < currentTask.children.length; j++)
+			if(orderPredecessor(currentTask.children[j], mother) && mother != currentTask.children[j])
+				return true;
+		mother = mother.mother;
+	}
+
+	return false;
+}
+
+function orderRelationShip(currentTask, comparison)
+{
+	if((orderSuccessor(currentTask, comparison) || orderPredecessor(currentTask, comparison)) && currentTask != comparison)
+		return true;
+
+	return false;
+}
+
+function hierarchyMother(currentTask, comparison)
+{
+	if(currentTask == comparison)
+		return true;
+
+	var origin = currentTask;
+	var mother = currentTask.mother;
+	while(mother != null)
+	{
+		for(var i = 0; i < mother.children.length; i++)
+			if(mother.children[i] != origin && hierarchyChildren(mother.children[i], comparison))
+				return true;
+
+		if(hierarchyMother(mother, comparison))
+			return true;
+		origin = mother;
+		mother = mother.mother;
+	}
+	return false;
+}
+
+function hierarchyChildren(currentTask, comparison)
+{
+	if(currentTask == comparison)
+		return true;
+	for(var i = 0; i < currentTask.children.length; i++)
+		if(hierarchyChildren(currentTask.children[i], comparison))
+			return true;
+	return false;
+};
+
+function hierarchyRelationship(currentTask, comparison)
+{
+	if(hierarchyMother(currentTask, comparison) || hierarchyChildren(currentTask, comparison))
+		return true;
+
+	return false;
+};
+
+function datePredecessor(currentTask, origin)
+{
+	var mother = currentTask;
+
+	while(mother != null)
+	{
+		for(var i = 0; i < origin.predecessors.length; i++)
+		{
+			if(origin.predecessors[i].endDate.getTime() < currentTask.startDate.getTime() || 
+				datePredecessor(mother, origin.predecessors[i]))
+				return false;
+		}
+		mother = mother.mother;
+	}
+	return true;
+};
+
+function levelHierarchy(task)
+{
+	var i =0;
+	var mother = task;
+	while(mother != null)
+	{
+		i++;
+		mother = mother.mother;
+	}
+	return i;
+};
+
+function canAddTask(child, mother)
+{
+	var valid = true;
+
+	if(child == mother || !(child instanceof(Task)))
+		return false;
+
+	else if(hierarchyRelationship(child, mother))
+	{
+		if(child.mother != mother.mother)
+			valid = false;
+	}
+	
+	else if(child.mother != null)
+		return false;
+
+	var motherMother = mother;
+	while(motherMother != null)
+	{
+		if(orderRelationShip(child, motherMother))
+			return false;
+		motherMother = motherMother.mother;
+	}
+
+	if(valid && datePredecessor(child, mother))
+		return levelHierarchy(mother) <= 2;
+	return false;
+}
+
 myApp.controller("ChildModal", function($scope, $uibModalInstance, tasks, task)
 {
 	$scope.task = task;
 	$scope.fullTasks     = [];
 	$scope.currentTaskID = 0;
 
-	//Test if the task we are looking in has an order (predecessor / successor) relationship with the desired task
-	$scope.orderSuccessor = function(currentTask, comparison)
-	{
-		if(currentTask == comparison)
-			return true;
-
-		for(var i = 0; i < currentTask.successors.length; i++)
-			if($scope.orderSuccessor(currentTask.successors[i], comparison))
-				return true;
-		return false;
-	};
-
-	$scope.orderPredecessor = function(currentTask, comparison)
-	{
-		if(currentTask == comparison)
-			return true;
-
-		for(var i = 0; i < currentTask.predecessors.length; i++)
-			if($scope.orderPredecessor(currentTask.predecessors[i], comparison))
-				return true;
-		return false;
-	};
-
-	$scope.orderRelationShip = function(currentTask, comparison)
-	{
-		if(($scope.orderSuccessor(currentTask, comparison) || $scope.orderPredecessor(currentTask, comparison)) && currentTask != comparison)
-			return true;
-
-		return false;
-	};
-
-	//Test if the task are in the same hierarchy
-	$scope.hierarchyMother = function(currentTask)
-	{
-		if(currentTask == task)
-			return true;
-
-		var origin = currentTask;
-		var mother = currentTask.mother;
-		while(mother != null)
-		{
-			for(var i = 0; i < mother.children.length; i++)
-				if(mother.children[i] != origin && $scope.hierarchyChildren(mother.children[i]))
-					return true;
-
-			if($scope.hierarchyMother(mother))
-				return true;
-			origin = mother;
-			mother = mother.mother;
-		}
-		return false;
-	};
-
-	$scope.hierarchyChildren = function(currentTask)
-	{
-		if(currentTask == task)
-			return true;
-		for(var i = 0; i < currentTask.children.length; i++)
-			if($scope.hierarchyChildren(currentTask.children[i]))
-				return true;
-		return false;
-	};
-	$scope.hierarchyRelationship = function(currentTask)
-	{
-		if($scope.hierarchyMother(currentTask) || $scope.hierarchyChildren(currentTask))
-			return true;
-
-		return false;
-	};
-
-	$scope.datePredecessor = function(currentTask, origin)
-	{
-		var mother = currentTask;
-
-		while(mother != null)
-		{
-			for(var i = 0; i < origin.predecessors.length; i++)
-			{
-				if(origin.predecessors[i].endDate.getTime() < currentTask.startDate.getTime() || 
-					$scope.datePredecessor(mother, task.predecessors[i]))
-					return false;
-			}
-			mother = mother.mother;
-		}
-		return true;
-	};
-
 	$scope.addToTask = function(currentTask)
 	{
-		var valid = true;
-
-		if(currentTask == task || !(currentTask instanceof(Task)))
-			return;
-
-		else if($scope.hierarchyRelationship(currentTask))
-		{
-			if(currentTask.mother != task.mother)
-				valid = false;
-		}
-		
-		else if(currentTask.mother != null)
-			return;
-
-		var mother = task;
-		while(mother != null)
-		{
-			if($scope.orderRelationShip(currentTask, mother))
-				return;
-			mother = mother.mother;
-		}
-
-		if(valid && $scope.datePredecessor(currentTask, task))
+		if(canAddTask(currentTask, task))
 			$scope.fullTasks.push(currentTask);
 
 		for(var i=0; i < currentTask.children.length; i++)
