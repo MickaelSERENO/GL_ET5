@@ -982,9 +982,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		modalInstance.result.then(
 			function(taskCpy) //ok
 			{
-				selected.advancement    = taskCpy.advancement;
-				selected.remaining      = taskCpy.remaining;
-				selected.chargeConsumed = taskCpy.chargeConsumed;
+				$scope.updateTask();
 			}, 
 			function() //cancel
 			{
