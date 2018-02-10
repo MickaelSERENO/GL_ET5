@@ -136,7 +136,7 @@
 
 					<!-- Gantt tab -->
 					<uib-tab id="ganttHeader" index="$index+1" heading="Planning" deselect="deselectTab()">
-						<div ng-controller="ganttProjectCtrl" id="ganttDiv" class="whiteProject" ng-click="selectTask(null, $event)">
+						<div ng-controller="ganttProjectCtrl" id="ganttDiv" class="whiteProject">
 
 							<!-- Pop ups -->
 							<!-- Task popup -->

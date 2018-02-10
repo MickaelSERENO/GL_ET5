@@ -975,13 +975,14 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 					  }
 		};
 
+		var selected = $scope.taskSelected;
 		var modalInstance = $uibModal.open($scope.opts);
 		modalInstance.result.then(
 			function(taskCpy) //ok
 			{
-				$scope.taskSelected.advancement    = taskCpy.advancement;
-				$scope.taskSelected.remaining      = taskCpy.remaining;
-				$scope.taskSelected.computedCharge = taskCpy.computedCharge;
+				selected.advancement    = taskCpy.advancement;
+				selected.remaining      = taskCpy.remaining;
+				selected.chargeConsumed = taskCpy.chargeConsumed;
 			}, 
 			function() //cancel
 			{
@@ -1062,13 +1063,13 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		};
 
 		var modalInstance = $uibModal.open($scope.opts);
+		var selected = $scope.taskSelected;
 		modalInstance.result.then(
 			function(result) //ok
 			{
-				$scope.taskSelected.startDate = new Date(result.startTime);
-				$scope.taskSelected.endDate   = new Date(result.endTime);
-
-				$scope.taskSelected.updateParentTime();
+				selected.startDate = new Date(result.startTime);
+				selected.endDate   = new Date(result.endTime);
+				selected.updateParentTime();
 			}, 
 			function() //cancel
 			{
@@ -1079,6 +1080,8 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	{
         if($scope.secondTaskSelected != null)
         {
+			var second = $scope.secondTaskSelected;
+			var first  = $scope.taskSelected;
             var httpCtx = new XMLHttpRequest();
             httpCtx.onreadystatechange = function()
             {
@@ -1087,8 +1090,8 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
                 {
                     if(httpCtx.responseText != '-1')
                     {
-                        $scope.secondTaskSelected.predecessors.push($scope.taskSelected);
-                        $scope.taskSelected.successors.push($scope.secondTaskSelected);
+                        second.predecessors.push(first);
+                        first.successors.push(second);
                     }
                 }
             }
@@ -1098,6 +1101,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
         }
         else
         {
+			var selected = $scope.taskSelected;
             $scope.opts = 
             {
                 backdrop : true,
@@ -1116,8 +1120,8 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
             modalInstance.result.then(
                 function(pred) //ok
                 {
-                    $scope.taskSelected.predecessors.push(pred);
-                    pred.successors.push($scope.taskSelected);
+                    selected.predecessors.push(pred);
+                    pred.successors.push(selected);
                 },
                 function() //cancel
                 {
