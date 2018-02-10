@@ -263,3 +263,171 @@ myApp.controller("SuccessorModal", function($scope, $uibModalInstance, tasks, ta
 		$uibModalInstance.dismiss();
 	};
 });
+
+myApp.controller("ChildModal", function($scope, $uibModalInstance, tasks, task)
+{
+	$scope.task = task;
+	$scope.fullTasks     = [];
+	$scope.currentTaskID = 0;
+
+	//Test if the task we are looking in has an order (predecessor / successor) relationship with the desired task
+	$scope.orderSuccessor = function(currentTask, comparison)
+	{
+		if(currentTask == comparison)
+			return true;
+
+		for(var i = 0; i < currentTask.successors.length; i++)
+			if($scope.orderSuccessor(currentTask.successors[i], comparison))
+				return true;
+		return false;
+	};
+
+	$scope.orderPredecessor = function(currentTask, comparison)
+	{
+		if(currentTask == comparison)
+			return true;
+
+		for(var i = 0; i < currentTask.predecessors.length; i++)
+			if($scope.orderPredecessor(currentTask.predecessors[i], comparison))
+				return true;
+		return false;
+	};
+
+	$scope.orderRelationShip = function(currentTask, comparison)
+	{
+		if(($scope.orderSuccessor(currentTask, comparison) || $scope.orderPredecessor(currentTask, comparison)) && currentTask != comparison)
+			return true;
+
+		return false;
+	};
+
+	//Test if the task are in the same hierarchy
+	$scope.hierarchyMother = function(currentTask)
+	{
+		if(currentTask == task)
+			return true;
+
+		var origin = currentTask;
+		var mother = currentTask.mother;
+		while(mother != null)
+		{
+			for(var i = 0; i < mother.children.length; i++)
+				if(mother.children[i] != origin && $scope.hierarchyChildren(mother.children[i]))
+					return true;
+
+			if($scope.hierarchyMother(mother))
+				return true;
+			origin = mother;
+			mother = mother.mother;
+		}
+		return false;
+	};
+
+	$scope.hierarchyChildren = function(currentTask)
+	{
+		if(currentTask == task)
+			return true;
+		for(var i = 0; i < currentTask.children.length; i++)
+			if($scope.hierarchyChildren(currentTask.children[i]))
+				return true;
+		return false;
+	};
+	$scope.hierarchyRelationship = function(currentTask)
+	{
+		if($scope.hierarchyMother(currentTask) || $scope.hierarchyChildren(currentTask))
+			return true;
+
+		return false;
+	};
+
+	$scope.datePredecessor = function(currentTask, origin)
+	{
+		var mother = currentTask;
+
+		while(mother != null)
+		{
+			for(var i = 0; i < origin.predecessors.length; i++)
+			{
+				if(origin.predecessors[i].endDate.getTime() < currentTask.startDate.getTime() || 
+					$scope.datePredecessor(mother, task.predecessors[i]))
+					return false;
+			}
+			mother = mother.mother;
+		}
+		return true;
+	};
+
+	$scope.addToTask = function(currentTask)
+	{
+		var valid = true;
+
+		if(currentTask == task || !(currentTask instanceof(Task)))
+			return;
+
+		else if($scope.hierarchyRelationship(currentTask))
+		{
+			if(currentTask.mother != task.mother)
+				valid = false;
+		}
+		
+		else if(currentTask.mother != null)
+			return;
+
+		var mother = task;
+		while(mother != null)
+		{
+			if($scope.orderRelationShip(currentTask, mother))
+				return;
+			mother = mother.mother;
+		}
+
+		if(valid && $scope.datePredecessor(currentTask, task))
+			$scope.fullTasks.push(currentTask);
+
+		for(var i=0; i < currentTask.children.length; i++)
+			$scope.addToTask(currentTask.children[i]);
+	};
+
+	for(var i=0; i < tasks.length; i++)
+		$scope.addToTask(tasks[i]);
+
+	$scope.currentTaskTxt = function()
+	{
+		if($scope.fullTasks.length == 0)
+			return "";
+		return $scope.fullTasks[$scope.currentTaskID].name;
+	};
+
+	$scope.clickTask = function(id)
+	{
+		$scope.currentTaskID = id;
+	};
+
+	$scope.ok = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			//Check for errors
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					$uibModalInstance.close();
+				}
+				else
+				{
+					$uibModalInstance.dismiss();
+				}
+			}
+		}
+		httpCtx.open('GET', "/AJAX/childTask.php?projectID="+projectID+"&requestID=0&idChild=" + $scope.fullTasks[$scope.currentTaskID].id + "&idMother=" + $scope.task.id, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	};
+
+	$scope.cancel = function()
+	{
+		$uibModalInstance.dismiss();
+	};
+});

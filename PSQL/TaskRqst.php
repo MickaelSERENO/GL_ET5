@@ -428,6 +428,263 @@
 			return false;
 		}
 
+		public function constructorTaskTree($idProject)
+		{
+			$tasks       = array();
+			$resultTasks = $this->getTasks($idProject);
+
+			//Add some properties needed
+			for($i = 0; $i < count($resultTasks->tasks); $i++)
+			{
+				$resultTasks->tasks[$i]->{"children"}     = array();
+				$resultTasks->tasks[$i]->{"predecessors"} = array();
+				$resultTasks->tasks[$i]->{"successors"}   = array();
+				$resultTasks->tasks[$i]->{"mother"}       = null;
+			}
+
+			//Fetch all mothers
+			for($i = 0; $i < count($resultTasks->tasks); $i++)
+			{
+				$isMother = true;
+				for($j = 0; $j < count($resultTasks->children); $j++)
+				{
+					if($resultTasks->children[$j]->idChild == $resultTasks->tasks[$i]->id)
+					{
+						$isMother = false;
+						break;
+					}
+				}
+
+				if($isMother)
+					array_push($tasks, $resultTasks->tasks[$i]);
+			}
+
+			//Construct children-tree
+			for($i = 0; $i < count($resultTasks->children); $i++)
+				for($j = 0; $j < count($resultTasks->tasks); $j++)
+					if($resultTasks->children[$i]->idMother == $resultTasks->tasks[$j]->id)
+						for($k = 0; $k < count($resultTasks->tasks); $k++)
+							if($resultTasks->tasks[$k]->id == $resultTasks->children[$i]->idChild)
+							{
+								array_push($resultTasks->tasks[$j]->children, $resultTasks->tasks[$k]);
+								$resultTasks->tasks[$k]->mother = $resultTasks->tasks[$j]; 
+							}
+
+			//Fill the successors
+			for($i = 0; $i < count($resultTasks->successors); $i++)
+				for($j = 0; $j < count($resultTasks->tasks); $j++)
+					if($resultTasks->successors[$i][0] == $resultTasks->tasks[$j]->id)
+						for($k = 0; $k < count($resultTasks->tasks); $k++)
+							if($resultTasks->tasks[$k]->id == $resultTasks->successors[$i][1])
+							{
+								array_push($resultTasks->tasks[$j]->successors  , $resultTasks->tasks[$k]);
+								array_push($resultTasks->tasks[$k]->predecessors, $resultTasks->tasks[$j]);
+							}
+
+			return $tasks;
+		}
+
+		//Tell if the child can be child of the mother given in parameters
+		public function checkChild($idMother, $idChild)
+		{
+			//Fetch the project id
+			$scriptMother       = "SELECT idProject FROM AbstractTask WHERE id = $idMother";
+			$resultScriptMother = pg_query($this->_conn, $scriptMother);
+			$rowMother          = pg_fetch_row($resultScriptMother);
+
+			$scriptChild       = "SELECT idProject FROM AbstractTask WHERE id = $idChild";
+			$resultScriptChild = pg_query($this->_conn, $scriptChild);
+			$rowChild          = pg_fetch_row($resultScriptChild);
+
+			//Check if the two tasks exist and are part of the same project
+			if($rowMother == null || $rowChild == null || $rowMother[0] != $rowChild[0])
+			{
+				error_log("issue project id");
+				return false;
+			}
+
+			//Fetch all the task of the project in a tree form
+			$tasks       = $this->constructorTaskTree($rowMother[0]);
+
+			//Find the mother and the child here
+			$mother = null;
+			$child  = null;
+			for($i = 0; $i < count($tasks); $i++)
+			{
+				$v = $this->findTask($tasks[$i], $idMother);
+				if($v != null)
+				{
+					$mother = $v;
+					break;
+				}
+			}
+
+			for($i = 0; $i < count($tasks); $i++)
+			{
+				$v = $this->findTask($tasks[$i], $idChild);
+				if($v != null)
+				{
+					$child = $v;
+					break;
+				}
+			}
+
+			//Check if they are compatible
+			if($mother == $child)
+			{
+				error_log("mother == child");
+				return false;
+			}
+			if($this->hierarchyRelationship($child, $mother))
+			{
+				if($mother->mother != $child->mother)
+				{
+					error_log("hierarchy relationship");
+					return false;
+				}
+			}
+			else if($mother->mother != null)
+			{
+				error_log("issue mother != null");
+				return false;
+			}
+
+			$motherMother = $mother;
+			while($motherMother != null)
+			{
+				if($this->orderRelationship($child, $motherMother))
+				{
+					error_log("issue order relationship");
+					return false;
+				}
+				$motherMother = $motherMother->mother;
+			}
+
+			if($this->datePredecessor($child, $mother))
+			{
+				error_log("issue date predecessors");
+				return false;
+			}
+
+			return true;
+		}
+
+		private function findTask($mother, $id)
+		{
+			if($mother->id == $id)
+				return $mother;
+
+			for($i = 0; $i < count($mother->children); $i++)
+			{
+				$v = $this->findTask($mother->children[$i], $id);
+				if($v != null)
+					return $v;
+			}
+			return null;
+		}
+
+		private function orderSuccessors($currentTask, $comparison)
+		{
+			if($currentTask == $comparison)
+				return true;
+
+			for($i = 0; $i < count($currentTask->successors); $i++)
+				if($this->orderSuccessors($currentTask->successors[$i], $comparison))
+					return true;
+			return false;
+		}
+
+		private function orderPredecessors($currentTask, $comparison)
+		{
+			if($currentTask == $comparison)
+				return true;
+
+			for($i = 0; $i < count($currentTask->predecessors); $i++)
+				if($this->orderSuccessors($currentTask->predecessors[$i], $comparison))
+					return true;
+			return false;
+		}
+
+		private function orderRelationship($currentTask, $comparison)
+		{
+			if($this->orderSuccessors($currentTask, $comparison) || $this->orderPredecessors($currentTask, $comparison))
+				return true;
+			return false;
+		}
+
+		private function hierarchyMother($currentTask, $origin)
+		{
+			if($currentTask == $origin)
+				return true;
+
+			$oldMother = $currentTask;
+			$mother    = $currentTask->mother;
+			while($mother != null)
+			{
+				for($i = 0; $i < count($mother->children); $i++)
+					if($mother->children[$i] != $oldMother && $this->hierarchyChildren($mother->children[$i], $origin))
+						return true;
+
+				if($this->hierarchyMother($mother, $origin))
+					return true;
+				$oldMother = $mother;
+				$mother    = $mother->mother;
+			}
+
+			return false;
+		}
+
+		private function hierarchyChildren($currentTask, $origin)
+		{
+			if($currentTask == $origin)
+				return true;
+
+			for($i = 0; $i < count($currentTask->children); $i++)
+				if($this->hierarchyChildren($currentTask->children[$i], $origin))
+					return true;
+			return false;
+		}
+
+		private function hierarchyRelationship($currentTask, $origin)
+		{
+			if($this->hierarchyMother($currentTask, $origin) || $this->hierarchyChildren($currentTask, $origin))
+				return true;
+			return false;
+		}
+
+		private function datePredecessor($currentTask, $origin)
+		{
+			$mother = $currentTask;
+			while($mother != null)
+			{
+				for($i = 0; $i < count($origin->predecessors); $i++)
+				{
+					$start = DateTime::createFromFormat("Y-m-d H:i:s", $currentTask->startDate            . " 00:00:00", new DateTimeZone("UTC"));
+					$end   = DateTime::createFromFormat("Y-m-d H:i:s", $origin->predecessors[$i]->endDate . " 00:00:00", new DateTimeZone("UTC"));
+
+					if($end->getTimestamp() < $start->getTimestamp() || $this->datePredecessor($mother, $origin->predecessors[$i]))
+					{
+						error_log("end : " . $end->getTimestamp() . " start : " . $start->getTimestamp());
+					   return true;	
+					}
+				}
+
+				$mother = $mother->mother;
+			}
+			return false;
+		}
+
+		public function addChild($idMother, $idChild, $isAdmin)
+		{
+			//Delete old child hierarchy and add a new one
+			$script = "BEGIN;
+				       DELETE FROM TaskHierarchy WHERE idChild = $idChild;						 INSERT INTO TaskHierarchy VALUES ($idMother, $idChild, true);
+				       COMMIT;";
+			$resultScript = pg_query($this->_conn, $script);
+
+			//TODO Maybe send notification
+		}
+
 		public function addSuccessor($idPred, $idSucc, $isAdmin)
 		{
 			$script = "INSERT INTO TaskOrder VALUES ($idPred, $idSucc);";

@@ -222,9 +222,9 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 		child  TASK%ROWTYPE;
 	BEGIN
 		--Check if they have the same project
-		IF (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2 WHERE T1.id = New.idMother AND T2.id = New.idChild AND T1.idProject = T2.idProject AND T2.startDate >= T1.startDate) = 0 THEN
+		IF (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2 WHERE T1.id = New.idMother AND T2.id = New.idChild AND T1.idProject = T2.idProject) = 0 THEN
 
-			RAISE EXCEPTION 'The two task are not part of the same project or the start date are not compatible';
+			RAISE EXCEPTION 'The two task are not part of the same project';
 		END IF;
 		lastID := NEW.idMother;
 		i      := 0;
@@ -237,8 +237,10 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 		SELECT * INTO mother FROM Task WHERE Task.id = New.idMother;
 		SELECT * INTO child  FROM Task WHERE Task.id = New.idChild;
 
-		IF (checkOrderChildren(mother, child) = TRUE OR checkOrderChildren(child, mother) = TRUE) THEN
-			RAISE EXCEPTION 'The two task cannot have an order relationship';
+		IF (child.id IS NOT NULL AND mother.id IS NOT NULL) THEN
+			IF (checkOrderChildren(mother, child) = TRUE OR checkOrderChildren(child, mother) = TRUE) THEN
+				RAISE EXCEPTION 'The two tasks cannot have an order relationship';
+			END IF;
 		END IF;
 
 		WHILE i < 2 
@@ -248,7 +250,7 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 				RETURN New;
 			ELSE
 				--test task order relationship through mother
-				IF (SELECT COUNT(*) FROM TaskOrder WHERE (successorID = lastID AND predecessorID = New.idChild) OR (successorID = New.idChild AND predecessorID = lastID)) = 0 THEN
+				IF (SELECT COUNT(*) FROM TaskOrder WHERE (successorID = lastID AND predecessorID = New.idChild) OR (successorID = New.idChild AND predecessorID = lastID)) > 0 THEN
 					RAISE EXCEPTION 'The two task cannot have an order relationship';
 				END IF;
 				lastID := lastRow.idMother;
@@ -398,8 +400,13 @@ CREATE OR REPLACE FUNCTION afterTaskUpdate() RETURNS TRIGGER AS $$
 
 CREATE OR REPLACE FUNCTION afterTaskHierarchyUpdate() RETURNS TRIGGER AS $$
 	BEGIN
-		EXECUTE updateProjectDate((SELECT DISTINCT idProject FROM AbstractTask WHERE AbstractTask.id = New.idMother LIMIT 1));
-		RETURN New;
+		IF TG_OP = 'DELETE' THEN
+			EXECUTE updateProjectDate((SELECT DISTINCT idProject FROM AbstractTask WHERE AbstractTask.id = Old.idMother LIMIT 1));
+			RETURN OLD;
+		ELSE
+			EXECUTE updateProjectDate((SELECT DISTINCT idProject FROM AbstractTask WHERE AbstractTask.id = New.idMother LIMIT 1));
+			RETURN New;
+		END IF;
 	END
 	$$ LANGUAGE plpgsql;
 
@@ -420,6 +427,10 @@ CREATE OR REPLACE FUNCTION updateTaskDate(mother Task, out startDate DATE, out e
 		_endDate   Date;
 		_startDate Date;
 		r          int;
+		sumConsumed  int;
+		sumRemaining int;
+		sumInitialCharge int;
+		sumComputedCharge int;
 		subTask Task%ROWTYPE;
 	BEGIN
 		endDate    := mother.endDate;
@@ -438,7 +449,27 @@ CREATE OR REPLACE FUNCTION updateTaskDate(mother Task, out startDate DATE, out e
 				startDate = _startDate;
 			END IF;
 		END LOOP;
-		UPDATE Task SET endDate = updateTaskDate.endDate WHERE id = mother.id;
+		SELECT SUM(chargeConsumed), SUM(remaining), SUM(initCharge), SUM(computedCharge) INTO sumConsumed, sumRemaining, sumInitialCharge, sumComputedCharge FROM Task, TaskHierarchy WHERE idMother = mother.id AND idChild = id;
+
+
+		IF sumConsumed IS NOT NULL THEN
+			IF sumConsumed != mother.chargeConsumed OR sumRemaining != mother.remaining OR sumInitialCharge != mother.initCharge OR sumComputedCharge != mother.computedCharge THEN
+				RAISE NOTICE 'Update advancement and charge values';
+			END IF;
+			UPDATE Task 
+			SET endDate        = updateTaskDate.endDate,
+				chargeConsumed = sumConsumed,
+				remaining      = sumRemaining,
+				computedCharge = sumComputedCharge,
+				initCharge     = sumInitialCharge,
+				advancement    = 100 * sumConsumed / (computedCharge)
+			WHERE id = mother.id;
+		ELSE
+			UPDATE Task 
+			SET endDate = updateTaskDate.endDate
+			WHERE id = mother.id;
+		END IF;
+
 		UPDATE AbstractTask SET startDate = updateTaskDate.startDate WHERE id = mother.id;
 	END
 	$$ LANGUAGE plpgsql;
@@ -457,7 +488,7 @@ CREATE OR REPLACE FUNCTION checkOrderChildren(mother Task, child Task) RETURNS B
 		FOR rec in SELECT * FROM TaskHierarchy WHERE idMother = mother.id
 		LOOP
 			SELECT * INTO childComputed FROM Task WHERE id = rec.idChild;
-			IF (childComputed <> NULL) THEN
+			IF (childComputed IS NOT NULL) THEN
 				IF (checkOrderChildren(childComputed, child) = TRUE) THEN
 					RETURN TRUE;
 				END IF;
@@ -478,7 +509,7 @@ CREATE OR REPLACE FUNCTION isParentOf(mother Task, child Task) RETURNS BOOLEAN A
 		FOR rec IN SELECT * FROM TaskHierarchy WHERE idMother = mother.id
 		LOOP
 			SELECT * INTO motherComputed FROM Task WHERE id = rec.idChild;
-			IF (childComputed <> NULL) THEN
+			IF (childComputed IS NOT NULL) THEN
 				IF (isParentOf(motherComputed, child)) THEN
 					RETURN TRUE;
 				END IF;

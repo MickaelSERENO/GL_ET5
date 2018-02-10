@@ -525,6 +525,8 @@ function redraw()
 	else if(currentUnit == "week")
 		canvas.width = getNbDayProject() * dateWidth / 7.0 + 100;
 
+	canvas.height = document.getElementById('infoGantt').offsetHeight;
+
 
 	//Clear the canvas
 	canvasCtx.beginPath();
@@ -1128,6 +1130,41 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
                 });
         }
 	};
+
+	$scope.openChild = function()
+	{
+        if($scope.secondTaskSelected != null)
+        {
+        }
+        else
+        {
+			var selected = $scope.taskSelected;
+            $scope.opts = 
+            {
+                backdrop : true,
+                backdropClick : true,
+                dialogFade : false,
+                keyboard : true,
+                templateUrl : "modalChild.html",
+                controller : "ChildModal",
+                controllerAs : "$ctrl",
+                resolve : {tasks : function() {return $scope.tasks;},
+                           task  : function() {return $scope.taskSelected;}
+                          }
+            };
+
+            var modalInstance = $uibModal.open($scope.opts);
+            modalInstance.result.then(
+                function() //ok
+                {
+					$scope.updateTask();
+                },
+                function() //cancel
+                {
+                });
+        }
+	};
+
 
 
 	$scope.openTask = function(task)

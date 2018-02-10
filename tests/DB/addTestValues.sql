@@ -38,7 +38,6 @@ INSERT INTO Marker VALUES (7);
 INSERT INTO TaskHierarchy VALUES (3, 4, true);
 INSERT INTO TaskHierarchy VALUES (3, 5, true);
 INSERT INTO TaskHierarchy VALUES (3, 6, true);
-INSERT INTO TaskOrder     VALUES (1, 2);
 INSERT INTO TaskOrder     VALUES (2, 3);
 
 --Add Notifications 

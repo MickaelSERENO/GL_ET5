@@ -261,6 +261,31 @@
 							</script>
 
 							<!--Child-->
+							<script type="text/ng-template" id="modalChild.html">
+								<div class="modal-header">
+									<h3 class="modal-title">Ajouter une sous tâche</h3>
+								</div>
+								<div class="modal-body alignedDiv">
+									<ng-form name="myForm" novalidate>
+										<div>
+											Ajouter une sous-tâche : 
+										</div>
+										<div class="btn-group sortList" uib-dropdown dropdown-append-to-body>
+											<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+												{{currentTaskTxt()}}<span class="caret sortList"></span>
+											</button>
+											<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+												<li role="menuitem" ng-repeat="t in fullTasks" ng-click="clickTask($index)"><a href="">{{t.name}}</a></li>
+											</ul>
+										</div>
+									</ng-form>
+								</div>
+								<div class="modal-footer">
+									<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+									<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+								</div>
+							</script>
+
 
 							<!--Successors-->
 							<script type="text/ng-template" id="modalSuccessor.html">
@@ -336,7 +361,7 @@
 								<!-- the central part of the page -->
 								<div class="row">
 									<!-- Left part of the gantt tab containing information about tab -->
-									<div class="infoGantt col-xs-3">
+									<div id="infoGantt" class="col-xs-3">
 										<div class="row">
 											<div id="sortingDiv" class="col-xs-6">
 												Trier par :
@@ -413,7 +438,7 @@
 											<div class="actionButton" ng-click="openCollModal()">
 												<div style="background-color:yellow;width:20px;height:20px" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true"></div>
 											</div>
-											<div class="actionButton" ng-click="addSubTask()" ng-show="taskSelected != null && editionMode == true">
+											<div class="actionButton" ng-click="openChild()" ng-show="taskSelected != null && editionMode == true">
 												<div style="background-color:black;width:20px;height:20px"></div>
 											</div>
 											<div class="actionButton" ng-click="openSuccessor()" ng-show="taskSelected != null && editionMode == true">
