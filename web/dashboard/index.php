@@ -7,13 +7,10 @@ session_start();
 file_put_contents('php://stderr', 'START');
 
 //Redirect if not signed in
-/*	if(!isset($_SESSION["email"]))
-	{
+if(!isset($_SESSION["email"]))
+{
 		header('Location: /connection.php');
-}*/
-#$_SESSION["email"]	= "jean.dupont@email.com";
-$_SESSION["email"]	= "stacy.gromat@email.com";
-$_SESSION["rank"]	= 1;
+}
 $user				= $_SESSION["email"];
 $rank				= $_SESSION["rank"];
 $notifRqst			= new NotifRqst();
