@@ -136,7 +136,7 @@
 
 					<!-- Gantt tab -->
 					<uib-tab id="ganttHeader" index="$index+1" heading="Planning" deselect="deselectTab()">
-						<div ng-controller="ganttProjectCtrl" id="ganttDiv" class="whiteProject">
+						<div ng-controller="ganttProjectCtrl" id="ganttDiv" class="whiteProject" ng-click="selectTask(null, $event)">
 
 							<!-- Pop ups -->
 							<!-- Task popup -->
@@ -259,6 +259,35 @@
 									<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
 								</div>
 							</script>
+
+							<!--Child-->
+
+							<!--Successors-->
+							<script type="text/ng-template" id="modalSuccessor.html">
+								<div class="modal-header">
+									<h3 class="modal-title">Ajouter un prédécesseur</h3>
+								</div>
+								<div class="modal-body alignedDiv">
+									<ng-form name="myForm" novalidate>
+										<div>
+											Ajouter un prédécesseur : 
+										</div>
+										<div class="btn-group sortList" uib-dropdown dropdown-append-to-body>
+											<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+												{{currentTaskTxt()}}<span class="caret sortList"></span>
+											</button>
+											<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+												<li role="menuitem" ng-repeat="t in fullTasks" ng-click="clickTask($index)"><a href="">{{t.name}}</a></li>
+											</ul>
+										</div>
+									</ng-form>
+								</div>
+								<div class="modal-footer">
+									<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+									<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+								</div>
+							</script>
+
 							<!-- toolbar -->
 							<ul class="list-inline smallTopSpace">
 
@@ -350,7 +379,7 @@
 												<div class="taskNode">
 													<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>
 													<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-right" ng-show="task.canExpand()"></span>
-													<div class="taskBackground" ng-dblclick="openTask(task)">
+													<div class="taskBackground" ng-dblclick="openTask(task)" ng-click="selectTask(task, $event)">
 														{{task.name}}
 													</div>
 												</div>
@@ -371,23 +400,23 @@
 										<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 
 	<?php if($projectStatus == "STARTED") : ?>
-											<div class="actionButton" ng-click="openTaskAdv()" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
+											<div class="actionButton" ng-click="openTaskAdv()" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0 && !projectClosed()">
 												<div style="background-color:blue;width:20px;height:20px"></div>
 											</div>
 	<?php endif;?>
 
 	<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
 			  $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>
-											<div class="actionButton" ng-click="openDateModal()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
+											<div class="actionButton" ng-click="openDateModal()" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true">
 												<div style="background-color:red;width:20px;height:20px"></div>
 											</div>
-											<div class="actionButton" ng-click="openCollModal()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
-												<div style="background-color:yellow;width:20px;height:20px"></div>
+											<div class="actionButton" ng-click="openCollModal()">
+												<div style="background-color:yellow;width:20px;height:20px" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true"></div>
 											</div>
-											<div class="actionButton" ng-click="addSubTask()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
+											<div class="actionButton" ng-click="addSubTask()" ng-show="taskSelected != null && editionMode == true">
 												<div style="background-color:black;width:20px;height:20px"></div>
 											</div>
-											<div class="actionButton" ng-click="addPredecessorTask()" ng-style="{'visibility' : showActionDiv() && editionMode == true ? 'visible' : 'hidden'}">
+											<div class="actionButton" ng-click="openSuccessor()" ng-show="taskSelected != null && editionMode == true">
 												<div style="background-color:green;width:20px;height:20px"></div>
 											</div>
 	<?php endif; ?>

@@ -5,7 +5,7 @@ var currentUnit = "week";
 var dateWidth   = 60;
 var dateOffset  = 5;
 var dateYOffset = 15;
-
+var markerWidth = 15;
 
 var SELECT_TASK_COLOR = "#0858CC";
 
@@ -239,93 +239,6 @@ class AbstractTask
 		}
 		this.children = tasks;
 	}
-}
-
-class Task extends AbstractTask
-{
-	//Contructor. cpy : json object from AJAX request
-	constructor(cpy)
-	{
-		super(cpy);
-		this.advancement       = cpy.advancement;
-		this.collaboratorEmail = cpy.collaboratorEmail;
-		this.initCharge        = cpy.initCharge;
-		this.computedCharge    = cpy.computedCharge;
-		this.chargeConsumed    = cpy.chargeConsumed;
-		this.remaining         = cpy.remaining;
-	}
-
-	minDate()
-	{
-		var minDate = project.startDate;
-		for(var i=0; i < this.predecessors.length; i++)
-			if(this.predecessors[i].endDate.getTime() > minDate.getTime())
-				minDate = this.predecessors[i].endDate;
-		return minDate;
-	}
-
-
-	maxDate()
-	{
-		var maxDate = project.endDate;
-		for(var i=0; i < this.successors.length; i++)
-			if(this.successors[i].startDate.getTime() < maxDate.getTime())
-				maxDate = this.successors[i].startDate;
-		return maxDate;
-	}
-
-	//Draw the task and its children.
-	draw(fontSize, unit)
-	{
-        var task = document.getElementsByClassName('taskNode')[this.internalID];
-        if(task.style.visibility == "hidden")
-            return;
-
-		var size = this.getTaskSize(unit);
-
-		if(scope.taskSelected == this)
-		{
-			canvasCtx.fillStyle = "#00FFFF";
-			drawRoundRect(size.xOffset-5, size.yOffset-2, size.width+10, fontSize+4, dateWidth/4);
-			canvasCtx.fill();
-		}
-
-		canvasCtx.fillStyle   = "gray";
-		drawRoundRect(size.xOffset, size.yOffset+2, size.width, fontSize-4, dateWidth/4);
-		canvasCtx.fill();
-
-		canvasCtx.fillStyle   = "#00FF00";
-		drawRoundRect(size.xOffset, size.yOffset+2, size.width * this.advancement/100.0, fontSize-4, dateWidth/4);
-		canvasCtx.fill();
-
-		this.drawChildren(fontSize, unit);
-		this.drawPredecessors(fontSize, unit);
-	}
-
-	//Recursive function used to draw the children recursively
-	drawChildren(fontSize, unit)
-	{
-		if(!this.expand)
-			return 0;
-
-		for(var i = 0; i < this.children.length; i++)
-		{
-			var id         = this.internalID;
-			var parentNode = document.getElementsByClassName('taskNode')[id];
-			var size       = this.children[i].getTaskSize(unit);
-
-			//Draw the rect
-			this.children[i].draw(fontSize, unit);
-
-			//Draw the line
-			canvasCtx.beginPath();
-            canvasCtx.lineWidth = 3;
-			canvasCtx.strokeStyle = "black";
-			canvasCtx.moveTo(size.xOffset + size.width/2, parentNode.offsetTop + fontSize-2);
-			canvasCtx.lineTo(size.xOffset + size.width/2, size.yOffset+2);
-			canvasCtx.stroke();
-		}
-	}
 
 	//Draw the predecessors's arrow
 	drawPredecessors(fontSize, unit)
@@ -379,6 +292,98 @@ class Task extends AbstractTask
 
 	getTaskSize(unit)
 	{
+		return {"yOffset": 0, "xOffset": 0, "width": 0};
+	}
+}
+
+class Task extends AbstractTask
+{
+	//Contructor. cpy : json object from AJAX request
+	constructor(cpy)
+	{
+		super(cpy);
+		this.advancement       = cpy.advancement;
+		this.collaboratorEmail = cpy.collaboratorEmail;
+		this.initCharge        = cpy.initCharge;
+		this.computedCharge    = cpy.computedCharge;
+		this.chargeConsumed    = cpy.chargeConsumed;
+		this.remaining         = cpy.remaining;
+	}
+
+	minDate()
+	{
+		var minDate = project.startDate;
+		for(var i=0; i < this.predecessors.length; i++)
+			if(this.predecessors[i].endDate.getTime() > minDate.getTime())
+				minDate = this.predecessors[i].endDate;
+		return minDate;
+	}
+
+
+	maxDate()
+	{
+		var maxDate = project.endDate;
+		for(var i=0; i < this.successors.length; i++)
+			if(this.successors[i].startDate.getTime() < maxDate.getTime())
+				maxDate = this.successors[i].startDate;
+		return maxDate;
+	}
+
+	//Draw the task and its children.
+	draw(fontSize, unit)
+	{
+        var task = document.getElementsByClassName('taskNode')[this.internalID];
+        if(task.style.visibility == "hidden")
+            return;
+
+		var size = this.getTaskSize(unit);
+
+		if(scope.taskSelected == this || scope.secondTaskSelected == this)
+		{
+			canvasCtx.fillStyle = "#00FFFF";
+			drawRoundRect(size.xOffset-5, size.yOffset-2, size.width+10, fontSize+4, dateWidth/4);
+			canvasCtx.fill();
+		}
+
+		canvasCtx.fillStyle   = "gray";
+		drawRoundRect(size.xOffset, size.yOffset+2, size.width, fontSize-4, dateWidth/4);
+		canvasCtx.fill();
+
+		canvasCtx.fillStyle   = "#00FF00";
+		drawRoundRect(size.xOffset, size.yOffset+2, size.width * this.advancement/100.0, fontSize-4, dateWidth/4);
+		canvasCtx.fill();
+
+		this.drawChildren(fontSize, unit);
+		this.drawPredecessors(fontSize, unit);
+	}
+
+	//Recursive function used to draw the children recursively
+	drawChildren(fontSize, unit)
+	{
+		if(!this.expand)
+			return 0;
+
+		for(var i = 0; i < this.children.length; i++)
+		{
+			var id         = this.internalID;
+			var parentNode = document.getElementsByClassName('taskNode')[id];
+			var size       = this.children[i].getTaskSize(unit);
+
+			//Draw the rect
+			this.children[i].draw(fontSize, unit);
+
+			//Draw the line
+			canvasCtx.beginPath();
+            canvasCtx.lineWidth = 3;
+			canvasCtx.strokeStyle = "black";
+			canvasCtx.moveTo(size.xOffset + size.width/2, parentNode.offsetTop + fontSize-2);
+			canvasCtx.lineTo(size.xOffset + size.width/2, size.yOffset+2);
+			canvasCtx.stroke();
+		}
+	}
+
+	getTaskSize(unit)
+	{
 		var id       = this.internalID;
 		var taskNode = document.getElementsByClassName('taskNode')[id];
 		var yOffset  = taskNode.offsetTop; 
@@ -400,6 +405,67 @@ class Task extends AbstractTask
 			xOffset  = dateOffset + getNbDay(project.startDate, projectDate)*dateWidth/7 + 
 				       (dateWidth * getNbDay(this.startDate, project.startDate) + dateWidth/2.0)/7;
 			width    = dateWidth * (getNbDay(this.endDate, this.startDate) - 1)/7;
+		}
+
+		return {"yOffset": yOffset, "xOffset": xOffset, "width": width};
+	}
+}
+
+class Marker extends AbstractTask
+{
+	//Draw to marker
+	draw(fontSize, unit)
+	{
+        var task = document.getElementsByClassName('taskNode')[this.internalID];
+        if(task.style.visibility == "hidden")
+            return;
+
+		var size = this.getTaskSize(unit);
+		if(scope.taskSelected == this)
+		{
+			canvasCtx.fillStyle = "#00FFFF";
+			canvasCtx.beginPath();
+			canvasCtx.moveTo(size.xOffset + size.width/2.0, size.yOffset - 5);
+			canvasCtx.lineTo(size.xOffset - 5,              size.yOffset + fontSize/2.0 );
+			canvasCtx.lineTo(size.xOffset + size.width/2.0, size.yOffset + fontSize + 5);
+			canvasCtx.lineTo(size.xOffset + size.width + 5, size.yOffset + fontSize/2.0);
+			canvasCtx.lineTo(size.xOffset + size.width/2.0, size.yOffset - 5);
+			canvasCtx.fill();
+		}
+
+		canvasCtx.fillStyle   = "black";
+		canvasCtx.beginPath();
+		canvasCtx.moveTo(size.xOffset + size.width/2.0, size.yOffset);
+		canvasCtx.lineTo(size.xOffset,                  size.yOffset + fontSize/2.0);
+		canvasCtx.lineTo(size.xOffset + size.width/2.0, size.yOffset + fontSize);
+		canvasCtx.lineTo(size.xOffset + size.width,     size.yOffset + fontSize/2.0);
+		canvasCtx.lineTo(size.xOffset + size.width/2.0, size.yOffset);
+		canvasCtx.fill();
+
+		this.drawPredecessors(fontSize, unit);
+	}
+
+	getTaskSize(unit)
+	{
+		var id       = this.internalID;
+		var taskNode = document.getElementsByClassName('taskNode')[id];
+		var yOffset  = taskNode.offsetTop; 
+		var xOffset  = 0;
+		var width    = markerWidth;
+
+
+		if(unit == "day")
+		{
+			xOffset  = dateOffset + (dateWidth * getNbDay(this.startDate, project.startDate) + dateWidth/2.0) - width/2;
+		}
+
+		else if(unit == "week")
+		{
+			var projectDate = new Date(project.startDate);
+			projectDate.setDate(projectDate.getDate() - getMondayDiff(project.startDate));
+
+			xOffset  = dateOffset + getNbDay(project.startDate, projectDate)*dateWidth/7 + 
+				       (dateWidth * getNbDay(this.startDate, project.startDate) + dateWidth/2.0)/7 - width/2;
 		}
 
 		return {"yOffset": yOffset, "xOffset": xOffset, "width": width};
@@ -454,7 +520,11 @@ function redraw()
     topY = document.getElementById('taskTreeView').offsetTop;
 
 	//Change the canvas size following the dates
-	canvas.width = getNbDayProject() * dateWidth;
+	if(currentUnit == "day")
+		canvas.width = getNbDayProject() * dateWidth + 50;
+	else if(currentUnit == "week")
+		canvas.width = getNbDayProject() * dateWidth / 7.0 + 100;
+
 
 	//Clear the canvas
 	canvasCtx.beginPath();
@@ -521,24 +591,25 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	scope = $scope;
 
 	//Variables
-	$scope.currentSorting = 0;
-	$scope.asc            = true;
-	$scope.currentScale   = 1;
-	$scope.dispUnstarted  = true;
-	$scope.editionMode    = false;
-	$scope.sortTask       = ["Date", "Nom"];
-	$scope.scale          = ["Jour", "Semaine"];
+	$scope.currentSorting     = 0;
+	$scope.asc                = true;
+	$scope.currentScale       = 1;
+	$scope.dispUnstarted      = true;
+	$scope.editionMode        = false;
+	$scope.sortTask           = ["Date", "Nom"];
+	$scope.scale              = ["Jour", "Semaine"];
 
-	$scope.tasks          = [];
-	$scope.taskSelected  = null;
+	$scope.tasks              = [];
+	$scope.taskSelected       = null;
+	$scope.secondTaskSelected = null;
 
-	$scope.actionDiv      = document.getElementById('actionDiv');
+	$scope.actionDiv          = document.getElementById('actionDiv');
 
-    $scope.editionTxt     = "Mode édition";
-    $scope.unstartedTxt   = "En cours";
+	$scope.editionTxt         = "Mode édition";
+	$scope.unstartedTxt       = "En cours";
 
-	$scope.closeStatus    = 0;
-	$scope.closeTxt       = "Clôturer";
+	$scope.closeStatus        = 0;
+	$scope.closeTxt           = "Clôturer";
 
 	//Init canvas
 	canvas    = document.getElementById('ganttCanvas');
@@ -747,40 +818,66 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	};
 
 	//Function called when the canvas is clicked
-	$scope.canvasClick      = function(event)
+    $scope.onSelectTask     = function(r)
+    {
+        //Reset selecting task
+        if($scope.taskSelected != null)
+            document.getElementsByClassName('taskNode')[$scope.taskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = "transparent";
+        if($scope.secondTaskSelected != null)
+            document.getElementsByClassName('taskNode')[$scope.secondTaskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = "transparent";
+
+        $scope.taskSelected       = r;
+        $scope.secondTaskSelected = null;
+
+        if(r != null)
+        {
+            document.getElementsByClassName('taskNode')[$scope.taskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = SELECT_TASK_COLOR;
+            $scope.positionActionDiv();
+        }
+    };
+
+    $scope.selectTask = function(r, event)
+    {
+        if(event.ctrlKey)
+        {
+            if($scope.taskSelected == null)
+                $scope.onSelectTask(r);
+            else if(r != null)
+            {
+                if($scope.secondTaskSelected != null)
+                    document.getElementsByClassName('taskNode')[$scope.secondTaskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = "transparent";
+                $scope.secondTaskSelected = r;
+                document.getElementsByClassName('taskNode')[$scope.secondTaskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = SELECT_TASK_COLOR;
+            }
+        }
+
+        else
+        {
+            $scope.onSelectTask(r);
+        }
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+	$scope.canvasClick = function(event)
 	{
 		//Left click
 		if(event.button == 0)
 		{
-			//Reset selecting task
-			if($scope.taskSelected != null)
-				document.getElementsByClassName('taskNode')[$scope.taskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = "transparent";
-			$scope.taskSelected = null;
-
-			var fontSize = getFontSize();
-			for(var i = 0; i < $scope.tasks.length; i++)
-			{
-				var r = $scope.tasks[i].getTaskInMousePos(event.offsetX, event.offsetY, getFontSize(), currentUnit);
-				if(r != null)
-				{
-					$scope.taskSelected = r;
-					document.getElementsByClassName('taskNode')[$scope.taskSelected.internalID].getElementsByClassName('taskBackground')[0].style.backgroundColor = SELECT_TASK_COLOR;
-
-					//Set the position of the action div
-					var size = r.getTaskSize(currentUnit);
-					$scope.actionDiv.style.left = -$scope.actionDiv.offsetWidth/2 + size.xOffset + size.width / 2 + "px";
-					$scope.actionDiv.style.top  = -$scope.actionDiv.offsetHeight  + size.yOffset -5 + "px";
-
-					break;
-				}
-			}
+            var r = null;
+            for(var i = 0; i < $scope.tasks.length; i++)
+            {
+                r = $scope.tasks[i].getTaskInMousePos(event.offsetX, event.offsetY, getFontSize(), currentUnit);
+                if(r != null)
+                    break;
+            }
+            $scope.selectTask(r, event);
 		}
 	};
 
 	$scope.showActionDiv = function()
 	{
-					
-		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && $scope.taskSelected.children.length == 0 && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail)) && $scope.taskSelected.isShown();
+		return $scope.taskSelected != null && $scope.taskSelected instanceof(Task) && (rank == 2 || rank == 1 || (rank == 0 && email == $scope.taskSelected.collaboratorEmail)) && $scope.taskSelected.isShown();
 	};
 
 	$scope.updateTask = function()
@@ -819,7 +916,11 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 							}
 						}
 
-						var currentTask = new Task(tasks.tasks[i]);
+						var currentTask = null;
+						if(tasks.tasks[i].isMarker)
+							currentTask = new Marker(tasks.tasks[i]);
+						else
+							currentTask = new Task(tasks.tasks[i]);
 						allTasks.push(currentTask);
 
 						if(isMother)
@@ -974,6 +1075,57 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			});
 	};
 
+	$scope.openSuccessor = function()
+	{
+        if($scope.secondTaskSelected != null)
+        {
+            var httpCtx = new XMLHttpRequest();
+            httpCtx.onreadystatechange = function()
+            {
+                //Check for errors
+                if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+                {
+                    if(httpCtx.responseText != '-1')
+                    {
+                        $scope.secondTaskSelected.predecessors.push($scope.taskSelected);
+                        $scope.taskSelected.successors.push($scope.secondTaskSelected);
+                    }
+                }
+            }
+            httpCtx.open('GET', "/AJAX/predecessorTask.php?projectID="+projectID+"&requestID=0&idPred=" + $scope.taskSelected.id + "&idSucc=" + $scope.secondTaskSelected.id, true);
+            httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            httpCtx.send(null);
+        }
+        else
+        {
+            $scope.opts = 
+            {
+                backdrop : true,
+                backdropClick : true,
+                dialogFade : false,
+                keyboard : true,
+                templateUrl : "modalSuccessor.html",
+                controller : "SuccessorModal",
+                controllerAs : "$ctrl",
+                resolve : {tasks : function() {return $scope.tasks;},
+                           task  : function() {return $scope.taskSelected;}
+                          }
+            };
+
+            var modalInstance = $uibModal.open($scope.opts);
+            modalInstance.result.then(
+                function(pred) //ok
+                {
+                    $scope.taskSelected.predecessors.push(pred);
+                    pred.successors.push($scope.taskSelected);
+                },
+                function() //cancel
+                {
+                });
+        }
+	};
+
+
 	$scope.openTask = function(task)
 	{
 		if(task == null)
@@ -1008,8 +1160,20 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 		$scope.openTask($scope.taskSelected);
 	}
 
+	$scope.positionActionDiv = function()
+	{
+		//Set the position of the action div
+		if($scope.taskSelected != null)
+		{
+			var size = $scope.taskSelected.getTaskSize(currentUnit);
+			$scope.actionDiv.style.left = -$scope.actionDiv.offsetWidth/2 + size.xOffset + size.width / 2 + "px";
+			$scope.actionDiv.style.top  = -$scope.actionDiv.offsetHeight  + size.yOffset -5 + "px";
+		}
+	}
+
 	$interval(function()
 	{
+		$scope.positionActionDiv();
 		redraw();
 	}, 100);
 });

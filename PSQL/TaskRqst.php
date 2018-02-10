@@ -168,7 +168,7 @@
 
 				else
 				{
-					array_push($fullTasks, $makers[$markerID]);
+					array_push($fullTasks, $markers[$markerID]);
 					$markerID = $markerID + 1;
 				}
 			}
@@ -379,6 +379,61 @@
 			//Send Notif
 
 			return true;
+		}
+
+		//Check if we can make the $idTaskPred and $idTaskSucc in an order relationship
+		public function checkSuccessor($idTaskPred, $idTaskSucc)
+		{
+			//Check date and project id
+			$script = "(SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Marker
+						WHERE T1.id = $idTaskPred AND T2.id = $idTaskSucc AND T1.idProject = T2.idProject AND
+						T1.startDate <= T2.startDate AND T1.id = Marker.id);";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			if($row[0] == 0)
+			{
+				$script = "(SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Task
+							WHERE T1.id = $idTaskPred AND T2.id = $idTaskSucc AND T1.idProject = T2.idProject AND
+							Task.endDate <= T2.startDate AND T1.id = Task.id);";
+				$resultScript = pg_query($this->_conn, $script);
+				$row          = pg_fetch_row($resultScript);
+				if($row[0] == 0)
+				{
+					return false;
+				}
+			}
+
+			//Check if $idTaskPred is mother of $idTaskSucc or the opposite
+			if($this->isMotherOf($idTaskPred, $idTaskSucc) || $this->isMotherOf($idTaskSucc, $idTaskPred))
+			   return false;	
+
+			return true;
+		}
+
+		//Tell of $idMother if mother of $idChild (even through hierarchy)
+		public function isMotherOf($idMother, $idChild)
+		{
+			$script       = "SELECT COUNT(*) FROM TaskHierarchy WHERE idMother = $idMother AND idChild = $idChild;";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			if($row[0] == 1)
+				return true;
+
+			$script = "SELECT idChild FROM TaskHierarchy WHERE idMother = $idMother;";
+			$resultScript = pg_query($this->_conn, $script);
+			while($row = pg_fetch_row($resultScript))
+				if($this->isMotherOf($row[0], $idChild))
+					return true;
+
+			return false;
+		}
+
+		public function addSuccessor($idPred, $idSucc, $isAdmin)
+		{
+			$script = "INSERT INTO TaskOrder VALUES ($idPred, $idSucc);";
+			$resultScript = pg_query($this->_conn, $script);
+
+			//TODO Maybe send notification
 		}
 	}
 ?>

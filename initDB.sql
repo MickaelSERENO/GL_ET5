@@ -217,20 +217,37 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 		i int;
 		lastID int;
 		lastRow TaskHierarchy%ROWTYPE;
+
+		mother TASK%ROWTYPE;
+		child  TASK%ROWTYPE;
 	BEGIN
 		--Check if they have the same project
 		IF (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2 WHERE T1.id = New.idMother AND T2.id = New.idChild AND T1.idProject = T2.idProject AND T2.startDate >= T1.startDate) = 0 THEN
+
 			RAISE EXCEPTION 'The two task are not part of the same project or the start date are not compatible';
 		END IF;
 		lastID := NEW.idMother;
 		i      := 0;
+
+		IF (New.idMother = New.idChild) THEN
+			RAISE EXCEPTION 'The task % cannot be a child and a mother', New.idMother;
+		END IF;
+
+		--Test task order relationship through children
+		SELECT * INTO mother FROM Task WHERE Task.id = New.idMother;
+		SELECT * INTO child  FROM Task WHERE Task.id = New.idChild;
+
+		IF (checkOrderChildren(mother, child) = TRUE OR checkOrderChildren(child, mother) = TRUE) THEN
+			RAISE EXCEPTION 'The two task cannot have an order relationship';
+		END IF;
+
 		WHILE i < 2 
 		LOOP	
 			SELECT * INTO lastRow FROM TaskHierarchy WHERE idChild = lastID;
 			IF (SELECT COUNT(*) FROM TaskHierarchy WHERE idChild = lastID) = 0 THEN
 				RETURN New;
 			ELSE
-				--test task order relationship
+				--test task order relationship through mother
 				IF (SELECT COUNT(*) FROM TaskOrder WHERE (successorID = lastID AND predecessorID = New.idChild) OR (successorID = New.idChild AND predecessorID = lastID)) = 0 THEN
 					RAISE EXCEPTION 'The two task cannot have an order relationship';
 				END IF;
@@ -314,15 +331,30 @@ CREATE OR REPLACE FUNCTION checkTask() RETURNS TRIGGER AS $triggerTask$
 	$triggerTask$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION checkTaskOrder() RETURNS TRIGGER AS $triggerTaskOrder$ 
+	DECLARE
+		child  Task%ROWTYPE;
+		mother Task%ROWTYPE;
 	BEGIN
-		IF (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Marker
-		   	WHERE T1.id = New.predecessorID AND T2.id = New.successorID AND T1.idProject = T2.idProject AND
-		    T1.startDate <= T2.startDate AND T1.id = Marker.id) = 0  AND
-		   (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Task
-		   	WHERE T1.id = New.predecessorID AND T2.id = New.successorID AND T1.idProject = T2.idProject AND
-			Task.endDate <= T2.startDate AND T1.id = Task.id) = 0 THEN
-			RAISE EXCEPTION 'The tasks must be in the same project and the date must be correct';
+		--Check if the task has the correct date and are in the same project
+		IF (New.predecessorID = New.successorID) THEN
+			RAISE EXCEPTION 'The task % cannot be a successor and a predecessor', New.predecessorID;
 		END IF;
+		IF (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Marker
+				WHERE T1.id = New.predecessorID AND T2.id = New.successorID AND T1.idProject = T2.idProject AND
+				T1.startDate <= T2.startDate AND T1.id = Marker.id) = 0  AND
+			   (SELECT COUNT(*) FROM AbstractTask AS T1, AbstractTask AS T2, Task
+				WHERE T1.id = New.predecessorID AND T2.id = New.successorID AND T1.idProject = T2.idProject AND
+				Task.endDate <= T2.startDate AND T1.id = Task.id) = 0 THEN
+				RAISE EXCEPTION 'The tasks must be in the same project and the date must be correct';
+		END IF;
+
+		--Check hierarchy relationship
+		SELECT * INTO child  FROM Task WHERE child.id = NEW.predecessorID;
+		SELECT * INTO mother FROM Task WHERE child.id = NEW.successorID;
+		IF (isParentOf(mother, child) OR isParentOf(child, mother)) THEN	
+			RAISE EXCEPTION 'An hierarchy relationship exists between % and %', New.predecessorID, New.successorID;
+		END IF;
+
 		RETURN New;
 	END
 	$triggerTaskOrder$ LANGUAGE plpgsql;
@@ -410,6 +442,52 @@ CREATE OR REPLACE FUNCTION updateTaskDate(mother Task, out startDate DATE, out e
 		UPDATE AbstractTask SET startDate = updateTaskDate.startDate WHERE id = mother.id;
 	END
 	$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION checkOrderChildren(mother Task, child Task) RETURNS BOOLEAN AS $$
+	DECLARE
+		rec            TaskHierarchy%ROWTYPE;
+		childComputed  Task%ROWTYPE;
+	BEGIN
+		IF (SELECT COUNT(*) FROM TaskOrder WHERE (successorID = mother.id AND predecessorID = child.id) OR
+				                                 (successorID = child.id  AND predecessorID = mother.id)) > 0 THEN
+			RAISE NOTICE 'The task id % and id % has an order relationship', mother.id, child.id;
+			RETURN TRUE;
+		END IF;
+
+		FOR rec in SELECT * FROM TaskHierarchy WHERE idMother = mother.id
+		LOOP
+			SELECT * INTO childComputed FROM Task WHERE id = rec.idChild;
+			IF (childComputed <> NULL) THEN
+				IF (checkOrderChildren(childComputed, child) = TRUE) THEN
+					RETURN TRUE;
+				END IF;
+			END IF;
+		END LOOP;
+		RETURN FALSE;
+	END
+	$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION isParentOf(mother Task, child Task) RETURNS BOOLEAN AS $$
+	DECLARE
+		rec            TaskHierarchy%ROWTYPE;
+		motherComputed TaskHierarchy%ROWTYPE;
+	BEGIN
+		IF (SELECT COUNT(*) FROM TaskHierarchy WHERE idMother = mother.id AND idChild = child.id) > 0 THEN
+			RETURN TRUE;
+		END IF;
+		FOR rec IN SELECT * FROM TaskHierarchy WHERE idMother = mother.id
+		LOOP
+			SELECT * INTO motherComputed FROM Task WHERE id = rec.idChild;
+			IF (childComputed <> NULL) THEN
+				IF (isParentOf(motherComputed, child)) THEN
+					RETURN TRUE;
+				END IF;
+			END IF;
+		END LOOP;
+		RETURN FALSE;
+	END
+	$$ LANGUAGE plpgsql;
+
 	
 --Check the status of an EndUser
 CREATE TRIGGER triggerEndUser BEFORE UPDATE

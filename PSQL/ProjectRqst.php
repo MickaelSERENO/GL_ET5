@@ -66,10 +66,7 @@
 
 			$resultScript = pg_query($this->_conn, $script);
 			$row          = pg_fetch_row($resultScript);
-
-			if($row == null)
-				return false;
-			return true;
+			return $row[0] == '1';
 		}
 
 		public function isManager($email, $id)
@@ -79,9 +76,7 @@
 			$resultScript = pg_query($this->_conn, $script);
 			$row          = pg_fetch_row($resultScript);
 
-			if($row == null)
-				return false;
-			return true;
+			return $row[0] == '1';
 		}
 
 		public function getProjectStatus($id)

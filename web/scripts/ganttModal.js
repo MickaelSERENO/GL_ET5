@@ -190,3 +190,76 @@ myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 		$uibModalInstance.dismiss();
 	};
 });
+
+myApp.controller("SuccessorModal", function($scope, $uibModalInstance, tasks, task)
+{
+	$scope.task = task;
+	$scope.fullTasks     = [];
+	$scope.currentTaskID = 0;
+
+	$scope.orderRelationShip = function(currentTask)
+	{
+		if(currentTask == task)
+			return true;
+		for(var i = 0; i < currentTask.children.length; i++)
+			if($scope.orderRelationShip(currentTask.children[i]))
+				return true;
+		return false;
+	};
+
+	$scope.addToTask = function(currentTask)
+	{
+		if(currentTask == task)
+			return;
+
+		//The date must be correct
+		if(currentTask.endDate.getTime() <= task.startDate.getTime() && !$scope.orderRelationShip(currentTask))
+			$scope.fullTasks.push(currentTask);
+
+		for(var i=0; i < currentTask.children.length; i++)
+			$scope.addToTask(currentTask.children[i]);
+	};
+
+	for(var i=0; i < tasks.length; i++)
+		$scope.addToTask(tasks[i]);
+
+	$scope.currentTaskTxt = function()
+	{
+		if($scope.fullTasks.length == 0)
+			return "";
+		return $scope.fullTasks[$scope.currentTaskID].name;
+	};
+
+	$scope.clickTask = function(id)
+	{
+		$scope.currentTaskID = id;
+	};
+
+	$scope.ok = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			//Check for errors
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					$uibModalInstance.close($scope.fullTasks[$scope.currentTaskID]);
+				}
+				else
+				{
+					$uibModalInstance.dismiss();
+				}
+			}
+		}
+		httpCtx.open('GET', "/AJAX/predecessorTask.php?projectID="+projectID+"&requestID=0&idPred=" + $scope.fullTasks[$scope.currentTaskID].id + "&idSucc=" + $scope.task.id, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	};
+
+	$scope.cancel = function()
+	{
+		$uibModalInstance.dismiss();
+	};
+});
