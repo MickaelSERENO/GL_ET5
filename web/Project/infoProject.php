@@ -23,7 +23,6 @@
 	$projectStatus = $projectRqst->getProjectStatus($_GET['projectID']);
 	
 	$projectInfo = $projectRqst->getInfoProject($_GET['projectID']);
-	$blankSpace = " ";
 ?>
 <!DOCTYPE html>
 <html>
@@ -41,7 +40,7 @@
 		<script type="text/javascript" src="/scripts/bower_components/angular-sanitize/angular-sanitize.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-		<script type="text/javascript" src="/scripts/setup.js"></script>
+		
 		<script type="text/javascript" src="/scripts/globalProject.js"></script>
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
@@ -54,9 +53,10 @@
 	</head>
 
 	<body ng-app="myApp">
-		<div id="topBanner">
-			<p>PoPS2017</p>
-		</div>
+		<header class="headerConnected">
+			<?php include('../Header/Header.php'); ?>
+		</header>
+		
 		<div id="centralPart">
 			<div ng-controller="globalProjectCtrl" id="ganttBody">
 				<uib-tabset active="activeTab">
@@ -107,7 +107,7 @@
 													<div> Description : </div>
 												</div>
 											</div>
-											<div class="row smallTopSpace">
+											<div class="row smallTopSpace smallBottomSpace">
 												<div class="col-md-12">
 													<div> &nbsp; &nbsp; &nbsp; <?= $projectInfo->description ?> </div>
 												</div>
