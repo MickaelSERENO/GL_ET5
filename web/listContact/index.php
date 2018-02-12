@@ -1,3 +1,15 @@
+<?php
+session_start();
+
+$_SESSION["email"] = 'jean.dupont@email.com';
+
+if(!isset($_SESSION["email"]))
+{
+    header('Location: /connection.php');
+}
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,30 +25,12 @@
     <link rel="stylesheet" type="text/css" href="/CSS/style.css">
 </head>
 
-<body ng-app="myApp">
+<body ng-app="myApp" ng-init="category='contact';">
 <div ng-controller="listControler">
     <div id="topBanner">
         <p>PoPS2017  -  {{loggerInfo.contactemail}}</p>
     </div>
     <div id="centralPart">
-        <div class="alignElem">
-            <nav role="navigation" class="navbar navbar-default">
-                <div>
-                    <ul class="nav navbar-nav">
-                        <li ng-click="selectCategory('project')"
-                            ng-style=" category =='project' ? {'background-color':'#D3FFAE','font-size':'16px','font-weight':'bold'}:{}">
-                            <a href=""> Projet </a></li>
-                        <li ng-click="selectCategory('task')"
-                            ng-style=" category =='task' ? {'background-color':'#D3FFAE','font-size':'16px','font-weight':'bold'}:{}">
-                            <a href=""> Tache </a></li>
-                        <li ng-click="selectCategory('contact')"
-                            ng-style=" category =='contact' ? {'background-color':'#D3FFAE','font-size':'16px','font-weight':'bold'}:{}">
-                            <a href=""> Contact </a></li>
-                    </ul>
-                </div>
-            </nav>
-            <div ng-view></div>
-        </div>
         <div style="margin: 10px">
             <div style="margin: 10px 10px">
                 <label>
@@ -116,90 +110,11 @@
                         <label> Filters </label>
                     </div>
                     <hr style="margin: 0px">
-                    <div ng-show="category=='project'" style="font-size: 10px;">
-                        <div ng-show="isCollaborator">
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    Status </label>
-                                <label ng-repeat="status in projectStatus">
-                                    <input type="checkbox"  checklist-model="user.projectStatus" checklist-value="status" ng-click="goFilter()">
-                                    {{status}}
-                                </label>
-                            </div>
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    Terminé depuis </label>
-                                <select ng-model="user.projectFinishedFor" ng-change="goFilter()">
-                                    <option></option>
-                                    <option ng-repeat="x in projectFinishedFor">{{x}}</option>
-                                </select>
-                                <label> mois</label>
-                            </div>
-                        </div>
-                        <div ng-show="isManager">
-                            <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                Responsable </label>
-                            <label>
-                                <input type="checkbox" ng-model="user.myprojects" ng-click="goFilter()">
-                                Mes projets
-                            </label>
-                        </div>
-                    </div>
-                    <div ng-show="category=='task'" style="font-size: 10px;">
-                        <div ng-show="isCollaborator">
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    Status </label>
-                                <label ng-repeat="status in taskStatus">
-                                    <input type="checkbox"  checklist-model="user.taskStatus" checklist-value="status" ng-click="goFilter()">
-                                    {{status}}
-                                </label>
-                            </div>
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    &nbsp; </label>
-                                <label>
-                                    <input type="checkbox" ng-model="user.taskFinishedProjectInTime" ng-click="goFilter()">
-                                    terminées dans projets en cours
-                                </label>
-                            </div>
-
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    &nbsp; </label>
-                                <label>
-                                    terminées dans projet terminé depuis </label>
-                                <br />
-                                <select ng-model="user.taskProjectFinishedFor" ng-change="goFilter()">
-                                    <option></option>
-                                    <option ng-repeat="x in taskProjectFinishedFor">{{x}}</option>
-                                </select>
-                                <label> mois</label>
-                            </div>
-
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    &nbsp; </label>
-                                <label>
-                                    <input type="checkbox" ng-model="user.myTasks" ng-click="goFilter()">
-                                    mes tâches
-                                </label>
-                            </div>
-                        </div>
-                        <div ng-show="isManager">
-                            <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                &nbsp; </label>
-                            <label>
-                                <input type="checkbox" ng-model="user.taskInMyProjects" ng-click="goFilter()">
-                                lié à un de mes projets
-                            </label>
-                        </div>
-                    </div>
                     <div ng-show="category=='contact'" style="font-size: 10px;">
                         <div ng-show="isCollaborator">
                             <div>
                                 <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                   Contact status </label>
+                                    Contact status </label>
                                 <label ng-repeat="status in contactActive">
                                     <input type="checkbox"  checklist-model="user.contactActive" checklist-value="status" ng-click="goFilter()">
                                     {{status}}
@@ -207,7 +122,7 @@
                             </div>
                             <div>
                                 <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                     Comme un collaborator </label>
+                                    Comme un collaborator </label>
                                 <label>
                                     <input type="checkbox" ng-model="user.contactHasProjects" ng-click="goFilter()">
                                     liés à un projet en cours

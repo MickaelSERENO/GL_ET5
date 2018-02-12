@@ -69,11 +69,9 @@ var categories = {
         },
         showFields: [
             "status",
-            "projectenddate",
-            // ,
-            // "name",
-            // "collaborator",
-            // "startdate",
+            "name",
+            "collaborator",
+            "startdate",
             "enddate"
         ],
         allSearchFields : [
@@ -145,7 +143,6 @@ myApp.controller("listControler", function ($scope, $http,$filter) {
         });
 
     // get all data refering to the category
-    self.category = 'task'; // by default
     self.dataListAll = new Array();
     self.dataList = new Array();
     self.selectCategory = function (c) {
@@ -219,7 +216,6 @@ myApp.controller("listControler", function ($scope, $http,$filter) {
 
 
     // filters
-
     self.showFilters = false;
     self.goFilter = function () {
         self.arrangeList();
