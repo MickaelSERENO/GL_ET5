@@ -462,7 +462,7 @@ CREATE OR REPLACE FUNCTION updateTaskDate(mother Task, out startDate DATE, out e
 				remaining      = sumRemaining,
 				computedCharge = sumComputedCharge,
 				initCharge     = sumInitialCharge,
-				advancement    = 100 * sumConsumed / (computedCharge)
+				advancement    = 100 * sumConsumed / (sumComputedCharge)
 			WHERE id = mother.id;
 		ELSE
 			UPDATE Task 

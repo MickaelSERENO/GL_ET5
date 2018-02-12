@@ -4,7 +4,7 @@
 
 	session_start();
 
-	if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
+	if(!isset($_GET['projectID']) || !canAccessProject($_GET['projectID']))
 	{
 		http_response_code(403);
 		die('Forbidden Access');

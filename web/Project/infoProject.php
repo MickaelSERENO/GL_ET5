@@ -12,7 +12,7 @@
 		return;
 	}
 
-	else if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
+	else if(!isset($_GET['projectID']) || !canAccessProject($_GET['projectID']))
 	{
 		http_response_code(403);
 		die('Forbidden Access');
@@ -316,7 +316,7 @@
 							<!-- toolbar -->
 							<ul class="list-inline smallTopSpace">
 
-	<?php if($rank == 1 || $rank == 2) : ?>
+	<?php if(canModifyProject($_GET['projectID'])) : ?>
 								<li>
 									<button class="btn btn-primary" ng-click="closeProject()">
 										{{closeTxt}}
@@ -339,8 +339,7 @@
 										Serrer
 									</button>
 								</li>
-	<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) && 
-			  $projectStatus != 'CLOSED_INVISIBLE' && $projectStatus != 'CLOSED_VISIBLE') : ?>
+	<?php if(canModifyProject($_GET['projectID']) && $projectStatus != 'CLOSED_INVISIBLE') : ?>
 								<li ng-hide="projectClosed()">
 									<button class="btn btn-primary" ng-click="onEditionClick()">
 										{{editionTxt}}
@@ -422,6 +421,7 @@
 									<div id="gantt" class="col-xs-9">
 										<canvas id="ganttCanvas" width=1600 height=800 ng-dblclick="openCanvasTaskModal($event)" ng-click="canvasClick($event)">
 										</canvas>
+	<?php if(canModifyProject($_GET['projectID'])) : ?>
 										<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 
 	<?php if($projectStatus == "STARTED") : ?>
@@ -446,6 +446,7 @@
 											</div>
 	<?php endif; ?>
 										</div>
+	<?php endif; ?>
 									</div>
 								</div>
 							</div>
