@@ -14,7 +14,7 @@ INSERT INTO Contact VALUES ('Karine', 'Legro', 'karine.legros@woodcorp.com');
 INSERT INTO ClientContact VALUES ('karine.legros@woodcorp.com', 'contact@woodcorp.com', '0627202562');
 
 --Add a Project
-INSERT INTO Project(managerEmail, contactEmail, name, description, startDate, endDate, status) VALUES ('administrator@email.com', 'karine.legros@woodcorp.com', 'Logiciel d''inventaire', 'Création d''un logiciel d''inventaire pour Woodcorp pour mieux gérer son matériel', '2017-12-27', '2018-12-27', 'STARTED');
+INSERT INTO Project(managerEmail, contactEmail, name, description, startDate, endDate, status) VALUES ('stacy.gromat@email.com', 'karine.legros@woodcorp.com', 'Logiciel d''inventaire', 'Création d''un logiciel d''inventaire pour Woodcorp pour mieux gérer son matériel', '2017-12-27', '2018-12-27', 'STARTED');
 INSERT INTO ProjectCollaborator VALUES(1, 'jean.dupont@email.com');
 
 --Add Tasks
