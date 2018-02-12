@@ -54,7 +54,7 @@
 
 	<body ng-app="myApp">
 		<header class="headerConnected">
-			<?php include('../Header/Header.php'); ?>
+			<?php include('../Header/header.php'); ?>
 		</header>
 		
 		<div id="centralPart">
