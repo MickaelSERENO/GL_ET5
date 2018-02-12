@@ -58,6 +58,23 @@
 	padding-right:5px;
 }
 
+.whiteProject
+{
+	background-color: white;
+	border-radius: 8px;
+	padding-top: 1em;
+	padding-bottom: 1em;
+	padding-left: 1em;
+	padding-right: 1em;
+	
+	margin-top: 1em;
+	margin-left: auto;
+	margin-right: auto;
+	width: 95%;
+	font-size: 100%;
+	color: black;
+}
+
 #ganttBody > div > .nav-tabs > li
 {
 	width: 50%;
