@@ -747,5 +747,22 @@
 			}
 			return $tasks;
 		}
+
+		public function addTask($idProject, $name, $collEmail, $initCharge, $mother, $startDate, $endDate, $description, $predecessors, $children)
+		{
+			$script = "INSERT INTO AbstractTask (idProject, name, description, startDate) VALUES ($idProject, '$name', '$description', '$startDate')
+					   RETURNING id;";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			$id           = $row[0];
+
+            $script = "INSERT INTO Task VALUES ($id, '$endDate', $initCharge, $initCharge, 0, 0, 0, '$collaboratorEmail', 'NOT_STARTED');";
+            foreach($predecessors as $pred)
+                $script = $script . "INSERT INTO TaskOrder VALUES($pred, $id);";
+
+            foreach($children as $child)
+                $script = $script . "INSERT TaskHierarchy VALUES($id, $child, TRUE);";
+			$resultScript = pg_query($this->_conn, $script);
+		};
 	}
 ?>

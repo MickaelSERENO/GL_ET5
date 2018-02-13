@@ -1,3 +1,101 @@
+myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls, tasks)
+{
+	$scope.projectID = projectID;
+	$scope.project   = project;
+
+	$scope.dateFormat  = "dd/MM/yyyy";
+	$scope.dateOptions = 
+		{
+			formatYear: 'yy',
+			maxDate: project.endDate,
+			minDate: project.startDate,
+			startingDay: 1
+		};
+
+	$scope.startDate   = new Date();
+	$scope.endDate     = new Date();
+
+
+	$scope.popupStartDate = {opened : false};
+	$scope.popupEndDate   = {opened : false};
+
+	$scope.name         = "";
+	$scope.description  = "";
+
+	$scope.initCharge   = 0;
+	$scope.currentCol   = 0;
+
+	$scope.fullTasks    = [{name : "\"Vide\"", id:"NULL"}];
+	$scope.taskMother   = [{name : "\"Vide\"", id:"NULL"}].concat(tasks);
+	$scope.predecessors = [];
+	$scope.mother       = 0;
+	$scope.children     = [];
+
+	$scope.collaborators = [new EndUser({name : "\"Vide\"", surname : "", email : ""})].concat(colls);
+	$scope.currentCol    = 0;
+
+	$scope.openStartDate = function()
+	{
+		$scope.popupStartDate.opened = true;
+	};
+
+	$scope.openEndDate = function()
+	{
+		$scope.popupEndDate.opened = true;
+	};
+
+	$scope.clickCollaborators = function(i)
+	{
+		$scope.currentCol = i;
+	};
+
+	$scope.clickMother = function(i)
+	{
+		$scope.mother = i;
+	};
+
+	$scope.clickPredecessor = function(i)
+	{
+		if(i != 0)
+			$scope.predecessors.push(i);
+	};
+	
+	$scope.delPredecessor = function(i)
+	{
+		$scope.predecessors.splice(i, 1);
+	};
+
+	$scope.delChild = function(i)
+	{
+		$scope.children.splice(i, 1);
+	};
+
+	$scope.clickChildren = function(i)
+	{
+		if(i != 0)
+			$scope.children.push(i);
+	};
+
+	$scope.ok        = function()
+	{
+	};
+
+	$scope.cancel    = function()
+	{
+	};
+
+	$scope.addTask = function(task)
+	{
+		$scope.fullTasks.push(task);
+		for(var i =0; i < task.children.length; i++)
+			$scope.addTask(task.children[i]);
+	};
+
+	for(var i =0; i < tasks.length; i++)
+		$scope.addTask(tasks[i]);
+
+});
+
 myApp.controller("CollaboratorModal", function($scope, $uibModalInstance, colls, project, task)
 {
 	$scope.collaborators      = [new EndUser({name : "\"Vide\"", surname : "", email : ""})].concat(colls);
