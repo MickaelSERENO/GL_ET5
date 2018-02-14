@@ -5,7 +5,7 @@
 
 	session_start();
 
-	if(!isset($_POST['projectID']) || !canModifyProject($_POST['projectID']))
+	if(!isset($_GET['projectID']) || !canModifyProject($_GET['projectID']))
 	{
 		http_response_code(403);
 		die('Forbidden Access');
@@ -15,12 +15,32 @@
 	if($_GET['requestID'] == 0)
 	{
 		$taskRqst     = new TaskRqst();
-		$predecessors = json_decode($_POST['predecessors']);
-		$children     = json_decode($_POST['children']);
+		$predecessors = json_decode($_GET['predecessors']);
 
-		if($taskRqst->canAddTask($_POST['idProject'], $_POST['collEmail'], $_POST['initCharge'], $_POST['mother'], $_POST['startDate'], $_POST['endDate'], $predecessors, $children))
+		if($_GET['isMarker'] == 0)
 		{
-			$taskRqst->addTask($_POST['idProject'], $_POST['name'], $_POST['collEmail'], $_POST['initCharge'], $_POST['mother'], $_POST['startDate'], $_POST['endDate'], $_POST['description'], $predecessors, $children);
+			$children     = json_decode($_GET['children']);
+
+			if($taskRqst->canAddTask($_GET['projectID'], $_GET['collEmail'], $_GET['initCharge'], $_GET['mother'], (int)($_GET['startDate']), (int)($_GET['endDate']), $predecessors, $children))
+			{
+				$taskRqst->addTask($_GET['projectID'], $_GET['name'], $_GET['collEmail'], $_GET['initCharge'], $_GET['mother'], (int)($_GET['startDate']), (int)($_GET['endDate']), $_GET['description'], $predecessors, $children);
+				echo '1';
+			}
+			else
+				echo '-1';
+			return;
+		}
+		else
+		{
+			if($taskRqst->canAddMarker($_GET['projectID'], (int)($_GET['startDate']), $predecessors))
+			{
+				$taskRqst->addMarker($_GET['projectID'], $_GET['name'], (int)($_GET['startDate']), $_GET['description'], $predecessors);
+				echo '1';
+			}
+			echo '-1';
+			return;
 		}
 	}
+	 echo '-1';
+	return;
 ?>

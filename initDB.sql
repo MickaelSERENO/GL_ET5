@@ -10,7 +10,7 @@ CREATE SCHEMA public;
 
 CREATE OR REPLACE FUNCTION checkTaskDate(in INTEGER, in DATE) RETURNS BOOLEAN AS $$
 	BEGIN
-		RETURN (SELECT COUNT(id) FROM AbstractTask WHERE id = $1 AND startDate < $2) > 0;
+		RETURN (SELECT COUNT(id) FROM AbstractTask WHERE id = $1 AND startDate <= $2) > 0;
 	END
 	$$ LANGUAGE plpgsql;
 

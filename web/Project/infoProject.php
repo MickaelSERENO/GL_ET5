@@ -148,15 +148,22 @@
 								<div class="modal-body">
 									<div class="container-fluid">
 										<div class="row">
-											Projet :
-											{{project.name}}
+											<div class="col-md-12">
+												Projet :
+												{{project.name}}
+											</div>
 										</div>
 										<div class="row smallTopSpace">
-											Nom : 
-											<input type="text" ng-model="name"></input>
+											<div class="col-md-6">
+												Nom : 
+												<input type="text" ng-model="name"></input>
+											</div>
+											<div class="col-md-6">
+												Jalon : <input type="checkbox" ng-model="isMarker"></input>
+											</div>
 										</div>
 
-										<div class="row smallTopSpace">
+										<div class="row smallTopSpace" ng-show="!isMarker">
 											Collaborateur : 
 											<div class="btn-group" uib-dropdown dropdown-append-to-body>
 												<button type="button" class="btn btn-primary" uib-dropdown-toggle>
@@ -179,7 +186,7 @@
 												</p>
 											</div>
 
-											<div class="col-md-4">
+											<div class="col-md-4" ng-show="!isMarker">
 												Fin :
 												<p class="input-group">
 													<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
@@ -189,14 +196,14 @@
 												</p>
 											</div>
 
-											<div class="col-md-4">
+											<div class="col-md-4" ng-show="!isMarker">
 												Charge initiale : <br/>
 												<input class="numberInput" type="number" ng-model="initCharge"></input>
 											</div>
 										</div>
 
-										<div class="row smallTopSpace">
-											<div class="col-md-10">
+										<div class="row smallTopSpace" ng-show="!isMarker">
+											<div class="col-md-12">
 												Tâche parente : 
 												<div class="btn-group" uib-dropdown dropdown-append-to-body>
 													<button type="button" class="btn btn-primary" uib-dropdown-toggle>
@@ -218,7 +225,7 @@
 											</div>
 										</div>
 
-										<div class="row smallTopSpace">
+										<div class="row smallTopSpace" ng-show="!isMarker">
 											<div class="col-md-12">
 												Sous-tâches : 
 
@@ -251,7 +258,7 @@
 												<ul class="list-inline listSpaceRight">
 													<li ng-repeat="t in predecessors track by $index">
 														<div class="closeWrapper">
-														<div>{{fullTasks[t].name}}</div>
+														<div>{{fullTasksPred[t].name}}</div>
 															<span class="close" ng-click="delPredecessor($index)"></span>
 														</div>
 													</li>
@@ -261,7 +268,7 @@
 																{{fullTasks[0].name}}<span class="caret sortList"></span>
 															</button>
 															<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-																<li role="menuitem" ng-repeat="t in fullTasks" ng-click="clickPredecessor($index)"><a href="">{{t.name}}</a></li>
+																<li role="menuitem" ng-repeat="t in fullTasksPred" ng-click="clickPredecessor($index)"><a href="">{{t.name}}</a></li>
 															</ul>
 														</div>
 													</li>
@@ -271,6 +278,7 @@
 									</div>
 								</div>
 								<div class="modal-footer">
+									<div    class="row errorMsg" ng-show="showMsg"><div class="col-md-12">{{errorMsg}}</div></div>
 									<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
 									<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
 								</div>

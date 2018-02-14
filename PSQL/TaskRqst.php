@@ -153,7 +153,7 @@
 
                 else
                 {
-                    array_push($fullTasks, $makers[$markerID]);
+                    array_push($fullTasks, $markers[$markerID]);
                     $markerID = $markerID + 1;
                 }
             }
@@ -748,6 +748,31 @@
 			return $tasks;
 		}
 
+		public function canAddMarker($idProject, $startDate, $predecessors)
+		{
+			return true;
+		}
+
+		public function addMarker($idProject, $name, $startDate, $description, $predecessors)
+		{
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$script = "INSERT INTO AbstractTask (idProject, name, description, startDate) VALUES ($idProject, '$name', '$description', '$startFormat')
+					   RETURNING id;";
+			error_log($script);
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			$id           = $row[0];
+
+            $script = "INSERT INTO Marker VALUES ($id);";
+            foreach($predecessors as $pred)
+                $script = $script . "INSERT INTO TaskOrder VALUES($pred, $id);";
+			$resultScript = pg_query($this->_conn, $script);
+			error_log($script);
+		}
+
 		public function canAddTask($idProject, $collEmail, $initCharge, $mother, $startDate, $endDate, $predecessors, $children)
 		{
 			return true;
@@ -755,13 +780,23 @@
 
 		public function addTask($idProject, $name, $collEmail, $initCharge, $mother, $startDate, $endDate, $description, $predecessors, $children)
 		{
-			$script = "INSERT INTO AbstractTask (idProject, name, description, startDate) VALUES ($idProject, '$name', '$description', '$startDate')
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$endTime     = new DateTime();
+			$endTime->setTimestamp($endDate);
+			$endFormat   = $endTime->format("Y-m-d");
+
+			$script = "INSERT INTO AbstractTask (idProject, name, description, startDate) VALUES ($idProject, '$name', '$description', '$startFormat')
 					   RETURNING id;";
 			$resultScript = pg_query($this->_conn, $script);
 			$row          = pg_fetch_row($resultScript);
 			$id           = $row[0];
 
-            $script = "INSERT INTO Task VALUES ($id, '$endDate', $initCharge, $initCharge, 0, 0, 0, '$collaboratorEmail', 'NOT_STARTED');";
+			$collEmail    = ($collEmail == 'NULL') ? 'NULL' : "'$collEmail'";
+
+            $script = "INSERT INTO Task VALUES ($id, '$endFormat', $initCharge, $initCharge, $initCharge, 0, 0, $collEmail, 'NOT_STARTED');";
             foreach($predecessors as $pred)
                 $script = $script . "INSERT INTO TaskOrder VALUES($pred, $id);";
 
