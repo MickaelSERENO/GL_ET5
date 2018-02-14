@@ -748,6 +748,11 @@
 			return $tasks;
 		}
 
+		public function canAddTask($idProject, $collEmail, $initCharge, $mother, $startDate, $endDate, $predecessors, $children)
+		{
+			return true;
+		}
+
 		public function addTask($idProject, $name, $collEmail, $initCharge, $mother, $startDate, $endDate, $description, $predecessors, $children)
 		{
 			$script = "INSERT INTO AbstractTask (idProject, name, description, startDate) VALUES ($idProject, '$name', '$description', '$startDate')
@@ -763,6 +768,6 @@
             foreach($children as $child)
                 $script = $script . "INSERT TaskHierarchy VALUES($id, $child, TRUE);";
 			$resultScript = pg_query($this->_conn, $script);
-		};
+		}
 	}
 ?>
