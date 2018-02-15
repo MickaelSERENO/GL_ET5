@@ -1,10 +1,9 @@
 #topBanner
 {
-	top:0em;
-	left:0em;
-	position:absolute;
 	background-color: #328F32;
 	width: 100%;
+	padding-top: 1em;
+	
 }
 
 #topBanner p
@@ -15,15 +14,47 @@
 	color: white;
 }
 
+#menu
+{
+	background-color: #8cff66;
+	width: 100%;
+	padding-top: 1em;
+	padding-bottom: 1em;
+	margin-top: -1em;
+}
+
+.centerItem
+{
+	margin-left: auto;
+	margin-right:auto;
+}
+
+.menuItem
+{
+	background-color: white;
+	border-radius: 8px;
+	padding-top: 1em;
+	padding-bottom: 1em;
+	padding-left: 2em;
+	padding-right: 2em;
+	margin-left:2em;
+	margin-right:2em;
+	font-weight: bold;
+	font-size: 125%;
+	color: black;
+}
+
+
+
 #centralPart
 {
 	background-color: #48A8FF;
 	border-radius: 8px;
-	padding-bottom:5em;
-	width:100%;
-	margin-top: 2em;
-	overflow-y: auto; 
-	margin-left:auto;
+	padding-bottom:1em;
+	width: 98%;
+	overflow-y: auto;
+	margin-top: 1em;
+	margin-left: auto;
 	margin-right:auto;
 	color: white;
 }

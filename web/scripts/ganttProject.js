@@ -26,6 +26,7 @@ class Project
 	//Constructor. cpy : the json result from AJAX request
 	constructor(cpy)
 	{
+		this.name      = cpy.name;
 		this.id        = cpy.id;
 		this.startDate = new Date(cpy.startDate);
 		this.endDate   = new Date(cpy.endDate);
@@ -971,6 +972,59 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.updateTask();
 
 	//Modals
+	
+	//Add a new task
+	$scope.openAddTask = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					//Parse the json result (fetch collaborators)
+					var jsonColls = JSON.parse(httpCtx.responseText);
+					var colls     = new Array();
+					for(var i=0; i < jsonColls.length; i++)
+					{
+						var endUser = new EndUser(jsonColls[i]);
+						colls.push(endUser);
+					}
+
+					$scope.opts = 
+					{
+						backdrop : true,
+						backdropClick : true,
+						dialogFade : false,
+						keyboard : true,
+						templateUrl : "modalAdd.html",
+						controller : "AddModal",
+						controllerAs : "$ctrl",
+						resolve : {project    : function() {return project;},
+								   tasks      : function() {return $scope.tasks;},
+								   colls      : function() {return colls;}
+								  }
+					};
+
+					var selected = $scope.taskSelected;
+					var modalInstance = $uibModal.open($scope.opts);
+					modalInstance.result.then(
+						function() //ok
+						{
+							$scope.updateTask();
+						}, 
+						function() //cancel
+						{
+						});
+				}
+			}
+		}
+		httpCtx.open('GET', "/AJAX/projectColls.php?projectID="+projectID+"&requestID=0", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	};
+
 	//open task advancement
 	$scope.openTaskAdv = function()
 	{

@@ -12,7 +12,7 @@
 		return;
 	}
 
-	else if(!isset($_GET['projectID']) || !canAccessProjet($_GET['projectID']))
+	else if(!isset($_GET['projectID']) || !canAccessProject($_GET['projectID']))
 	{
 		http_response_code(403);
 		die('Forbidden Access');
@@ -23,7 +23,6 @@
 	$projectStatus = $projectRqst->getProjectStatus($_GET['projectID']);
 	
 	$projectInfo = $projectRqst->getInfoProject($_GET['projectID']);
-	$blankSpace = " ";
 ?>
 <!DOCTYPE html>
 <html>
@@ -41,7 +40,7 @@
 		<script type="text/javascript" src="/scripts/bower_components/angular-sanitize/angular-sanitize.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-		<script type="text/javascript" src="/scripts/setup.js"></script>
+		
 		<script type="text/javascript" src="/scripts/globalProject.js"></script>
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
@@ -54,9 +53,10 @@
 	</head>
 
 	<body ng-app="myApp">
-		<div id="topBanner">
-			<p>PoPS2017</p>
-		</div>
+		<header class="headerConnected">
+			<?php include('../Header/header.php'); ?>
+		</header>
+		
 		<div id="centralPart">
 			<div ng-controller="globalProjectCtrl" id="ganttBody">
 				<uib-tabset active="activeTab">
@@ -107,7 +107,7 @@
 													<div> Description : </div>
 												</div>
 											</div>
-											<div class="row smallTopSpace">
+											<div class="row smallTopSpace smallBottomSpace">
 												<div class="col-md-12">
 													<div> &nbsp; &nbsp; &nbsp; <?= $projectInfo->description ?> </div>
 												</div>
@@ -139,6 +139,151 @@
 						<div ng-controller="ganttProjectCtrl" id="ganttDiv" class="whiteProject">
 
 							<!-- Pop ups -->
+
+							<!-- Add task popup-->
+							<script type="text/ng-template" id="modalAdd.html">
+								<div class="modal-header">
+									<h3 class="modal-title">Ajouter une tâche</h3>
+								</div>
+								<div class="modal-body">
+									<div class="container-fluid">
+										<div class="row">
+											<div class="col-md-12">
+												Projet :
+												{{project.name}}
+											</div>
+										</div>
+										<div class="row smallTopSpace">
+											<div class="col-md-6">
+												Nom : 
+												<input type="text" ng-model="name"></input>
+											</div>
+											<div class="col-md-6">
+												Jalon : <input type="checkbox" ng-model="isMarker"></input>
+											</div>
+										</div>
+
+										<div class="row smallTopSpace" ng-show="!isMarker">
+											Collaborateur : 
+											<div class="btn-group" uib-dropdown dropdown-append-to-body>
+												<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+													{{collaborators[currentCol].name}}<span class="caret sortList"></span>
+												</button>
+												<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+													<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}} {{c.surname}}</a></li>
+												</ul>
+											</div>
+										</div>
+
+										<div class="row smallTopSpace">
+											<div class="col-md-4">
+												Début :
+												<p class="input-group">
+													<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="startDate" is-open="popupStartDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+													<span class="input-group-btn">
+														<button type="button" class="btn btn-default" ng-click="openStartDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+													</span>
+												</p>
+											</div>
+
+											<div class="col-md-4" ng-show="!isMarker">
+												Fin :
+												<p class="input-group">
+													<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+													<span class="input-group-btn">
+														<button type="button" class="btn btn-default" ng-click="openEndDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+													</span>
+												</p>
+											</div>
+
+											<div class="col-md-4" ng-show="!isMarker">
+												Charge initiale : <br/>
+												<input class="numberInput" type="number" ng-model="initCharge"></input>
+											</div>
+										</div>
+
+										<div class="row smallTopSpace" ng-show="!isMarker">
+											<div class="col-md-12">
+												Tâche parente : 
+												<div class="btn-group" uib-dropdown dropdown-append-to-body>
+													<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+														{{fullTasks[mother].name}}<span class="caret sortList"></span>
+													</button>
+													<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+														<li role="menuitem" ng-repeat="t in fullTasks" ng-click="clickMother($index)"><a href="">{{t.name}}</a></li>
+													</ul>
+												</div>
+											</div>
+										</div>
+
+										<div class="row smallTopSpace">
+											<div class="col-md-12">
+												<div>
+													Description : 
+												</div>
+												<textarea style="width:100%;" ng-model="description" rows="5"></textarea>
+											</div>
+										</div>
+
+										<div class="row smallTopSpace" ng-show="!isMarker">
+											<div class="col-md-12">
+												Sous-tâches : 
+
+												<ul class="list-inline listSpaceRight">
+													<li ng-repeat="t in children track by $index">
+														<div class="closeWrapper">
+														<div>{{taskMother[t].name}}</div>
+															<span class="close" ng-click="delChild($index)"></span>
+														</div>
+													</li>
+
+													<li>
+														<div class="btn-group" uib-dropdown dropdown-append-to-body>
+															<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+																{{taskMother[0].name}}<span class="caret sortList"></span>
+															</button>
+															<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+																<li role="menuitem" ng-repeat="t in taskMother" ng-click="clickChildren($index)"><a href="">{{t.name}}</a></li>
+															</ul>
+														</div>
+													</li>
+												</ul>
+											</div>
+										</div>
+
+										<div class="row smallTopSpace">
+											<div class="col-md-12">
+												Prédécesseurs : 
+
+												<ul class="list-inline listSpaceRight">
+													<li ng-repeat="t in predecessors track by $index">
+														<div class="closeWrapper">
+														<div>{{fullTasksPred[t].name}}</div>
+															<span class="close" ng-click="delPredecessor($index)"></span>
+														</div>
+													</li>
+													<li>
+														<div class="btn-group" uib-dropdown dropdown-append-to-body>
+															<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+																{{fullTasks[0].name}}<span class="caret sortList"></span>
+															</button>
+															<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+																<li role="menuitem" ng-repeat="t in fullTasksPred" ng-click="clickPredecessor($index)"><a href="">{{t.name}}</a></li>
+															</ul>
+														</div>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<div    class="row errorMsg" ng-show="showMsg"><div class="col-md-12">{{errorMsg}}</div></div>
+									<button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+									<button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+								</div>
+							</script>
+
 							<!-- Task popup -->
 							<?php include('../../Libraries/TaskPopUp.php'); ?>
 
@@ -151,7 +296,7 @@
 									<div class="container-fluid">
 										<div class="row">
 											<div class="col-xs-4">Charge consommée : </div>
-											<input class="col-xs-2" type="number" id="advInput" ng-model="task.chargeConsumed"/>
+											<input class="numberInput col-xs-2" type="number" ng-model="task.chargeConsumed"/>
 											<div class="col-xs-2"> jour(s) </div>
 										</div>
 
@@ -199,7 +344,7 @@
 
 										<div class="row topSpace" ng-show="canShowDate()">
 											<div class="col-xs-6">Date d'effet : </div>
-											<p class="input-group class-xs-4">
+											<p class="input-group col-xs-4">
 												<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="middleDate" is-open="popupDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
 												<span class="input-group-btn">
 													<button type="button" class="btn btn-default" ng-click="openDate()"><i class="glyphicon glyphicon-calendar"></i></button>
@@ -313,10 +458,14 @@
 								</div>
 							</script>
 
+							<script>
+								
+							</script>
+
 							<!-- toolbar -->
 							<ul class="list-inline smallTopSpace">
 
-	<?php if($rank == 1 || $rank == 2) : ?>
+	<?php if(canModifyProject($_GET['projectID'])) : ?>
 								<li>
 									<button class="btn btn-primary" ng-click="closeProject()">
 										{{closeTxt}}
@@ -339,15 +488,14 @@
 										Serrer
 									</button>
 								</li>
-	<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) && 
-			  $projectStatus != 'CLOSED_INVISIBLE' && $projectStatus != 'CLOSED_VISIBLE') : ?>
+	<?php if(canModifyProject($_GET['projectID']) && $projectStatus != 'CLOSED_INVISIBLE') : ?>
 								<li ng-hide="projectClosed()">
 									<button class="btn btn-primary" ng-click="onEditionClick()">
 										{{editionTxt}}
 									</button>
 								</li>
 	<?php endif; ?>	
-	<?php if($rank == 1 || $rank == 2) : ?>
+	<?php if(($rank == 1 || $rank == 2) && canModifyProject($_GET['projectID'])) : ?>
 								<li>
 									<button class="btn btn-primary" ng-click="onNotificationClick()">
 										Notifications
@@ -396,9 +544,11 @@
 
 										<!-- The list of tasks"-->
 										<div id="taskTreeView">
-											<button type="button" class="btn btn-primary alignedDiv smallBottomSpace">
+	<?php if(($rank == 1 || $rank == 2) && canModifyProject($_GET['projectID'])) : ?>
+											<button type="button" class="btn btn-primary alignedDiv smallBottomSpace" ng-click="openAddTask()">
 												Add
 											</button>
+	<?php endif;?>
 
 											<script type="text/ng-template" id="treeViewTasks.html">
 												<div class="taskNode">
@@ -422,6 +572,7 @@
 									<div id="gantt" class="col-xs-9">
 										<canvas id="ganttCanvas" width=1600 height=800 ng-dblclick="openCanvasTaskModal($event)" ng-click="canvasClick($event)">
 										</canvas>
+	<?php if(canModifyProject($_GET['projectID'])) : ?>
 										<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 
 	<?php if($projectStatus == "STARTED") : ?>
@@ -446,6 +597,7 @@
 											</div>
 	<?php endif; ?>
 										</div>
+	<?php endif; ?>
 									</div>
 								</div>
 							</div>

@@ -153,7 +153,7 @@
 
                 else
                 {
-                    array_push($fullTasks, $makers[$markerID]);
+                    array_push($fullTasks, $markers[$markerID]);
                     $markerID = $markerID + 1;
                 }
             }
@@ -746,6 +746,86 @@
 				array_push($tasks, $task);
 			}
 			return $tasks;
+		}
+
+		public function containDuplicate($arr, $index = 1)
+		{
+			for($i = $index; $i < count($arr); $i++)
+				for($j = $i+1; $j <  count($arr); $j++)
+					if($arr[$i] == $arr[$j])
+						return true;
+			return false;
+		}
+
+		public function canAddMarker($idProject, $startDate, $predecessors)
+		{
+			$startTime    = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat  = $startTime->format("Y-m-d");
+
+			//Test the date
+			$script       = "SELECT COUNT(*) WHERE startDate <= '$startDate' AND endDate >= '$startDate';";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+
+			if($row[0] == 0)
+				return false;
+
+			if($this->containDuplicate
+		}
+
+		public function addMarker($idProject, $name, $startDate, $description, $predecessors, $isAdmin)
+		{
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$script = "INSERT INTO AbstractTask (idProject, name, description, startDate) VALUES ($idProject, '$name', '$description', '$startFormat')
+					   RETURNING id;";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			$id           = $row[0];
+
+            $script = "INSERT INTO Marker VALUES ($id);";
+            foreach($predecessors as $pred)
+                $script = $script . "INSERT INTO TaskOrder VALUES($pred, $id);";
+			$resultScript = pg_query($this->_conn, $script);
+
+			//TODO Maybe send a notification
+		}
+
+		public function canAddTask($idProject, $collEmail, $initCharge, $mother, $startDate, $endDate, $predecessors, $children)
+		{
+			return true;
+		}
+
+		public function addTask($idProject, $name, $collEmail, $initCharge, $mother, $startDate, $endDate, $description, $predecessors, $children, $isAdmin)
+		{
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$endTime     = new DateTime();
+			$endTime->setTimestamp($endDate);
+			$endFormat   = $endTime->format("Y-m-d");
+
+			$script = "INSERT INTO AbstractTask (idProject, name, description, startDate) VALUES ($idProject, '$name', '$description', '$startFormat')
+					   RETURNING id;";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			$id           = $row[0];
+
+			$collEmail    = ($collEmail == 'NULL') ? 'NULL' : "'$collEmail'";
+
+            $script = "INSERT INTO Task VALUES ($id, '$endFormat', $initCharge, $initCharge, $initCharge, 0, 0, $collEmail, 'NOT_STARTED');";
+            foreach($predecessors as $pred)
+                $script = $script . "INSERT INTO TaskOrder VALUES($pred, $id);";
+
+            foreach($children as $child)
+                $script = $script . "INSERT TaskHierarchy VALUES($id, $child, TRUE);";
+			$resultScript = pg_query($this->_conn, $script);
+
+			//TODO Maybe send a notification
 		}
 	}
 ?>

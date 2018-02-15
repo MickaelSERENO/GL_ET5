@@ -10,7 +10,7 @@ CREATE SCHEMA public;
 
 CREATE OR REPLACE FUNCTION checkTaskDate(in INTEGER, in DATE) RETURNS BOOLEAN AS $$
 	BEGIN
-		RETURN (SELECT COUNT(id) FROM AbstractTask WHERE id = $1 AND startDate < $2) > 0;
+		RETURN (SELECT COUNT(id) FROM AbstractTask WHERE id = $1 AND startDate <= $2) > 0;
 	END
 	$$ LANGUAGE plpgsql;
 
@@ -462,7 +462,7 @@ CREATE OR REPLACE FUNCTION updateTaskDate(mother Task, out startDate DATE, out e
 				remaining      = sumRemaining,
 				computedCharge = sumComputedCharge,
 				initCharge     = sumInitialCharge,
-				advancement    = 100 * sumConsumed / (computedCharge)
+				advancement    = 100 * sumConsumed / (sumComputedCharge)
 			WHERE id = mother.id;
 		ELSE
 			UPDATE Task 
