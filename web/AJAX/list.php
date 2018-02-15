@@ -1,8 +1,8 @@
 <?php
 
-	require_once __DIR__.'/../../PSQL/CommonRqst.php';
+	require_once __DIR__.'/../../PSQL/ListRqst.php';
 
-	$rsqt = new CommonRqst();
+	$rsqt = new ListRqst();
 
 	if(isset($_GET['function'])){
 		switch($_GET['function']) {

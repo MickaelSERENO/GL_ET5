@@ -43,13 +43,13 @@ if(!isset($_SESSION["email"]))
             <table class="table tableList" style="table-layout: fixed;">
                 <thead>
                 <tr>
-                    <th ng-repeat="field in showFields" >
+                    <th ng-repeat="field in showFields" ng-style="(field == orderColumn || '-'+field == orderColumn)?{'background': 'linear-gradient(to right, #00c1fc, #eaeaea)'}:{}">
                         <label ng-click="order(field)" style="cursor:pointer">{{fileds[field].label}}</label>
                     </th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="row in dataList | orderBy: orderColumn track by $index" ng-show="inPage($index)">
+                <tr ng-repeat="row in dataList | orderBy: orderColumn track by $index" ng-show="inPage($index)" ng-click="goToDetail(row[detailField])">
                     <td ng-repeat="field in showFields">
                         {{row[field]}}
                     </td>

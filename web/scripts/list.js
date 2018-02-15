@@ -21,10 +21,9 @@ var categories = {
         },
         showFields: [
             "status",
+            "name",
             "managername",
             "clientname",
-            "name",
-            "description",
             "startdate",
             "enddate"
         ],
@@ -44,7 +43,9 @@ var categories = {
             "startdate",
             "enddate"
         ],
-        requestDB: "getProjects"
+        requestDB: "getProjects",
+        detailField: "id",
+        detailPage:"/Project/infoProject.php?projectID="
     },
     task: {
         label: "Tâche",
@@ -115,32 +116,8 @@ var categories = {
     }
 };
 
-myApp.controller("listControler", function ($scope, $http,$filter) {
+myApp.controller("listControler", function ($scope, $http,$filter, $window) {
     var self = $scope;
-
-    self.loggerInfo = {};
-    self.isCollaborator = false;
-    self.isManager = false;
-    $http.get("/AJAX/list.php", {params: {function: 'getLoggerInfo'}})
-        .then(function (response) {
-            self.loggerInfo = response.data;
-            // console.log(self.loggerInfo);
-            $http.get("/AJAX/list.php", {params: {function: 'getCollaborator'}})
-                .then(function (response) {
-                    var allCollaborators = response.data;
-                    self.isCollaborator = allCollaborators.some(function (v) {
-                        return v.useremail == self.loggerInfo.contactemail;
-                    });
-
-                });
-            $http.get("/AJAX/list.php", {params: {function: 'getManager'}})
-                .then(function (response) {
-                    var allManagers = response.data;
-                    self.isManager = allManagers.some(function (v) {
-                        return v.useremail == self.loggerInfo.contactemail;
-                    });
-                });
-        });
 
     // get all data refering to the category
     self.dataListAll = new Array();
@@ -152,6 +129,7 @@ myApp.controller("listControler", function ($scope, $http,$filter) {
         self.showFields = categories[self.category].showFields;
         self.allSearchFields = categories[self.category].allSearchFields;
         self.userSearchFields = categories[self.category].userSearchFields;
+        self.detailField = categories[self.category].detailField;
 
         self.orderColumn = '';
 
@@ -225,7 +203,8 @@ myApp.controller("listControler", function ($scope, $http,$filter) {
             case "project":
                 return self.satisfyFilterProjectStatus(row.status)
                     && self.satisfyFilterProjectFinishedFor(row.enddate)
-                    && self.satisfyFilterMyprojects(row.manageremail);
+                    && self.satisfyFilterMyprojects(row.manageremail)
+                    && self.satisfyFilterMyprojectsCollaborateur(row.collaborateurs);
                 break;
             case "task":
                 return self.satisfyFilterTaskStatus(row.status)
@@ -274,6 +253,14 @@ myApp.controller("listControler", function ($scope, $http,$filter) {
             return self.loggerInfo.contactemail == manageremail;
         else
             return true;
+    };
+
+    //      filter projects: mes projects for collaborateurs
+    self.satisfyFilterMyprojectsCollaborateur = function (collaborateurs) {
+        if(self.isCollaborator){
+            return collaborateurs.includes(self.loggerInfo.contactemail)
+        }
+        return true;
     };
 
     //      filter tasks: status
@@ -406,7 +393,37 @@ myApp.controller("listControler", function ($scope, $http,$filter) {
         }
     };
 
-    self.selectCategory(self.category);
+
+
+    self.goToDetail = function (id) {
+        if(categories[self.category].detailPage)
+            $window.location.href = categories[self.category].detailPage + id;
+    };
+
+
+    self.loggerInfo = {};
+    self.isCollaborator = false;
+    self.isManager = false;
+    $http.get("/AJAX/list.php", {params: {function: 'getLoggerInfo'}})
+        .then(function (response) {
+            self.loggerInfo = response.data;
+            $http.get("/AJAX/list.php", {params: {function: 'getCollaborator'}})
+                .then(function (response) {
+                    var allCollaborators = response.data;
+                    self.isCollaborator = allCollaborators.some(function (v) {
+                        return v.useremail == self.loggerInfo.contactemail;
+                    });
+                    self.selectCategory(self.category);
+                });
+            $http.get("/AJAX/list.php", {params: {function: 'getManager'}})
+                .then(function (response) {
+                    var allManagers = response.data;
+                    self.isManager = allManagers.some(function (v) {
+                        return v.useremail == self.loggerInfo.contactemail;
+                    });
+                    self.selectCategory(self.category);
+                });
+        });
 
 
 });

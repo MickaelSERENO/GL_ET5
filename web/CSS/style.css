@@ -146,10 +146,14 @@
 }
 .tableList tr:nth-child(even) td{
 	background-color: rgba(30, 198, 250, 0.16);
+	cursor:pointer
+
 }
 
 .tableList tbody tr:hover {
 	background: rgba(30, 198, 250, 0.39);
+	cursor:pointer
+
 }
 
 .tableList thead tr th:hover {
