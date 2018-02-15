@@ -107,6 +107,14 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 
 	$scope.canAdd = function()
 	{
+		var startTime = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000; 
+		for(var i = 0; i < $scope.predecessors.length; i++)
+			if($scope.fullTasksPred[$task.predecessors].endDate.getTime() > startTime)
+			{
+				$scope.errorMsg = "Un des prédécesseur se termine avant la date de début de la tâche";
+				return false;
+			}
+
 		if($scope.isMarker)
 		{
 			if($scope.startDate == undefined)
@@ -115,7 +123,6 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 				return false;
 			}
 
-			var startTime = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000; 
 			if(startTime < project.startDate.getTime())
 			{
 				$scope.errorMsg = "Les dates ne correspondent pas";
