@@ -771,7 +771,7 @@
 			if($row[0] == 0)
 				return false;
 
-			if($this->containDuplicate
+			//if($this->containDuplicate
 		}
 
 		public function addMarker($idProject, $name, $startDate, $description, $predecessors, $isAdmin)

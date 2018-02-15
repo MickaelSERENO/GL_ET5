@@ -26,16 +26,16 @@
 					<div class="container-fluid">
 						<div class="row">
 							<div class="col-md-3">
-								<li class="list-inline-item"> <div class="menuItem"> Tableu de bord </div></li>
+								<li class="list-inline-item"> <div class="menuItem"> <a href="../dashboard"> Tableau de bord </a></div></li>
 							</div>
 							<div class="col-md-3">
-								<li class="list-inline-item"> <div class="menuItem"> Projets </div></li>
+								<li class="list-inline-item"> <div class="menuItem"> <a href="../listProject"> Projets </a></div></li>
 							</div>
 							<div class="col-md-3">
 								<li class="list-inline-item"> <div class="menuItem"> Clients </div></li>
 							</div>
 							<div class="col-md-3">
-								<li class="list-inline-item"> <div class="menuItem"> Contacts </div></li>
+								<li class="list-inline-item"> <div class="menuItem"> <a href="../listContact"> Contacts </a> </div></li>
 							</div>
 						</div>
 					</div>
