@@ -27,7 +27,6 @@
     <script type="text/javascript" src="/scripts/bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
     <script type="text/javascript" src="/scripts/connection.js"></script>
-    <script type="text/javascript" src="/scripts/setup.js"></script>
     <link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/CSS/style.css">
     <script type="text/javascript" src="/scripts/notif.js"></script>	
@@ -38,10 +37,11 @@
   </head>
 
   <body ng-app="myApp">
+	<header class="headerConnected">
+			<?php include('../Header/header.php'); ?>
+	</header>
+	
     <div ng-controller="formController">
-      <div id="topBanner">
-        <p>PoPS2017</p>
-      </div>
       <div id="centralPart">
         <div class="alignElem">
 <div class="container-fluid">
