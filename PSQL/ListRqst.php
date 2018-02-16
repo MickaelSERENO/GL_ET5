@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__.'/../PSQL/PSQLDatabase.php';
 
-class CommonRqst extends PSQLDatabase
+class ListRqst extends PSQLDatabase
 {
 
     public function getLoggerInfo()
@@ -34,13 +34,28 @@ class CommonRqst extends PSQLDatabase
 
         $resultScript = pg_query($this->_conn, $script);
         $result = array();
-        while($row = pg_fetch_assoc($resultScript))
+        while($row = pg_fetch_object($resultScript))
         {
+            $row->collaborateurs = $this->getProjectCollaborateurs($row->id);
             array_push($result, $row);
         }
         return $result;
     }
 
+    public function getProjectCollaborateurs($projectId)
+    {
+        $script = "SELECT t.collaboratoremail
+                  FROM abstracttask abt, task t 
+                  WHERE abt.idproject = '$projectId' and t.id = abt.id;";
+
+        $resultScript = pg_query($this->_conn, $script);
+        $result = array();
+        while($row = pg_fetch_object($resultScript))
+        {
+            array_push($result, $row->collaboratoremail);
+        }
+        return array_unique($result);
+    }
 
     public function getCollaborator()
     {

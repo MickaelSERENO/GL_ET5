@@ -130,6 +130,24 @@
 							</div>
 							<div>
 								<!-- bouton -->
+								<div class="buttonInfo">
+									<div class="centerItem">
+										<ul class="list-inline text-center">
+											<div class="container-fluid">
+												<div class="row">
+													<div class="col-md-4"> </div>
+													<div class="col-md-2">
+														<li class="list-inline-item"> <div class="buttonItem"> Modifier </div></li>
+													</div>
+													<div class="col-md-2">
+														<li class="list-inline-item"> <div class="buttonItem"> Supprimer </div></li>
+													</div>
+													<div class="col-md-4"> </div>
+												</div>
+											</div>
+										</ul>
+									</div>
+								</div>
 							</div>
 						</div>
 					</uib-tab>
