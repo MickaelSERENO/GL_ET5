@@ -7,7 +7,7 @@ var dateOffset  = 5;
 var dateYOffset = 15;
 var markerWidth = 15;
 
-var SELECT_TASK_COLOR = "#0858CC";
+var SELECT_TASK_COLOR = "#48A2E2";
 
 //The end user class
 class EndUser
@@ -707,7 +707,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 						$scope.$apply(function()
 						{
 							$scope.closeStatus = 1;
-							$scope.closeTxt    = "Ré-Ouvrir";
+							$scope.closeTxt    = "Démarrer";
 						});
 					}
 				}
