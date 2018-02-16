@@ -169,7 +169,6 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 			//Check if the mother is not in the children list
 			for(var i =0; i < $scope.children.length; i++)
 			{
-
 				if($scope.taskMother[$scope.children[i]] == $scope.fullTasks[$scope.mother])
 				{
 					$scope.errorMsg = "Une tâche parente ne peut être une sous-tâche";

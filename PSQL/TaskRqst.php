@@ -764,7 +764,7 @@
 			$startFormat  = $startTime->format("Y-m-d");
 
 			//Test the date
-			$script       = "SELECT COUNT(*) WHERE startDate <= '$startDate' AND endDate >= '$startDate';";
+			$script       = "SELECT COUNT(*) FROM Project WHERE startDate <= '$startFormat' AND endDate >= '$startFormat';";
 			$resultScript = pg_query($this->_conn, $script);
 			$row          = pg_fetch_row($resultScript);
 
@@ -778,8 +778,8 @@
 			{
 				$idPred = $predecessors[$i];
 				$script = "SELECT COUNT(*) FROM (
-								SELECT T1.* FROM AbstractTask AS T1, Marker WHERE T1.id = $idPred AND T1.startDate <= '$startDate' AND T1.ID = Marker.ID UNION ALL
-								SELECT T1.* FROM AbstractTask AS T1, Task WHERE T1.id = $idPred AND T1.id = Task.id AND T1.endDate <= '$startDate')";
+								SELECT T1.* FROM AbstractTask AS T1, Marker WHERE T1.id = $idPred AND T1.startDate <= '$startFormat' AND T1.ID = Marker.ID UNION ALL
+								SELECT T1.* FROM AbstractTask AS T1, Task WHERE T1.id = $idPred AND T1.id = Task.id AND T1.endDate <= '$startFormat')";
 				$resultScript = pg_query($this->_conn, $script);
 				$row          = pg_fetch_row($resultScript);
 

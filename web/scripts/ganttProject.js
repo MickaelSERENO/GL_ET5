@@ -309,6 +309,7 @@ class Task extends AbstractTask
 		this.computedCharge    = cpy.computedCharge;
 		this.chargeConsumed    = cpy.chargeConsumed;
 		this.remaining         = cpy.remaining;
+		this.stats             = cpy.stats;
 	}
 
 	minDate()
@@ -346,7 +347,15 @@ class Task extends AbstractTask
 			canvasCtx.fill();
 		}
 
-		canvasCtx.fillStyle   = "gray";
+		if(this.stats == "NOT_STARTED")
+			canvasCtx.fillStyle   = "#888888";
+		else if(this.stats == "STARTED")
+			canvasCtx.fillStyle   = "#BBBBBB";
+		else if(this.stats == "LATE_STARTED")
+			canvasCtx.fillStyle   = "#FF0000";
+		else
+			canvasCtx.fillStyle   = "#CC0000";
+
 		drawRoundRect(size.xOffset, size.yOffset+2, size.width, fontSize-4, dateWidth/4);
 		canvasCtx.fill();
 
@@ -515,6 +524,32 @@ function drawRoundRect(x, y, w, h, r)
 	canvasCtx.closePath();
 }
 
+function getTodayPos()
+{
+	var xOffset = 0;
+	var date    = new Date();
+
+	if(currentUnit == "day")
+		xOffset  = dateOffset + (dateWidth * getNbDay(date, project.startDate) + dateWidth/2.0);
+	else if(currentUnit == "week")
+	{
+		var projectDate = new Date(project.startDate);
+		projectDate.setDate(projectDate.getDate() - getMondayDiff(project.startDate));
+		xOffset  = dateOffset + getNbDay(project.startDate, projectDate)*dateWidth/7 + 
+				   (dateWidth * getNbDay(date, project.startDate) + dateWidth/2.0)/7;
+	}
+
+	return xOffset;
+}
+
+function isTodayInProjectLimits()
+{
+	var date = new Date();
+	if(date.getTime() < project.startDate.getTime() || date.getTime() > project.endDate.getTime())
+		return false;
+	return true;
+}
+
 //Redraw the gantt
 function redraw()
 {
@@ -530,10 +565,40 @@ function redraw()
 
 
 	//Clear the canvas
-	canvasCtx.beginPath();
-	canvasCtx.fillStyle = "white";
-	canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-	canvasCtx.fill();
+	if(isTodayInProjectLimits())
+	{
+		canvasCtx.beginPath();
+		canvasCtx.fillStyle = "white";
+		canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+		canvasCtx.fill();
+
+		//Get today in gantt limits
+		var todayX   = getTodayPos();
+		var taskNode = document.getElementsByClassName('taskNode'); 
+		if(taskNode  != null)
+		{
+			var todayY   = taskNode[0].offsetTop;
+			var endY     = taskNode[taskNode.length - 1].offsetTop;
+
+//			canvasCtx.beginPath();
+//			canvasCtx.strokeStyle = "red";
+//			canvasCtx.moveTo(todayX, todayY);
+//			canvasCtx.lineTo(todayX, endY);
+//			canvasCtx.stroke();
+
+			canvasCtx.beginPath();
+			canvasCtx.fillStyle = "#EEEEEE";
+			canvasCtx.fillRect(0, 0, todayX, canvas.height);
+			canvasCtx.fill();
+		}
+	}
+	else
+	{
+		canvasCtx.beginPath();
+		canvasCtx.fillStyle = "#EEEEEE";
+		canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+		canvasCtx.fill();
+	}
 
 	if(scope.tasks.length == 0)
 		return;

@@ -528,9 +528,11 @@
 								<div class="row">
 									<!-- Left part of the gantt tab containing information about tab -->
 									<div id="infoGantt" class="col-xs-3">
-										<div class="row">
-											<div id="sortingDiv" class="col-xs-6">
+										<div class="row" id="sortingDiv">
+											<div class="col-md-4">
 												Trier par :
+											</div>
+											<div class="col-md-8">
 												<div class="btn-group sortList" uib-dropdown dropdown-append-to-body>
 													<button type="button" class="btn btn-primary" uib-dropdown-toggle>
 														{{sortTask[currentSorting]}}<span class="caret sortList"></span>
@@ -540,12 +542,15 @@
 														<li role="menuitem" ng-click="changeSorting(1)"><a href="">Nom</a></li>
 													</ul>
 												</div>
-
 												<button type="button" class="btn btn-primary" ng-click="changeAsc()">{{asc ? "Az" : "Za"}}</button>
 											</div>
-
-											<div id="scaleDiv" class="col-xs-6">
+										</div>
+										<div class="row smallTopSpace" id="scaleDiv">
+											<div class="col-md-4">
 												Échelle :
+											</div>
+
+											<div class="col-md-8">
 												<div class="btn-group sortList" uib-dropdown dropdown-append-to-body>
 													<button type="button" class="btn btn-primary" uib-dropdown-toggle>
 														{{scale[currentScale]}}<span class="caret sortList"></span>
@@ -572,7 +577,7 @@
 												<div class="taskNode">
 													<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>
 													<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-right" ng-show="task.canExpand()"></span>
-													<div class="taskBackground" ng-dblclick="openTask(task)" ng-click="selectTask(task, $event)">
+													<div class="taskBackground" ng-dblclick="openTask(task)" ng-click="selectTask(task, $event)" ng-class="{'lateTask' : !(task.stats == undefined || task.stats == 'STARTED' || task.stats == 'NOT_STARTED')}">
 														{{task.name}}
 													</div>
 												</div>

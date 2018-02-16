@@ -176,3 +176,9 @@
 {
 	margin-right:5px;
 }
+
+.lateTask
+{
+	text-decoration: underline red;
+	color: red;
+}

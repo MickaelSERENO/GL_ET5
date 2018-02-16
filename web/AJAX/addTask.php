@@ -23,7 +23,7 @@
 
 			if($taskRqst->canAddTask($_GET['projectID'], $_GET['collEmail'], $_GET['initCharge'], $_GET['mother'], (int)($_GET['startDate']), (int)($_GET['endDate']), $predecessors, $children))
 			{
-				$taskRqst->addTask($_GET['projectID'], $_GET['name'], $_GET['collEmail'], $_GET['initCharge'], $_GET['mother'], (int)($_GET['startDate']), (int)($_GET['endDate']), $_GET['description'], $predecessors, $children);
+				$taskRqst->addTask($_GET['projectID'], $_GET['name'], $_GET['collEmail'], $_GET['initCharge'], $_GET['mother'], (int)($_GET['startDate']), (int)($_GET['endDate']), $_GET['description'], $predecessors, $children, $_SESSION['rank'] == 2);
 				echo '1';
 			}
 			else
@@ -34,7 +34,7 @@
 		{
 			if($taskRqst->canAddMarker($_GET['projectID'], (int)($_GET['startDate']), $predecessors))
 			{
-				$taskRqst->addMarker($_GET['projectID'], $_GET['name'], (int)($_GET['startDate']), $_GET['description'], $predecessors);
+				$taskRqst->addMarker($_GET['projectID'], $_GET['name'], (int)($_GET['startDate']), $_GET['description'], $predecessors, $_SESSION['rank'] == 2);
 				echo '1';
 			}
 			echo '-1';
