@@ -2,13 +2,13 @@
 {
 	background-color: white;
 	border-radius: 8px;
-	padding-top: 1em;
-	padding-bottom: 1em;
-	padding-left: 2em;
-	padding-right: 2em;
+	padding-top: 0.75em;
+	padding-bottom: 0.75em;
+	padding-left: 1em;
+	padding-right: 1em;
 	margin-top: 1em;
-	margin-left: 2em;
-	margin-right: 2em;
+	margin-left: 1em;
+	margin-right: 1em;
 	font-weight: bold;
 	font-size: 100%;
 	color: black;
@@ -125,7 +125,7 @@
 #ganttBody > div > .nav-tabs > li > a
 {
 	color : #FFFFFF;
-	background-color : #0858CC;
+	background-color : #073c8a;
 	margin: -2px 0 0 0;
 	margin-right:0px;
 	width:100%;
@@ -134,7 +134,7 @@
 #ganttBody > div > .nav-tabs > li.active > a
 {
 	color : #FFFFFF;
-	background-color : #48A8FF;
+	background-color : #2589b9;
 	margin: -2px 0 0 0;
 }
 

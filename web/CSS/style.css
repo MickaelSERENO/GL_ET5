@@ -1,8 +1,8 @@
 #topBanner
 {
-	background-color: #328F32;
+	background-color: #090342;
 	width: 100%;
-	padding-top: 1em;
+	padding-top: 0.5em;
 	
 }
 
@@ -16,10 +16,10 @@
 
 #menu
 {
-	background-color: #8cff66;
+	background-color: #2F2699;
 	width: 100%;
 	padding-top: 1em;
-	padding-bottom: 1em;
+	padding-bottom: 0.5em;
 	margin-top: -1em;
 }
 
@@ -33,12 +33,12 @@
 {
 	background-color: white;
 	border-radius: 8px;
-	padding-top: 1em;
-	padding-bottom: 1em;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
 	padding-left: 2em;
 	padding-right: 2em;
-	margin-left:2em;
-	margin-right:2em;
+	margin-left:1em;
+	margin-right:1em;
 	font-weight: bold;
 	font-size: 125%;
 	color: black;
@@ -48,7 +48,7 @@
 
 #centralPart
 {
-	background-color: #48A8FF;
+	background-color: #2589b9;
 	border-radius: 8px;
 	padding-bottom:1em;
 	width: 98%;

@@ -40,7 +40,6 @@ if($rank != 2)
 		<script type="text/javascript" src="/scripts/bower_components/angular-animate/angular-animate.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-sanitize/angular-sanitize.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
-		<script type="text/javascript" src="/scripts/setup.js"></script>
 		<script type="text/javascript" src="/scripts/dashboard.js"></script>
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
@@ -54,10 +53,11 @@ var tasks = JSON.parse(<?= '\''.json_encode($tasks,JSON_HEX_APOS).'\''?>);
 	</head>
 
 	<body ng-app="myApp">
+		<header class="headerConnected">
+			<?php include('../Header/header.php'); ?>
+		</header>
+		
 		<div ng-controller="dashboardController">
-			<div id="topBanner">
-				<p>PoPS2017</p>
-			</div>
 			<div id="centralPart">
 				<div class="alignElem">
 					<h1 class="mainTitle">Tableau de bord</h1>
