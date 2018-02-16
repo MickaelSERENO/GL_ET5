@@ -771,7 +771,22 @@
 			if($row[0] == 0)
 				return false;
 
-			if($this->containDuplicate
+			if($this->containDuplicate($predecessors))
+				return false;
+
+			for($i = 0; $i < count($predecessors); $i++)
+			{
+				$idPred = $predecessors[$i];
+				$script = "SELECT COUNT(*) FROM (
+								SELECT T1.* FROM AbstractTask AS T1, Marker WHERE T1.id = $idPred AND T1.startDate <= '$startDate' AND T1.ID = Marker.ID UNION ALL
+								SELECT T1.* FROM AbstractTask AS T1, Task WHERE T1.id = $idPred AND T1.id = Task.id AND T1.endDate <= '$startDate')";
+				$resultScript = pg_query($this->_conn, $script);
+				$row          = pg_fetch_row($resultScript);
+
+				if($row[0] == 0)
+					return false;
+			}
+			return true;
 		}
 
 		public function addMarker($idProject, $name, $startDate, $description, $predecessors, $isAdmin)
@@ -796,6 +811,8 @@
 
 		public function canAddTask($idProject, $collEmail, $initCharge, $mother, $startDate, $endDate, $predecessors, $children)
 		{
+			$tasks = $this->constructorTaskTree($idProject);
+
 			return true;
 		}
 
