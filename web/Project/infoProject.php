@@ -497,14 +497,10 @@
 									</button>
 								</li>
 								<li>
-									<button class="btn btn-primary" ng-click="expandTasks()">
-										Étendre
-									</button>
+									<img src="/Resources/Images/expand_icon.png" width=32 height=32 class="mousePointer" ng-click="expandTasks()">
 								</li>
 								<li>
-									<button class="btn btn-primary" ng-click="reduceTasks()">
-										Serrer
-									</button>
+									<img src="/Resources/Images/reduce_icon.png" width=32 height=32 class="mousePointer" ng-click="reduceTasks()">
 								</li>
 	<?php if(canModifyProject($_GET['projectID']) && $projectStatus != 'CLOSED_INVISIBLE') : ?>
 								<li ng-hide="projectClosed()">
@@ -542,7 +538,7 @@
 														<li role="menuitem" ng-click="changeSorting(1)"><a href="">Nom</a></li>
 													</ul>
 												</div>
-												<button type="button" class="btn btn-primary" ng-click="changeAsc()">{{asc ? "Az" : "Za"}}</button>
+												<img ng-click="changeAsc()" ng-src="{{asc && '/Resources/Images/up_icon.png' || '/Resources/Images/down_icon.png'}}" width="24" height="24" class="mousePointer">
 											</div>
 										</div>
 										<div class="row smallTopSpace" id="scaleDiv">
@@ -568,9 +564,7 @@
 										<!-- The list of tasks"-->
 										<div id="taskTreeView">
 	<?php if(($rank == 1 || $rank == 2) && canModifyProject($_GET['projectID'])) : ?>
-											<button type="button" class="btn btn-primary alignedDiv smallBottomSpace" ng-click="openAddTask()">
-												Add
-											</button>
+											<img src="/Resources/Images/add_icon.png" width=32 height=32 class="mousePointer smallBottomSpace alignedDiv" ng-click="openAddTask()">
 	<?php endif;?>
 
 											<script type="text/ng-template" id="treeViewTasks.html">
@@ -600,23 +594,23 @@
 
 	<?php if($projectStatus == "STARTED") : ?>
 											<div class="actionButton" ng-click="openTaskAdv()" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0 && !projectClosed()">
-												<div style="background-color:blue;width:20px;height:20px"></div>
+												<img src="/Resources/Images/progress_bar.png" alt="advancement" width="32" height="32">
 											</div>
 	<?php endif;?>
 
 	<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
 			  $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>
 											<div class="actionButton" ng-click="openDateModal()" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true">
-												<div style="background-color:red;width:20px;height:20px"></div>
+												<img src="/Resources/Images/calendar_icon.png" alt="date" width="32" height="32">
 											</div>
-											<div class="actionButton" ng-click="openCollModal()">
-												<div style="background-color:yellow;width:20px;height:20px" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true"></div>
+											<div class="actionButton" ng-click="openCollModal()" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true">
+												<img src="/Resources/Images/coll_icon.png" alt="collaborateur" width="32" height="32">
 											</div>
 											<div class="actionButton" ng-click="openChild()" ng-show="taskSelected != null && editionMode == true && levelHierarchy(taskSelected) <= 2 && (secondTaskSelected == null || canAddTask(secondTaskSelected, taskSelected))">
-												<div style="background-color:black;width:20px;height:20px"></div>
+												<img src="/Resources/Images/subtask_icon.png" alt="sous-tâche" width="32" height="32">
 											</div>
 											<div class="actionButton" ng-click="openSuccessor()" ng-show="taskSelected != null && editionMode == true && (secondTaskSelected == null || canAddPredecessor(secondTaskSelected, taskSelected))">
-												<div style="background-color:green;width:20px;height:20px"></div>
+												<img src="/Resources/Images/predecessor_icon.png" alt="predecessor" width="32" height="32">
 											</div>
 	<?php endif; ?>
 										</div>
