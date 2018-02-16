@@ -12,7 +12,9 @@
 							<li class="topBannerRight"> <p> Notif Rapide </p> </li>
 						</div>
 						<div class="col-md-2">
-							<li class="topBannerRight"> <p> Déconnexion </p> </li>
+							<a href="/disconnect.php">
+								<li class="topBannerRight"> <p> Déconnexion </p> </li>
+							</a>
 						</div>
 					</div>
 				</div>
@@ -26,16 +28,16 @@
 					<div class="container-fluid">
 						<div class="row">
 							<div class="col-md-3">
-								<li class="list-inline-item"> <div class="menuItem"> <a href="../dashboard"> Tableau de bord </a></div></li>
+								<li class="list-inline-item"> <a href="/dashboard"> <div class="menuItem"> Tableau de bord </div></a></li>
 							</div>
 							<div class="col-md-3">
-								<li class="list-inline-item"> <div class="menuItem"> <a href="../listProject"> Projets </a></div></li>
+								<li class="list-inline-item"> <a href="/listProject"> <div class="menuItem"> Projets </div></a></li>
 							</div>
 							<div class="col-md-3">
 								<li class="list-inline-item"> <div class="menuItem"> Clients </div></li>
 							</div>
 							<div class="col-md-3">
-								<li class="list-inline-item"> <div class="menuItem"> <a href="../listContact"> Contacts </a> </div></li>
+								<li class="list-inline-item"> <a href="/listContact"><div class="menuItem"> Contacts </div></a></li>
 							</div>
 						</div>
 					</div>
