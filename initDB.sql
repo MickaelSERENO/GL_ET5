@@ -119,6 +119,7 @@ CREATE TABLE Project
 	startDate    DATE NOT NULL,
 	endDate      DATE NOT NULL,
 	status       PROJECT_STATUS NOT NULL,
+	isLate       BOOLEAN DEFAULT FALSE,
 	CHECK (startDate < endDate),
 	FOREIGN KEY(managerEmail) REFERENCES ProjectManager(userEmail),
 	FOREIGN KEY(contactEmail) REFERENCES ClientContact(contactEmail)

@@ -22,16 +22,16 @@ INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'D�
 INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Création de la base de données', 'Création de la base de données', '2018-01-27');
 INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Création de l''interface', 'Création de l''interface', '2018-03-27');
 INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Page d''accueil', 'Page d''accueil', '2018-03-27');
-INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Page de consultation de l''inventaire', 'Page de consultaton de l''inventaire', '2018-04-27');
-INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Page de saisie des informations de la base de donnes', 'Page de saisie des informations de la base de données', '2018-05-27');
-INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Livraison', 'Livraison du produit', '2018-06-28');
+INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Page de consultation de l''inventaire', 'Page de consultaton de l''inventaire', '2018-05-27');
+INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Page de saisie des informations de la base de donnes', 'Page de saisie des informations de la base de données', '2018-07-27');
+INSERT INTO AbstractTask(idProject, name, description, startDate) VALUES (1, 'Livraison', 'Livraison du produit', '2018-09-28');
 
 INSERT INTO Task   VALUES (1, '2018-01-27', '35', '35', '15', '20', '57', 'jean.dupont@email.com');
 INSERT INTO Task   VALUES (2, '2018-03-27', '55', '55', '55', '0',  '0',  'jean.dupont@email.com');
-INSERT INTO Task   VALUES (3, '2018-04-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
-INSERT INTO Task   VALUES (4, '2018-04-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
-INSERT INTO Task   VALUES (5, '2018-05-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
-INSERT INTO Task   VALUES (6, '2018-06-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
+INSERT INTO Task   VALUES (3, '2018-05-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
+INSERT INTO Task   VALUES (4, '2018-05-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
+INSERT INTO Task   VALUES (5, '2018-07-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
+INSERT INTO Task   VALUES (6, '2018-09-27', '35', '35', '35', '0',  '0',  'jean.dupont@email.com');
 INSERT INTO Marker VALUES (7);
 
 --Add Tasks hierarchy and task order

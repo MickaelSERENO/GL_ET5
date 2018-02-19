@@ -1001,6 +1001,14 @@ $scope.projectClosed = function()
 							currentTask = new Task(tasks.tasks[i]);
 						allTasks.push(currentTask);
 
+						if($scope.taskSelected)
+							if($scope.taskSelected.id == currentTask.id)
+								$scope.taskSelected = currentTask;
+
+						if($scope.secondTaskSelected)
+							if($scope.secondTaskSelected.id == currentTask.id)
+								$scope.secondTaskSelected = currentTask;
+
 						if(isMother)
 							$scope.tasks.push(currentTask);
 					}

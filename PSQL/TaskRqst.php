@@ -1,6 +1,7 @@
 <?php
 	require_once __DIR__.'/PSQLDatabase.php';
 	require_once __DIR__.'/ProjectRqst.php';
+	require_once __DIR__.'/TimerRqst.php';
 
 	class IndeTask
 	{
@@ -346,6 +347,8 @@
 
 			$script       = "UPDATE Task SET endDate = '$endFormat' WHERE id = $idTask;";
 			$resultScript = pg_query($this->_conn, $script);
+
+			$this->updateProject($idTask);
 		}
 
 		public function canAccessTask($idTask, $email, $rank)
@@ -382,6 +385,8 @@
 
 			$script = "UPDATE Task SET advancement = $adv, chargeConsumed = $chargeConsumed, remaining = $remaining WHERE id = $idTask;";
 			$resultScript = pg_query($this->_conn, $script);
+
+			$this->updateProject($idTask);
 
 			//Send Notif
 
@@ -710,9 +715,12 @@
 		{
 			//Delete old child hierarchy and add a new one
 			$script = "BEGIN;
-				       DELETE FROM TaskHierarchy WHERE idChild = $idChild;						 INSERT INTO TaskHierarchy VALUES ($idMother, $idChild, true);
+					   DELETE FROM TaskHierarchy WHERE idChild = $idChild;
+    				   INSERT INTO TaskHierarchy VALUES ($idMother, $idChild, true);
 				       COMMIT;";
 			$resultScript = pg_query($this->_conn, $script);
+
+			$this->updateProject($idMother);
 
 			//TODO Maybe send notification
 		}
@@ -721,6 +729,8 @@
 		{
 			$script = "INSERT INTO TaskOrder VALUES ($idPred, $idSucc);";
 			$resultScript = pg_query($this->_conn, $script);
+
+			$this->updateProject($idPred);
 
 			//TODO Maybe send notification
 		}
@@ -811,6 +821,9 @@
                 $script = $script . "INSERT INTO TaskOrder VALUES($pred, $id);";
 			$resultScript = pg_query($this->_conn, $script);
 
+			$timerRqst = new TimerRqst();
+			$timerRqst->updateProject($idProject);
+
 			//TODO Maybe send a notification
 		}
 
@@ -847,7 +860,21 @@
                 $script = $script . "INSERT TaskHierarchy VALUES($id, $child, TRUE);";
 			$resultScript = pg_query($this->_conn, $script);
 
+			$timerRqst = new TimerRqst();
+			$timerRqst->updateProject($idProject);
+
 			//TODO Maybe send a notification
+		}
+
+		public function updateProject($idTask)
+		{
+			$script       = "SELECT idProject FROM AbstractTask WHERE id = $idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+
+			$timerRqst = new TimerRqst();
+			$timerRqst->updateProject($row[0]);
+
 		}
 	}
 ?>
