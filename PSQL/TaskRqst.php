@@ -1,7 +1,13 @@
 <?php
 	require_once __DIR__.'/PSQLDatabase.php';
 	require_once __DIR__.'/ProjectRqst.php';
-	
+
+	class IndeTask
+	{
+		public $project;
+		public $task;
+	}
+
 	class AbstractTask
 	{
 		public $id;
@@ -11,6 +17,7 @@
 		public $endDate;
         public $isMarker;
 		public $stats;
+		public $projectID;
 	}
 
 	class Marker extends AbstractTask
@@ -722,28 +729,26 @@
 		{
 			$tasks	= array();
 			$script	= "SELECT 
-							abstracttask.name, 
-							task.enddate, 
-							task.advancement, 
-							project.name 
+							abstracttask.id, 
+							project.id
 						FROM abstracttask 
 							JOIN task ON abstracttask.id = task.id
 							JOIN project ON project.id = abstracttask.idproject
-						WHERE collaboratoremail = '$email'";
+						WHERE task.collaboratoremail = '$email'";
 			if($started)
 			{
 				$script = $script . " AND task.status != 'NOT_STARTED'";
 			}
-			$script = $script . "ORDER BY idproject, enddate";
+			$script = $script . "ORDER BY project.id, task.enddate";
 			$resultScript = pg_query($this->_conn, $script);
+			$prReq = new ProjectRqst();
 			while($row = pg_fetch_row($resultScript))
 			{
-				$task				= new Task();
-				$task->name			= $row[0];
-				$task->endDate		= $row[1];
-				$task->advancement	= $row[2];
+				$indeTask			= new IndeTask();
+				$indeTask->task		= $this->getTask((int)$row[0]);
+				$indeTask->project	= $prReq->getInfoProject((int)$row[1]);
 
-				array_push($tasks, $task);
+				array_push($tasks, $indeTask);
 			}
 			return $tasks;
 		}

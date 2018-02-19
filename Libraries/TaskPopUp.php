@@ -27,7 +27,7 @@
 						<div class="col-lg-6">
 							<div class="input-group">
 								<span class="input-group-addon" id="basic-addon2">Projet :</span>
-								<input type="text" class="form-control" ng-disabled=true  placeholder="projectname" aria-describedby="basic-addon2" value="<?= $projectInfo->name ?>">
+								<input type="text" class="form-control" ng-disabled=true  placeholder="projectname" aria-describedby="basic-addon2" value="{{project.name}}">
 
 							</div>
 							<br>

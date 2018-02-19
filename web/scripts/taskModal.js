@@ -1,6 +1,7 @@
-myApp.controller("TaskModal", function($scope, $uibModalInstance, task)
+myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project)
 {
 	$scope.task = task;
+	$scope.project = project;
 
 	$scope.dateFormat  = "dd/MM/yyyy";
 	$scope.dateOptions =
@@ -10,7 +11,7 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task)
 		minDate: project.startDate,
 		startingDay: 1
 	};
-	$scope.currentDate   = task.startDate;
+	$scope.currentDate = task.startDate;
 	$scope.startDate   = new Date();
 	$scope.endDate     = new Date();
 

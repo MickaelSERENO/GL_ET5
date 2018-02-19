@@ -841,40 +841,40 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 							}
 						}
 						else
+					{
+						if(tasks[j].name < $scope.tasks[i].name)
 						{
-							if(tasks[j].name < $scope.tasks[i].name)
-							{
-								found = true;
-								tasks.splice(j, 0, $scope.tasks[i]);
-								break;
-							}
+							found = true;
+							tasks.splice(j, 0, $scope.tasks[i]);
+							break;
 						}
 					}
-					if(!found)
-						tasks.push($scope.tasks[i]);
-					$scope.tasks[i].sortByName($scope.asc);
 				}
-				$scope.tasks = tasks;
-				break;
-		}
-		computeInternalId();
-	};
+				if(!found)
+					tasks.push($scope.tasks[i]);
+				$scope.tasks[i].sortByName($scope.asc);
+			}
+			$scope.tasks = tasks;
+			break;
+	}
+	computeInternalId();
+};
 
-	$scope.changeScale = function(id)
+$scope.changeScale = function(id)
+{
+	$scope.currentScale = id;
+	switch(id)
 	{
-		$scope.currentScale = id;
-		switch(id)
-		{
-			case 0:
-				currentUnit           = "day";
-				break;
-			case 1:
-				currentUnit           = "week";
-				break;
-		}
-	};
+		case 0:
+			currentUnit           = "day";
+			break;
+		case 1:
+			currentUnit           = "week";
+			break;
+	}
+};
 
-	$scope.projectClosed = function()
+$scope.projectClosed = function()
 	{
 		return project == null || $scope.closeStatus == 1;
 	};
@@ -1319,7 +1319,8 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 			templateUrl : "modalTask.html",
 			controller : "TaskModal",
 			controllerAs : "$ctrl",
-			resolve : {task    : function() {return task;}
+			resolve : {task    : function() {return task;},
+						project    : function() {return project;}
 					  }
 		};
 
