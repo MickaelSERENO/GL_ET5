@@ -12,11 +12,11 @@ if(!isset($_SESSION["email"]))
 $user				= $_SESSION["email"];
 $rank				= $_SESSION["rank"];
 $notifRqst			= new NotifRqst();
-$notifs				= array_slice($notifRqst->getNotifs($user, true),0,5);
+$notifs				= $notifRqst->getNotifs($user, true);
 if($rank == 1)
 {
 	$projetRsqt = new ProjectRqst();
-	$projects	= array_slice($projetRsqt->getManagedProjects($user, true),0,5);
+	$projects	= $projetRsqt->getManagedProjects($user, false);
 }
 if($rank != 2)
 {
@@ -76,18 +76,24 @@ console.log(tasks);
 							<h2><a href="/dashboard/notifications.php">Notifications</a></h2>
 							<table class="table tableList">
 								<thead>
-									<tr><td>Titre</td><td>De</td><td>Reçue le</td></tr>
+									<tr>
+										<td>Titre</td>
+										<td>Expéditeur</td>
+										<td>Date</td>
+										<td>Projet</td>
+									</tr>
 								</thead>
 								<tbody>
 <?php if(count($notifs) != 0) : ?>
 								<tr ng-repeat="notif in notifs" ng-click="linkTo(notif.id,'notif')">
 										<td>{{ notif.title }}</td>
 										<td>{{ notif.sender }}</td>
-										<td>{{ notif.theDate }}</td>
+										<td>{{ notif.theDate | date:'dd/MM/yyyy' }}</td>
+										<td>{{ notif.project}}</td>
 								</tr>
 <?php else: ?>
 								<tr>
-									<td colspan=3>Pas de nouvelles notifications</td>
+									<td colspan=4>Pas de nouvelles notifications</td>
 								</tr>
 <?php endif; ?>
 								</tbody>
@@ -103,19 +109,23 @@ console.log(tasks);
 								<thead>
 									<tr>
 										<td>Nom</td>
-										<td>Date</td>
+										<td>Début</td>
+										<td>Fin</td>
+										<td>Client</td>
 										<td>Statut</td>
 									</tr>
 								</thead>
 								<tbody>
 <?php if(count($projects)==0): ?>
 									<tr>
-										<td colspan=3>Vous n'avez aucun projet en cours</td>
+										<td colspan=5>Vous n'avez aucun projet en cours</td>
 									</tr>
 <?php else:?>
 									<tr ng-repeat="project in projects" ng-click="linkTo(project.id, 'project')">
 										<td>{{ project.name }}</td>
-										<td>{{ project.startDate }}</td>
+										<td>{{ project.startDate | date:'dd/MM/yyyy'}}</td>
+										<td>{{ project.endDate | date:'dd/MM/yyyy'}}</td>
+										<td>{{ project.clientName}}</td>
 										<td>{{ project.status }}</td>
 									</tr>
 <?php endif; ?>
@@ -133,20 +143,26 @@ console.log(tasks);
 						<thead>
 							<tr>
 								<td>Nom</td>
-								<td>Date</td>
 								<td>Statut</td>
+								<td>Projet</td>
+								<td>Début</td>
+								<td>Avancement</td>
+								<td>Fin</td>
 							</tr>
 						</thead>
 						<tbody>
 <?php if(count($tasks)==0): ?>
 							<tr>
-								<td colspan=3>Vous n'avez aucune tâche en cours</td>
+								<td colspan=6>Vous n'avez aucune tâche en cours</td>
 							</tr>
 <?php else: ?>
 							<tr ng-repeat="itask in tasks" ng-click="openTask(itask)">
 								<td>{{ itask.task.name }}</td>
-								<td>{{ itask.task.startDate }}</td>
-								<td>{{ itask.task.status }}</td>
+								<td>{{ itask.task.stats }}</td>
+								<td>{{ itask.project.name }}</td>
+								<td>{{ itask.task.startDate | date:'dd/MM/yyyy' }}</td>
+								<td>{{ itask.task.advancement }}%</td>
+								<td>{{ itask.task.endDate | date:'dd/MM/yyyy'}}</td>
 							</tr>
 <?php endif; ?>			
 						</tbody>

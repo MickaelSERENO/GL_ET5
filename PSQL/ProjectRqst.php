@@ -181,25 +181,27 @@
 		public function getManagedProjects($email, $started)
 		{
 			$projects = array();
-			$script = "SELECT id, managerEmail, contactEmail, name, description, startDate, endDate, status FROM project WHERE managerEmail = '$email'";
+			$script = "SELECT id
+						FROM project 
+						WHERE managerEmail = '$email'";
 			if($started)
 			{
-				$script = $script . " AND status = 'STARTED' OR status = 'NOT_STARTED'";
+				$script = $script . " AND status != 'NOT_STARTED'";
 			}
 			$script = $script . " ORDER BY status, startDate";
 			$resultScript = pg_query($this->_conn, $script);
 			
 			while($row = pg_fetch_row($resultScript))
 			{
-				$project				= new Project();
-				$project->id			= (int)($row[0]);
-				$project->managerEmail	= $row[1];
-				$project->contactEmail	= $row[2];
-				$project->name			= $row[3];
-				$project->description	= $row[4];
-				$project->startDate		= $row[5];
-				$project->endDate		= $row[6];
-				$project->status		= $row[7];
+				var_dump($row);
+				var_dump($row[0]);
+				var_dump((int)$row[0]);
+				$project = $this->getInfoProject((int)$row[0]);
+				$project->id = (int) $row[0];
+				$project->startDate = $project->startDate->format("Y-m-d");
+				$project->endDate = $project->endDate->format("Y-m-d");
+				$project->status = $this->getProjectStatus($project->id);
+				var_dump($project->startDate);
 
 				array_push($projects, $project);
 			}
