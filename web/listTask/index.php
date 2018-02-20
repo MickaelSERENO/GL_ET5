@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-$_SESSION["email"] = 'jean.dupont@email.com';
+//$_SESSION["email"] = 'jean.dupont@email.com';
 
 if(!isset($_SESSION["email"]))
 {
@@ -26,10 +26,10 @@ if(!isset($_SESSION["email"]))
 </head>
 
 <body ng-app="myApp" ng-init="category='task';">
+<header class="headerConnected">
+			<?php include('../Header/header.php'); ?>
+		</header>
 <div ng-controller="listControler">
-    <div id="topBanner">
-        <p>PoPS2017  -  {{loggerInfo.contactemail}}</p>
-    </div>
     <div id="centralPart">
         <div style="margin: 10px">
             <div style="margin: 10px 10px">
