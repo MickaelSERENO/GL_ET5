@@ -9,6 +9,7 @@
        	public $message;
 		public $read;
 		public $send;
+		public $projectName;
 		
 	}
 
@@ -18,10 +19,19 @@
 		{
 			$notifs = array();
 			//Fetch notifs
-			$script = "SELECT notification.id, thedate, title, message, read, emailsender
-					   FROM notification, Sender
-					   WHERE 
-						Notification.id = Sender.idnotification AND emailReceiver = '$emailReceiver'";
+			$script = "SELECT  
+					notification.id, 
+					notification.thedate, 
+					notification.title, 
+					notification.message, 
+					notification.read, 
+					Sender.emailsender,
+					project.name
+				FROM notification
+					JOIN Sender ON Notification.id = Sender.idnotification
+					JOIN projectnotification ON Notification.id = projectnotification.notificationID
+					JOIN project ON projectnotification.projectID = project.id
+				WHERE emailReceiver = '$emailReceiver'";
 			if($unread)
 			{
 				$script = $script." AND NOT read";
@@ -39,7 +49,7 @@
 				$notif->message	= $row[3];
 				$notif->read	= (boolean)($row[4]);
 				$notif->send	= $row[5];
-				
+				$notif->projectName = $row[6];
 
 				array_push($notifs, $notif);
 			}

@@ -31,7 +31,7 @@
     <link rel="stylesheet" type="text/css" href="/CSS/style.css">
     <script type="text/javascript" src="/scripts/notif.js"></script>	
     <script type="text/javascript">
-	var listNotifJS = JSON.parse(<?php echo '\''.json_encode($listeNotifs).'\'' ?>); 
+	var listNotifJS = JSON.parse(<?php echo '\''.json_encode($listeNotifs, JSON_HEX_APOS).'\'' ?>); 
 	console.log(listNotifJS);
     </script>
   </head>
@@ -89,12 +89,11 @@
 			      <tr>
 				<td>{{ listNotifJS[selectedNotif].theDate }}</td>
 			      </tr>
-				<tr>
+			      <tr>
 				<td>{{ listNotifJS[selectedNotif].send }}</td>
 			      </tr>
-			      </tr>
-				<tr>
-				<td>{{ listNotifJS[selectedNotif].project }}</td>
+			      <tr>
+				<td>{{ listNotifJS[selectedNotif].projectName }}</td>
 			      </tr>
 			
 				<tr class="table bordering">
