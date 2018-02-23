@@ -47,7 +47,14 @@
 				$notif->theDate	= $row[1];
 				$notif->title	= $row[2];
 				$notif->message	= $row[3];
-				$notif->read	= (boolean)($row[4]);
+				if($row[4]=='f')
+				{
+					$notif->read	= false;
+				}
+				else
+				{
+					$notif->read	= true;
+				}
 				$notif->send	= $row[5];
 				$notif->projectName = $row[6];
 

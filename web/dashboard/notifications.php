@@ -48,30 +48,27 @@
 <div class="row topSpace">
 <div class="col-sm-4">
           <table class="table tableList">
-            <tbody>
 		<thead>
 		      <tr>
 		        <td>Date</td>
 		        <td>Notification</td>
+			<td>Etat</td>
 		      </tr>
 		</thead>
-              <?php
-							foreach($listeNotifs as $i => $notif)
-							{
-						  ?>
-              <?php
-							echo '<tr ng-click="selectedNotif=' . $i . '">'
-              ?>
+		<tbody>
+<?php foreach($listeNotifs as $i => $notif)
+{?>
+		<?php echo '<tr ng-click="selectedNotif=' . $i . '">'?>
                   <td>
-                    <?php		
-									  echo $notif->theDate;
-						        ?>
+			<?php echo $notif->theDate;?>
+                  </td>
+                  <td  <?php if(!$notif->read){echo 'class="unread"';} ?>>
+                    <?php echo $notif->title;?>
                   </td>
                   <td>
-                    <?php	
-									  echo $notif->title;
-							      ?>
+                    <?php echo $notif->read;?>
                   </td>
+
                   </tr>
                   <?php	
 						      	}
