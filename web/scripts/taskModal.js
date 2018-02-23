@@ -1,7 +1,8 @@
-myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project)
+myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project, tasks)
 {
-	$scope.task = task;
+	$scope.task    = task;
 	$scope.project = project;
+	$scope.tasks   = tasks;
 
 	$scope.dateFormat  = "dd/MM/yyyy";
 	$scope.dateOptions =
@@ -102,6 +103,112 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project)
 		return false;
 	};
 
+	$scope.canAdd = function()
+	{
+		var startTime = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000; 
+		for(var i = 0; i < $scope.predecessors.length; i++)
+			if($scope.fullTasksPred[$scope.predecessors].endDate.getTime() > startTime)
+			{
+				$scope.errorMsg = "Un des prédécesseur se termine avant la date de début de la tâche";
+				return false;
+			}
+
+		if($scope.isMarker)
+		{
+			if($scope.startDate == undefined)
+			{
+				$scope.errorMsg = "La date de début n'est pas comprehensible";
+				return false;
+			}
+
+			if(startTime < project.startDate.getTime())
+			{
+				$scope.errorMsg = "Les dates ne correspondent pas";
+				return false;
+			}
+
+			if($scope.containDuplicate($scope.predecessors, 1))
+			{
+				$scope.errorMsg = "Doublon dans la liste des prédécesseurs";
+				return false;
+			}
+		}
+
+		else
+		{
+			if($scope.startDate == undefined || $scope.endDate == undefined)
+			{
+				$scope.errorMsg = "Les dates de début ou de fin ne sont pas compréhensibles";
+				return false;
+			}
+
+			var startTime = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000; 
+			var endTime   = $scope.endDate.getTime()   - $scope.endDate.getTimezoneOffset()*60*1000; 
+			if(endTime < startTime || endTime > project.endDate.getTime() || startTime < project.startDate.getTime())
+			{
+				$scope.errorMsg = "Les dates ne correspondent pas";
+				return false;
+			}
+			
+			//Check if we have duplication
+			//Predecessors and children
+			if($scope.containDuplicate($scope.predecessors, 1))
+			{
+				$scope.errorMsg = "Doublon dans la liste des prédécesseurs";
+				return false;
+			}
+
+			else if($scope.containDuplicate($scope.children, 1))
+			{
+				$scope.errorMsg = "Doublon dans la liste des sous-tâches";
+				return false;
+			}
+
+			//Check if the mother is not in the children list
+			for(var i =0; i < $scope.children.length; i++)
+			{
+				if($scope.taskMother[$scope.children[i]] == $scope.fullTasks[$scope.mother])
+				{
+					$scope.errorMsg = "Une tâche parente ne peut être une sous-tâche";
+					return false;
+				}
+
+				if(levelHierarchy($scope.taskMother[$scope.children[i]]) <= 2)
+				{
+					$scope.errorMsg = "Une sous-tâche ne peut avoir un niveau de hiérarchie supérieur à 3";
+					return false;
+				}
+			}
+
+			//Check if the predecessor is not in the mother succession list
+			if($scope.mother > 0)
+			{
+				for(var i =0; i < $scope.predecessors.length; i++)
+				{
+					if($scope.fullTasks[$scope.mother] == $scope.fullTasksPred[$scope.predecessors[i]])
+					{
+						$scope.errorMsg = "Une relation d'ordre existe entre un des prédécesseur et la tâche parent";
+						return false;
+					}
+
+					var motherMother = $scope.fullTasks[$scope.mother];
+					while(motherMother != null)
+					{
+						if(orderRelationShip($scope.fullTasksPred[$scope.predecessors[i]], motherMother) || hierarchyChildren($scope.fullTasksPred[$scope.predecessors[i]], motherMother))
+						{
+							$scope.errorMsg = "Une relation d'ordre existe entre un des prédécesseur et la tâche parent";
+							return false;
+						}
+						motherMother = motherMother.mother;
+					}
+				}
+			}
+
+		}
+
+		return true;
+	};
+
 
 	$scope.inactive = true;
 	$scope.modifyText = 'Modifier';
@@ -114,5 +221,17 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project)
 		}
 	}
 
+	$scope.addTask = function(task)
+	{
+		if(!task.isMarker)
+			$scope.fullTasks.push(task);
+		$scope.fullTasksPred.push(task);
+
+		for(var i =0; i < task.children.length; i++)
+			$scope.addTask(task.children[i]);
+	};
+
+	for(var i =0; i < tasks.length; i++)
+		$scope.addTask(tasks[i]);
 
 });

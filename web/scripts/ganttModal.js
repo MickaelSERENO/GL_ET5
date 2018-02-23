@@ -109,7 +109,7 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 	{
 		var startTime = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000; 
 		for(var i = 0; i < $scope.predecessors.length; i++)
-			if($scope.fullTasksPred[$task.predecessors].endDate.getTime() > startTime)
+			if($scope.fullTasksPred[$scope.predecessors].endDate.getTime() > startTime)
 			{
 				$scope.errorMsg = "Un des prédécesseur se termine avant la date de début de la tâche";
 				return false;
@@ -167,6 +167,10 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 			}
 
 			//Check if the mother is not in the children list
+			var level = 2;
+			if($scope.mother > 0)
+				level = 1;
+
 			for(var i =0; i < $scope.children.length; i++)
 			{
 				if($scope.taskMother[$scope.children[i]] == $scope.fullTasks[$scope.mother])
@@ -175,7 +179,7 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 					return false;
 				}
 
-				if(levelHierarchy($scope.taskMother[$scope.children[i]]) <= 2)
+				if(levelHierarchy($scope.taskMother[$scope.children[i]]) >= level)
 				{
 					$scope.errorMsg = "Une sous-tâche ne peut avoir un niveau de hiérarchie supérieur à 3";
 					return false;
@@ -265,7 +269,7 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 		}
 	};
 
-	$scope.cancel    = function()
+	$scope.cancel  = function()
 	{
 		$uibModalInstance.dismiss();
 	};
@@ -438,16 +442,20 @@ myApp.controller("DateModal", function($scope, $uibModalInstance, task, minDate,
 
 myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 {
-	$scope.task = Object.assign({}, task);
+	$scope.task        = Object.assign({}, task);
+	$scope.inc         = 0;
+	$scope.remaining   = $scope.task.remaining;
+	$scope.advancement = $scope.task.advancement;
 
-	$scope.$watch('task.chargeConsumed', function(newValue)
+	$scope.$watch('inc', function(newValue)
 	{
-		if(newValue > $scope.task.initCharge)
-			$scope.task.chargeConsumed = $scope.task.initCharge;
-		else if (newValue < 0)
-			$scope.task.chargeConsumed = 0;
-		$scope.task.remaining   = $scope.task.computedCharge - $scope.task.chargeConsumed;
-		$scope.task.advancement = parseInt(100 * $scope.task.chargeConsumed / $scope.task.computedCharge);
+		if(newValue > $scope.task.remaining)
+			newValue = $scope.task.remaining;
+		else if(newValue < 0)
+			newValue = 0;
+		$scope.inc = newValue;
+		$scope.remaining   = $scope.task.computedCharge - ($scope.task.chargeConsumed + $scope.inc);
+		$scope.advancement = parseInt(100 * ($scope.inc + $scope.task.chargeConsumed) / $scope.task.computedCharge);
 	});
 
 	$scope.ok = function()
@@ -459,6 +467,7 @@ myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 			{
 				if(httpCtx.responseText != '-1')
 				{
+					$scope.task.chargeConsumed += $scope.inc;
 					$uibModalInstance.close($scope.task);
 				}
 				else
@@ -467,7 +476,7 @@ myApp.controller("AdvModal", function($scope, $uibModalInstance, task)
 				}
 			}
 		}
-		httpCtx.open('POST', "/AJAX/advTask.php?projectID="+projectID+"&requestID=0&taskID=" + $scope.task.id + "&advancement="+$scope.task.advancement+"&chargeConsumed="+$scope.task.chargeConsumed+"&remaining="+$scope.task.remaining, true);
+		httpCtx.open('POST', "/AJAX/advTask.php?projectID="+projectID+"&requestID=0&taskID=" + $scope.task.id + "&advancement="+$scope.advancement+"&chargeConsumed="+($scope.inc + $scope.task.chargeConsumed)+"&remaining="+$scope.remaining, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
 	};

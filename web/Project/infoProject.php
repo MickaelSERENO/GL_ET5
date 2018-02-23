@@ -313,22 +313,22 @@
 								<div class="modal-body">
 									<div class="container-fluid">
 										<div class="row">
-											<div class="col-xs-4">Charge consommée : </div>
-											<input class="numberInput col-xs-2" type="number" ng-model="task.chargeConsumed"/>
+											<div class="col-xs-4">Charge consommée : {{task.chargeConsumed}} + </div>
+											<input class="numberInput col-xs-2" type="number" ng-model="inc"/>
 											<div class="col-xs-2"> jour(s) </div>
 										</div>
 
 										<div class="row topSpace">
 											<div class="col-xs-4">Avancement : </div>
-											<div class="col-xs-2">{{task.advancement}} %</div>
+											<div class="col-xs-2">{{advancement}} %</div>
 											<div class="col-xs-4">
-												<uib-progressbar value="task.advancement" id="advProgressbar"><span style="color:white; white-space:nowrap;">{{task.advancement}} %</span></uib-progressbar>
+												<uib-progressbar value="advancement" id="advProgressbar"><span style="color:white; white-space:nowrap;">{{advancement}} %</span></uib-progressbar>
 											</div>
 										</div>
 
 										<div class="row topSpace">
 											<div class="col-xs-4">Reste à faire: </div>
-											<div class="col-xs-2">{{task.remaining}}</div>
+											<div class="col-xs-2">{{remaining}}</div>
 											<div class="col-xs-2"> jour(s) </div>
 										</div>
 									</div>
@@ -589,14 +589,12 @@
 									<div id="gantt" class="col-xs-9">
 										<canvas id="ganttCanvas" width=1600 height=800 ng-dblclick="openCanvasTaskModal($event)" ng-click="canvasClick($event)">
 										</canvas>
-	<?php if(canModifyProject($_GET['projectID'])) : ?>
+	<?php if(canAccessProject($_GET['projectID'])) : ?>
 										<div id="actionDiv" ng-style="{'visibility' : showActionDiv() && !projectClosed() ? 'visible' : 'hidden'}">
 
-	<?php if($projectStatus == "STARTED") : ?>
 											<div class="actionButton" ng-click="openTaskAdv()" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0 && !projectClosed()">
 												<img src="/Resources/Images/progress_bar.png" alt="advancement" width="32" height="32">
 											</div>
-	<?php endif;?>
 
 	<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
 			  $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>

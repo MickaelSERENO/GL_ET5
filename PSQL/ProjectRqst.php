@@ -193,15 +193,11 @@
 			
 			while($row = pg_fetch_row($resultScript))
 			{
-				var_dump($row);
-				var_dump($row[0]);
-				var_dump((int)$row[0]);
 				$project = $this->getInfoProject((int)$row[0]);
 				$project->id = (int) $row[0];
 				$project->startDate = $project->startDate->format("Y-m-d");
 				$project->endDate = $project->endDate->format("Y-m-d");
 				$project->status = $this->getProjectStatus($project->id);
-				var_dump($project->startDate);
 
 				array_push($projects, $project);
 			}

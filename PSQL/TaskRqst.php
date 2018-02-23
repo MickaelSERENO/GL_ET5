@@ -829,8 +829,6 @@
 
 		public function canAddTask($idProject, $collEmail, $initCharge, $mother, $startDate, $endDate, $predecessors, $children)
 		{
-			$tasks = $this->constructorTaskTree($idProject);
-
 			return true;
 		}
 
@@ -857,7 +855,10 @@
                 $script = $script . "INSERT INTO TaskOrder VALUES($pred, $id);";
 
             foreach($children as $child)
-                $script = $script . "INSERT TaskHierarchy VALUES($id, $child, TRUE);";
+                $script = $script . "INSERT INTO TaskHierarchy VALUES($id, $child, TRUE);";
+
+			$script = $script . "INSERT INTO TaskHierarchy VALUES($mother, $id, TRUE);";
+
 			$resultScript = pg_query($this->_conn, $script);
 
 			$timerRqst = new TimerRqst();
