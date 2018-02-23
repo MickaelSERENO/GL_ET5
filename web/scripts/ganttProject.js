@@ -1204,9 +1204,7 @@ $scope.projectClosed = function()
 		modalInstance.result.then(
 			function(result) //ok
 			{
-				selected.startDate = new Date(result.startTime);
-				selected.endDate   = new Date(result.endTime);
-				selected.updateParentTime();
+				$scope.updateTask();
 			}, 
 			function() //cancel
 			{
@@ -1313,6 +1311,11 @@ $scope.projectClosed = function()
         }
 	};
 
+	$scope.canModify = function()
+	{
+		return rank == 2 || rank == 1 && project.managerEmail == email || rank == 0 && task.collaboratorEmail == email;
+	}
+
 	$scope.openTask = function(task)
 	{
 		if(task == null)
@@ -1328,7 +1331,8 @@ $scope.projectClosed = function()
 			controller : "TaskModal",
 			controllerAs : "$ctrl",
 			resolve : {task    : function() {return task;},
-						project    : function() {return project;}
+					   project : function() {return project;},
+					   tasks   : function() {return $scope.tasks;}
 					  }
 		};
 

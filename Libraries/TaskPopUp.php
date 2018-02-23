@@ -126,28 +126,23 @@
 								<li ng-repeat="t in children track by $index">
 									<div class="closeWrapper">
 										<div>{{taskMother[t].name}}</div>
-										<span class="close" ng-click="delChild($index)"></span>
+										<span class="close" ng-click="delChild($index)" ng-show="IsVisible"></span>
 									</div>
 								</li>
 
 								<li>
-									<div class="btn-group" uib-dropdown dropdown-append-to-body>
-										<div class="col-xs-7" ng-show = "IsVisible"><button type="button" class="btn btn-primary" uib-dropdown-toggle>
-											<i class="glyphicon glyphicon-plus"></i>
+									<div class="btn-group" uib-dropdown dropdown-append-to-body ng-show="isVisible">
+										<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+											"Vide"<span class="caret sortList"></span>
 										</button>
+										<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+											<li role="menuitem" ng-repeat="t in taskMother" ng-click="clickChildren($index)"><a href="">{{t.name}}</a></li>
+										</ul>
 									</div>
-									<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-										<li role="menuitem" ng-repeat="t in taskMother" ng-click="clickChildren($index)"><a href="">{{t.name}}</a></li>
-									</ul>
-								</div>
-							</li>
-						</ul>
+								</li>
+							</ul>
+						</div>
 					</div>
-
-				</div>
-
-
-
 
 
 				<div class="row topSpace">
@@ -158,14 +153,17 @@
 							<li ng-repeat="t in predecessors track by $index">
 								<div class="closeWrapper">
 									<div>{{fullTasksPred[t].name}}</div>
-									<span class="close" ng-click="delPredecessor($index)"></span>
+									<span class="close" ng-show="IsVisible" ng-click="delPredecessor($index)"></span>
 								</div>
 							</li>
 							<li>
-								<div class="btn-group" uib-dropdown dropdown-append-to-body>
-									<div class="col-xs-6" ng-show = "IsVisible"><button type="button" class="btn btn-primary" uib-dropdown-toggle>
-										<i class="glyphicon glyphicon-plus"></i>
+								<div class="btn-group" uib-dropdown dropdown-append-to-body ng-show="IsVisible">
+									<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+										"Vide"<span class="caret sortList"></span>
 									</button>
+									<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+										<li role="menuitem" ng-repeat="t in fullTasksPred" ng-click="clickPredecessor($index)"><a href="">{{t.name}}</a></li>
+									</ul>
 								</div>
 							</li>
 						</ul>
@@ -249,7 +247,7 @@
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" ng-click="grab()">Saisir</button>
-				<button type="button" class="btn btn-warning" ng-click="inactive = !inactive;modify();ShowHide()">{{ modifyText }} </button>
+				<button type="button" class="btn btn-warning" ng-show="canModify()" ng-click="inactive = !inactive;modify();ShowHide()">{{ modifyText }} </button>
 			</div>
 		</div>
 	</uib-tab>

@@ -8,7 +8,7 @@
 		header('Location: /connection.php');
 	}
 */
-	$_SESSION["email"] = "jean.dupont@email.com";
+//	$_SESSION["email"] = "jean.dupont@email.com";
 	$notifRequest = new NotifRqst();
 	$listeNotifs = $notifRequest->getNotifs($_SESSION["email"],false);
 
