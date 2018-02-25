@@ -6,11 +6,10 @@
 		public $id;
 		public $theDate;
 		public $title;
-       	public $message;
+       		public $message;
 		public $read;
 		public $send;
 		public $projectName;
-		
 	}
 
 	class NotifRqst extends PSQLDatabase
@@ -29,8 +28,8 @@
 					project.name
 				FROM notification
 					JOIN Sender ON Notification.id = Sender.idnotification
-					JOIN projectnotification ON Notification.id = projectnotification.notificationID
-					JOIN project ON projectnotification.projectID = project.id
+					LEFT OUTER JOIN projectnotification ON Notification.id = projectnotification.notificationID
+					LEFT OUTER JOIN project ON projectnotification.projectID = project.id
 				WHERE emailReceiver = '$emailReceiver'";
 			if($unread)
 			{
@@ -60,7 +59,14 @@
 
 				array_push($notifs, $notif);
 			}
-            return $notifs;
+            		return $notifs;
+		}
+		public function readNotif($idNotif)
+		{	
+		$script = "update notification 
+			set read = true 
+			where id = $idNotif;";
+		$resultScript = pg_query($this->_conn, $script);	
 		}
 	}
 ?>
