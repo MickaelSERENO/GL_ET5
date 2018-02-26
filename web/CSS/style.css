@@ -202,6 +202,10 @@
 .tableContenuNotif td {
 	border: none !important;
 }
+.unread{
+	font-weight:bold !important;
+}
+
 .bordering{
 	border-top: 1px solid #ccccb3;
 	background-color: #F5F5F5 !important;

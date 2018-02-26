@@ -48,4 +48,14 @@
 		return false;
 	}
 
+	// Check if the notification is one of the user's
+	function canAccessNotification($id)
+	{
+		//Check if the user is connected
+		if(!isset($_SESSION["email"]))
+			return false;
+
+		//...
+	}
+	
 ?>

@@ -6,10 +6,10 @@
 		public $id;
 		public $theDate;
 		public $title;
-       	public $message;
+       		public $message;
 		public $read;
 		public $send;
-		
+		public $projectName;
 	}
 
 	class NotifRqst extends PSQLDatabase
@@ -18,10 +18,19 @@
 		{
 			$notifs = array();
 			//Fetch notifs
-			$script = "SELECT notification.id, thedate, title, message, read, emailsender
-					   FROM notification, Sender
-					   WHERE 
-						Notification.id = Sender.idnotification AND emailReceiver = '$emailReceiver'";
+			$script = "SELECT  
+					notification.id, 
+					notification.thedate, 
+					notification.title, 
+					notification.message, 
+					notification.read, 
+					Sender.emailsender,
+					project.name
+				FROM notification
+					JOIN Sender ON Notification.id = Sender.idnotification
+					LEFT OUTER JOIN projectnotification ON Notification.id = projectnotification.notificationID
+					LEFT OUTER JOIN project ON projectnotification.projectID = project.id
+				WHERE emailReceiver = '$emailReceiver'";
 			if($unread)
 			{
 				$script = $script." AND NOT read";
@@ -37,13 +46,27 @@
 				$notif->theDate	= $row[1];
 				$notif->title	= $row[2];
 				$notif->message	= $row[3];
-				$notif->read	= (boolean)($row[4]);
+				if($row[4]=='f')
+				{
+					$notif->read	= false;
+				}
+				else
+				{
+					$notif->read	= true;
+				}
 				$notif->send	= $row[5];
-				
+				$notif->projectName = $row[6];
 
 				array_push($notifs, $notif);
 			}
-            return $notifs;
+            		return $notifs;
+		}
+		public function readNotif($idNotif)
+		{	
+		$script = "update notification 
+			set read = true 
+			where id = $idNotif;";
+		$resultScript = pg_query($this->_conn, $script);	
 		}
 	}
 ?>
