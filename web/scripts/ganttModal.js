@@ -492,7 +492,7 @@ function pred_orderRelationShip(pred, succ)
 	if(pred == succ)
 		return true;
 	for(var i = 0; i < pred.children.length; i++)
-		if(pre_orderRelationShip(pred.children[i], succ))
+		if(pred_orderRelationShip(pred.children[i], succ))
 			return true;
 	return false;
 };

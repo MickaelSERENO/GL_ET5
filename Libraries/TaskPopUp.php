@@ -125,7 +125,7 @@
 							<ul class="list-inline listSpaceRight">
 								<li ng-repeat="t in children track by $index">
 									<div class="closeWrapper">
-										<div>{{fullTasks[t].name}}</div>
+										<div>{{taskMother[t].name}}</div>
 										<span class="close" ng-click="delChild($index)" ng-show="IsVisible"></span>
 									</div>
 								</li>

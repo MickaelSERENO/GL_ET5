@@ -30,7 +30,11 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 
 	$scope.fullTasks     = [{name : "\"Vide\"", id:"NULL"}];
 	$scope.fullTasksPred = [{name : "\"Vide\"", id:"NULL"}];
-	$scope.taskMother    = [{name : "\"Vide\"", id:"NULL"}].concat(task);
+	$scope.taskMother    = [{name : "\"Vide\"", id:"NULL"}].concat(task.children);
+	for(var i = 0; i < tasks.length; i++)
+		if(!tasks[i].isMarker)
+			$scope.taskMother.push(tasks[i]);
+
 	$scope.predecessors  = [];
 	$scope.mother        = 0;
 	$scope.children      = [];
@@ -203,7 +207,6 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 					}
 				}
 			}
-
 		}
 
 		return true;
@@ -221,28 +224,51 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 		}
 	}
 
-	$scope.addTask = function(task)
+	$scope.addTask = function(t)
 	{
-		if(!task.isMarker)
-			$scope.fullTasks.push(task);
-		$scope.fullTasksPred.push(task);
+		console.log(t.id);
+		if(t.id != $scope.task.id)
+		{
+			if(!t.isMarker)
+				$scope.fullTasks.push(t);
+			$scope.fullTasksPred.push(t);
+		}
 
-		for(var i =0; i < task.children.length; i++)
-			$scope.addTask(task.children[i]);
+		for(var i =0; i < t.children.length; i++)
+			$scope.addTask(t.children[i]);
 	};
 
+	$scope.deleteTask = function(currentTask, taskToDelete)
+	{
+		for(var i =0; i < currentTask.successors.length; i++)
+			if(currentTask.successors[i].id == taskToDelete.id)
+				currentTask.successors.splice(i, 1);
+
+		for(var i = 0; i < currentTask.children.length; i++)
+		{
+			if(currentTask.children[i].id == taskToDelete.id)
+				currentTask.children.splice(i, 1);
+			else
+				$scope.deleteTask(currentTask.children[i], taskToDelete);
+		}
+	};
+
+	//Need to delete this task in the tree task
 	for(var i =0; i < tasks.length; i++)
-		$scope.addTask(tasks[i]);
+		$scope.deleteTask(tasks[i], $scope.task);
+
+	for(var i =0; i < $scope.tasks.length; i++)
+		$scope.addTask($scope.tasks[i]);
 
 	//Fill predecessors
-	for(var i =0; i < task.predecessors.length; i++)
+	for(var i =0; i < $scope.task.predecessors.length; i++)
 		for(var j =0; j < $scope.fullTasksPred.length; j++)
-			if(task.predecessors[i] == $scope.fullTasksPred[j])
+			if($scope.task.predecessors[i].id == $scope.fullTasksPred[j].id)
 				$scope.predecessors.push(j);
 
 	//Fill children
-	for(var i =0; i < task.children.length; i++)
-		for(var j=0; j < $scope.fullTasks.length; j++)
-			if(task.children[i] == $scope.fullTasks[j])
+	for(var i =0; i < $scope.task.children.length; i++)
+		for(var j=0; j < $scope.taskMother.length; j++)
+			if($scope.task.children[i].id == $scope.taskMother[j].id)
 				$scope.children.push(j);
 });
