@@ -234,4 +234,15 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 	for(var i =0; i < tasks.length; i++)
 		$scope.addTask(tasks[i]);
 
+	//Fill predecessors
+	for(var i =0; i < task.predecessors.length; i++)
+		for(var j =0; j < $scope.fullTasksPred.length; j++)
+			if(task.predecessors[i] == $scope.fullTasksPred[j])
+				$scope.predecessors.push(j);
+
+	//Fill children
+	for(var i =0; i < task.children.length; i++)
+		for(var j=0; j < $scope.fullTasks.length; j++)
+			if(task.children[i] == $scope.fullTasks[j])
+				$scope.children.push(j);
 });
