@@ -2,7 +2,7 @@
     session_start();
 
 //    $_SESSION["email"] = 'jean.dupont@email.com';
-    $_SESSION["email"] = 'stacy.gromat@email.com';
+//    $_SESSION["email"] = 'stacy.gromat@email.com';
 
 	if(!isset($_SESSION["email"]))
 	{

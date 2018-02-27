@@ -4,7 +4,7 @@ session_start();
 //$_SESSION["email"] = 'jean.dupont@email.com';
 //$_SESSION["email"] = 'administrator@email.com';
 //$_SESSION["email"] = 'stacy.gromat@email.com';
-$_SESSION["email"] = 'karine.legros@woodcorp.com';
+//$_SESSION["email"] = 'karine.legros@woodcorp.com';
 
 if(!isset($_SESSION["email"]))
 {
