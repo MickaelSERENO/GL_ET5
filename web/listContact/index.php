@@ -2,6 +2,9 @@
 session_start();
 
 //$_SESSION["email"] = 'jean.dupont@email.com';
+//$_SESSION["email"] = 'administrator@email.com';
+//$_SESSION["email"] = 'stacy.gromat@email.com';
+$_SESSION["email"] = 'karine.legros@woodcorp.com';
 
 if(!isset($_SESSION["email"]))
 {
@@ -111,7 +114,7 @@ if(!isset($_SESSION["email"]))
                     </div>
                     <hr style="margin: 0px">
                     <div ng-show="category=='contact'" style="font-size: 10px;">
-                        <div ng-show="isCollaborator">
+                        <div>
                             <div>
                                 <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
                                     Contact status </label>
@@ -122,12 +125,13 @@ if(!isset($_SESSION["email"]))
                             </div>
                             <div>
                                 <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    Comme un collaborator </label>
-                                <label>
-                                    <input type="checkbox" ng-model="user.contactHasProjects" ng-click="goFilter()">
-                                    liés à un projet en cours
+                                    Contact roles </label>
+                                <label ng-repeat="role in contactRole">
+                                    <input type="checkbox"  checklist-model="user.contactRole" checklist-value="role" ng-click="goFilter()">
+                                    {{role}}
                                 </label>
                             </div>
+
                         </div>
                         <div ng-show="isManager">
                             <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">

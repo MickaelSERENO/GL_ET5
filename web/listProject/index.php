@@ -2,6 +2,7 @@
     session_start();
 
 //    $_SESSION["email"] = 'jean.dupont@email.com';
+    $_SESSION["email"] = 'stacy.gromat@email.com';
 
 	if(!isset($_SESSION["email"]))
 	{
@@ -112,7 +113,7 @@
                     </div>
                     <hr style="margin: 0px">
                     <div ng-show="category=='project'" style="font-size: 10px;">
-                        <div ng-show="isCollaborator">
+                        <div>
                             <div>
                                 <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
                                     Status </label>

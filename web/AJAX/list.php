@@ -18,7 +18,6 @@
             case 'getManager':
                 echo json_encode($rsqt->getManager());
 				break;
-
 			case 'getContacts':
                 echo json_encode($rsqt->getContacts());
                 break;
