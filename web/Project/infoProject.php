@@ -45,7 +45,6 @@
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttModal.js"></script>
-		<script type="text/javascript" src="/scripts/taskModal.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
@@ -571,7 +570,7 @@
 												<div class="taskNode">
 													<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-down" ng-show="task.canReduce()"></span>
 													<span ng-click="toggleExpandTask($parent)" class="glyphicon glyphicon-menu-right" ng-show="task.canExpand()"></span>
-													<div class="taskBackground" ng-dblclick="openTask(task)" ng-click="selectTask(task, $event)" ng-class="{'lateTask' : !(task.stats == undefined || task.stats == 'STARTED' || task.stats == 'NOT_STARTED')}">
+													<div class="taskBackground" ng-dblclick="openTask(task)" ng-click="selectTask(task, $event)" ng-class="{'lateTask' : !(task.stats == undefined || task.stats == 'STARTED' || task.stats == 'NOT_STARTED' || task.stats == 'FINISHED')}">
 														{{task.name}}
 													</div>
 												</div>

@@ -203,5 +203,15 @@
 			}
 			return $projects;
 		}
+
+		public function getProjectIDFromTask($idTask)
+		{
+			$script = "SELECT idProject FROM AbstractTask WHERE id = $idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+			$row = pg_fetch_row($resultScript);
+			if($row == null)
+				return -1;
+			return (int)($row[0]);
+		}
 	}
 ?>

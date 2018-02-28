@@ -877,5 +877,32 @@
 			$timerRqst->updateProject($row[0]);
 
 		}
+
+		public function deleteTask($idTask)
+		{
+			//DELETE PREDECESSORS, CHILDREN and Task
+			$script = "DELETE FROM TaskOrder     WHERE predecessorID = $idTask OR successorID = $idTask;
+					   DELETE FROM TaskHierarchy WHERE idMother      = $idTask OR idChild     = $idTask;
+					   DELETE FROM Marker        WHERE id            = $idTask;
+					   DELETE FROM Task          WHERE id            = $idTask;
+					   DELETE FROM AbstractTask  WHERE id            = $idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+			//TODO maybe send notification
+		}
+
+		public function setTaskInitCharge($idTask, $initCharge)
+		{
+			$script = "UPDATE Task SET initCharge=$initCharge WHERE id=$idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+		}
+
+		public function setTaskCharge($idTask, $chargeConsumed, $remaining)
+		{
+			$computedCharge = $remaining + $chargeConsumed;
+			$advancement    = (int)((1.0*$chargeConsumed)/($computedCharge)*100);
+
+			$script         = "UPDATE Task SET advancement=$advancement, remaining=$remaining, chargeConsumed=$chargeConsumed, computedCharge=$computedCharge WHERE id=$idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+		}
 	}
 ?>

@@ -60,7 +60,7 @@
 						</label>
 					</div>
 
-					<p> <a href="/new-password.php" class="pwdLink">Mot de passe oublié</a></p>
+					<p> <a href="/new-password.php" class="whiteLink">Mot de passe oublié</a></p>
 
 					<div class="container-fluid">
 						<div class="row">

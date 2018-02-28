@@ -146,7 +146,7 @@ CREATE TABLE ProjectNotification
 ---------------------------------------
 --Task tables (AbstractTask, TaskOrder)
 ---------------------------------------
-CREATE TYPE TASK_STATUS AS ENUM('STARTED', 'NOT_STARTED', 'LATE_STARTED', 'LATE_UNSTARTED');
+CREATE TYPE TASK_STATUS AS ENUM('FINISHED', 'STARTED', 'NOT_STARTED', 'LATE_STARTED', 'LATE_UNSTARTED');
 
 CREATE TABLE AbstractTask
 (
@@ -394,7 +394,12 @@ CREATE OR REPLACE FUNCTION checkDeleteProjectCollaborator() RETURNS TRIGGER AS $
 
 CREATE OR REPLACE FUNCTION afterTaskUpdate() RETURNS TRIGGER AS $$
 	BEGIN
-		EXECUTE updateProjectDate((SELECT idProject FROM AbstractTask WHERE AbstractTask.id = New.id));
+		IF TG_OP = 'DELETE' THEN
+			EXECUTE updateProjectDate((SELECT idProject FROM AbstractTask WHERE AbstractTask.id = Old.id));
+		ELSE
+			EXECUTE updateProjectDate((SELECT idProject FROM AbstractTask WHERE AbstractTask.id = New.id));
+		END IF;
+
 		RETURN New;
 	END
 	$$ LANGUAGE plpgsql;

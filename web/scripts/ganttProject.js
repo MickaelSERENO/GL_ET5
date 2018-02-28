@@ -31,6 +31,7 @@ class Project
 		this.startDate = new Date(cpy.startDate);
 		this.endDate   = new Date(cpy.endDate);
 		this.stats     = cpy.status;
+		this.managerEmail = cpy.managerEmail;
 	}
 }
 
@@ -1321,29 +1322,55 @@ $scope.projectClosed = function()
 		if(task == null)
 			return;
 
-		$scope.opts = 
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
 		{
-			backdrop : true,
-			backdropClick : true,
-			dialogFade : false,
-			keyboard : true,
-			templateUrl : "modalTask.html",
-			controller : "TaskModal",
-			controllerAs : "$ctrl",
-			resolve : {task    : function() {return task;},
-					   project : function() {return project;},
-					   tasks   : function() {return $scope.tasks;}
-					  }
-		};
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					//Parse the json result (fetch collaborators)
+					var jsonColls = JSON.parse(httpCtx.responseText);
+					var colls     = new Array();
+					for(var i=0; i < jsonColls.length; i++)
+					{
+						var endUser = new EndUser(jsonColls[i]);
+						colls.push(endUser);
+					}
 
-		var modalInstance = $uibModal.open($scope.opts);
-		modalInstance.result.then(
-			function()
-			{
-			},
-			function() //cancel
-			{
-			});
+					$scope.opts = 
+					{
+						backdrop : true,
+						backdropClick : true,
+						dialogFade : false,
+						keyboard : true,
+						templateUrl : "modalTask.html",
+						controller : "TaskModal",
+						controllerAs : "$ctrl",
+						resolve : {colls   : function() {return colls;},
+								   task    : function() {return task;},
+								   project : function() {return project;},
+								   tasks   : function() {return $scope.tasks;}
+								  }
+					};
+
+					var modalInstance = $uibModal.open($scope.opts);
+					modalInstance.result.then(
+						function()
+						{
+							$scope.updateTask();
+							$scope.taskSelected = null;
+						},
+						function() //cancel
+						{
+							$scope.updateTask();
+						});
+				}
+			}
+		}
+		httpCtx.open('GET', "/AJAX/projectColls.php?projectID="+projectID+"&requestID=0", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 	};
 
 	$scope.openCanvasTaskModal = function(event)
