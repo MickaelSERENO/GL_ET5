@@ -1,18 +1,18 @@
 --Add a collaborator
-INSERT INTO Contact      VALUES ('Jean', 'Dupont', 'jean.dupont@email.com');
+INSERT INTO Contact      VALUES ('Jean', 'Dupont', 'jean.dupont@email.com', '0627812161');
 INSERT INTO EndUser      VALUES ('jean.dupont@email.com', '$2y$10$ZRffHRCZxBuD545YelpwS.bTFhxFogn7yxfIMuBhBIrZUcXorVKl2', TRUE);
 INSERT INTO Collaborator VALUES ('jean.dupont@email.com'); 
 
 --Add a Project Manager
-INSERT INTO Contact        VALUES ('Stacy', 'Gromat', 'stacy.gromat@email.com');
+INSERT INTO Contact        VALUES ('Stacy', 'Gromat', 'stacy.gromat@email.com', '0781536894');
 INSERT INTO EndUser        VALUES ('stacy.gromat@email.com', '$2y$10$ZRffHRCZxBuD545YelpwS.bTFhxFogn7yxfIMuBhBIrZUcXorVKl2', TRUE);
 
 INSERT INTO ProjectManager VALUES ('stacy.gromat@email.com');
 
 --Add a Client
-INSERT INTO Client VALUES ('contact@woodcorp.com', 'Woodcorp');
-INSERT INTO Contact VALUES ('Karine', 'Legro', 'karine.legros@woodcorp.com');
-INSERT INTO ClientContact VALUES ('karine.legros@woodcorp.com', 'contact@woodcorp.com', '0627202562');
+INSERT INTO Client VALUES ('contact@woodcorp.com', 'Woodcorp', 'Société du bois', '0125984325');
+INSERT INTO Contact VALUES ('Karine', 'Legros', 'karine.legros@woodcorp.com', '0627202562');
+INSERT INTO ClientContact VALUES ('karine.legros@woodcorp.com', 'contact@woodcorp.com');
 
 --Add a Project
 INSERT INTO Project(managerEmail, contactEmail, name, description, startDate, endDate, status) VALUES ('stacy.gromat@email.com', 'karine.legros@woodcorp.com', 'Logiciel d''inventaire', 'Création d''un logiciel d''inventaire pour Woodcorp pour mieux gérer son matériel', '2017-12-27', '2018-12-27', 'STARTED');

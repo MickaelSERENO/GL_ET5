@@ -1,13 +1,19 @@
 <?php
+	require_once __DIR__.'/../../PSQL/ContactsRqst.php';
+	require_once __DIR__.'/../../Libraries/check.php';
+
 	session_start();
-	if(!isset($_GET['contactEmail']))
-	{	//POUR TEST
-		$email="contactSiliconSaclay@email.com";
-	}
-	else
+
+	//Redirect if not signed in
+	if(!isset($_SESSION["email"]))
 	{
-		$email=$_GET['contactEmail'];
+		header('Location: /connection.php');
+		return;
 	}
+
+	$rank = $_SESSION['rank'];
+	$contactRqst = new ContactsRqst();
+	$contact = $contactRqst->getContact($_GET['contactID']);
 ?>
 
 <!DOCTYPE html>
@@ -22,36 +28,60 @@
 		<script type="text/javascript" src="../scripts/bower_components/angular-sanitize/angular-sanitize.js"></script>
 		<script type="text/javascript" src="../scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
 		<script type="text/javascript" src="../scripts/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-		
-		<script type="text/javascript" src="../scripts/setup.js"></script>
-		
-		<script type="text/javascript" src="../scripts/infoContact.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="../scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="../CSS/style.css">
+		<link rel="stylesheet" type="text/css" href="../CSS/styleContact.css">
 		
 	</head>
 
 	<body ng-app="myApp">
-	
-		    <div id="topBanner">
-				<p>PoPS2017  -  {{loggerInfo.contactemail}}</p>
-			</div>
-			
-			<div id="centralPart">
-					<div class="container-fluid">
-						<div class="alignElem">
-							<div class="row" ng-controller="ContactCtrl" >
-								<div class="row"  ><h2> Name : {{selectedContact.name}} {{selectedContact.surname}} </h2></div>
-									<div class="row" ><span> Email : {{ selectedContact.email}} </span> </div>
-									<div class="row" ><span> Telephone : {{ selectedContact.clientContactTelephone}} </span> </div>
+		<header class="headerConnected">
+			<?php include('../Header/header.php'); ?>
+		</header>
+		
+		<div id="centralPart">
+			<div class="infoContact">
+				<h3> &nbsp; <?= $contact->name ?> <?= $contact->surname ?> </h3>
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row smallTopSpace">
+								<div class="col-md-12">
+									<div class="flexDiv">
+										<div> Adresse email : </div>
+										<div> &nbsp; <?= $contact->email ?> </div>
+									</div>
+								</div>
+							</div>
+							<div class="row smallTopSpace">
+								<div class="col-md-12">
+									<div class="flexDiv">
+										<div> Téléphone : </div>
+										<div> &nbsp; <?= $contact->telephone ?> </div>
+									</div>
+								</div>
+							</div>
+							<div class="row smallTopSpace">
+								<div class="col-md-12">
+									<div class="flexDiv">
+										<div> Société : </div>
+										<div> &nbsp; <?= $contact->entreprise ?> </div>
+									</div>
+								</div>
+							</div>
+							<div class="row smallTopSpace">
+								<div class="col-md-12">
+									<div class="flexDiv">
+										<div> Statut : </div>
+										<div> &nbsp; <?= $contact->status ?> </div>
+									</div>
+								</div>
 							</div>
 						</div>
-					
 					</div>
-
+				</div>
 			</div>
-			
-				
+		</div>
 	</body>
 </html>

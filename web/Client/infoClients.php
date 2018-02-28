@@ -16,8 +16,6 @@
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 		
-		<script type="text/javascript" src="/scripts/setup.js"></script>
-		
 		<script type="text/javascript" src="/scripts/globalClients.js"></script>
 		<script type="text/javascript" src="/scripts/infoClient.js"></script>
 
@@ -27,18 +25,16 @@
 	</head>
 
 	<body ng-app="myApp">
+		<header class="headerConnected">
+			<?php include('../Header/header.php'); ?>
+		</header>
+	
 		<div ng-controller="globalClientsCtrl">
-		    <div id="topBanner">
-				<p>PoPS2017  -  {{loggerInfo.contactemail}}</p>
-			</div>
-			
 			<div id="centralPart">
-					<!-- <h1 class="mainTitle">Clients</h1> -->
-		
-					<div ng-controller="ClientsCtrl">
+				<!-- <h1 class="mainTitle">Clients</h1> -->
+				<div ng-controller="ClientsCtrl">
 					<div class="container-fluid">
-						<div class="row"  >
-						
+						<div class="row">
 							<div class="col-md-4" id="listClients" >
 								<table class="table tableList">
 									<thead>
@@ -52,25 +48,33 @@
 								</table>
 							</div>
 							
-							
 							<div class="col-md-8" id="infosClient">
 								<div class="row" id="descriptionClient">
-									<div class="row"  ><h2> {{selectedClient.name}} </h2></div>
-									
-									<div class="row" ><span> Description : {{ selectedClient.description }} </span></div>
-									<div class="row" ><span> Adresse email : {{ selectedClient.email}} </span> </div>
-									<div class="row" ><span> Telephone : {{ selectedClient.contactTelephone}} </span> </div>
+									<div class="row">
+										<h2> {{selectedClient.name}} </h2>
+									</div>
+									<div class="row">
+										<span> Description : {{ selectedClient.description }} </span>
+									</div>
+									<div class="row">
+										<span> Adresse email : {{ selectedClient.email}} </span>
+									</div>
+									<div class="row">
+										<span> Telephone : {{ selectedClient.telephone}} </span>
+									</div>
 								</div>
 								
 								<div class="row" id="listProjectsClient">
-									<div class="row"> <h2> Projets </h2> </div>
+									<div class="row">
+										<h2> Projets </h2>
+									</div>
 									<div class="row">
 										<table class="table tableList">
 											<thead>
 												<tr>
 													<td> Nom du projet</td>
 													<td> Responsable</td>
-													<td> Contact Client </td>
+													<td> Client </td>
 													<td> Début </td>
 													<td> Fin </td>
 												</tr>
@@ -79,26 +83,46 @@
 												<tr ng-repeat="project in clientProjects">
 													<td> {{ project.name }}</td>
 													<td> {{ project.managerEmail }}</td>
-													<td> {{ project.contactEmail }}</td>
+													<td> {{ project.client }}</td>
 													<td> {{ project.startDate }}</td>
 													<td> {{ project.endDate }}</td>
 												</tr>
 											</tbody>
 										<table>
 									</div>
-									
 								</div>
-							</div>
 								
+								<div class="row" id="listContactsClient">
+									<div class="row">
+										<h2> Contacts Client </h2>
+									</div>
+									<div class="row">
+										<table class="table tableList">
+											<thead>
+												<tr>
+													<td> Prénom </td>
+													<td> Nom </td>
+													<td> Email </td>
+													<td> Téléphone </td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr ng-repeat="contact in clientContacts">
+													<td> {{ contact.name }}</td>
+													<td> {{ contact.surname }}</td>
+													<td> {{ contact.email }}</td>
+													<td> {{ contact.telephone }}</td>
+												</tr>
+											</tbody>
+										<table>
+									</div>
+								</div>
+								
+							</div>	
 						</div>
-						</div>
-					
 					</div>
-
-			</div>
-			
-				
-				
+				</div>
+			</div>	
 		</div>
 	</body>
 </html>

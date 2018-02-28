@@ -5,8 +5,7 @@ class ClientInfo
 		this.name = copy.name;
 		this.email=copy.email;
 		this.description=copy.description;
-		this.contactEmail = copy.contactEmail;
-		this.contactTelephone=copy.contactTelephone;
+		this.telephone=copy.telephone;
 	}
 }
 
@@ -15,10 +14,22 @@ class Project
 	constructor(copy)
 	{
 		this.managerEmail	=	copy.managerEmail;
-		this.contactEmail	=	copy.contactEmail;
+		this.client	        =	copy.client;
 		this.name			= 	copy.name;
 		this.startDate 		= 	copy.startDate;
 		this.endDate		=	copy.endDate;
+	}
+}
+
+class Contact
+{
+	constructor(copy)
+	{
+		this.name = copy.name;
+		this.surname = copy.surname;
+		this.email = copy.email;
+		this.telephone = copy.telephone;
+		this.entreprise = copy.entreprise;
 	}
 }
 
@@ -41,14 +52,14 @@ myApp.controller("ClientsCtrl", function($scope, $timeout)
 				for(var i in clients)
 				{
 					// console.log(clients[i]);
-					currentClient=new ClientInfo(clients[i]);
+					currentClient = new ClientInfo(clients[i]);
 					// console.log(currentClient);
 					$scope.clients.push(currentClient);
 				}
 			});				
 		}			
 	}
-	httpCtx.open('GET', "../AJAX/fetchClientsInfo.php",true);
+	httpCtx.open('GET', "/AJAX/fetchClientsInfo.php",true);
 	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	httpCtx.send(null);
 	// console.log($scope.clients);
@@ -73,31 +84,48 @@ myApp.controller("ClientsCtrl", function($scope, $timeout)
 		
 		//RECUPERE LES PROJETS DU CLIENT
 		$scope.clientProjects=[];
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange= function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				$scope.$apply(function()
+				{
+					console.log(httpCtx.responseText)
+					var projects = JSON.parse(httpCtx.responseText);
+					for(var i in projects)
+					{
+						currentProject=new Project(projects[i]);
+						$scope.clientProjects.push(currentProject);
+					}
+				});				
+			}
+		}
+		// console.log("../AJAX/fetchClientProjects.php?clientEmail="+$scope.selectedClient.contactEmail);
+		httpCtx.open("GET", "../AJAX/fetchClientProjects.php?clientEmail="+encodeURIComponent($scope.selectedClient.email), true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+		
+		//RECUPERE LES CONTACTS DU CLIENT
+		$scope.clientContacts=[];
 		var httpCx = new XMLHttpRequest();
 		httpCx.onreadystatechange= function()
 		{
 			if(httpCx.readyState == 4 && (httpCx.status == 200 || httpCx.status == 0))
 			{
 				$scope.$apply(function()
-				{
-					console.log(httpCx.responseText)
-					
-					var projects = JSON.parse(httpCx.responseText);
-					for(var i in projects)
+				{					
+					var contacts = JSON.parse(httpCx.responseText);
+					for(var i in contacts)
 					{
-						// console.log(clients[i]);
-						currentProject=new Project(projects[i]);
-						// console.log(currentClient);
-						if(projects[i].contactEmail==$scope.selectedClient.contactEmail)
-						{
-							$scope.clientProjects.push(currentProject);
-						}
+						currentContact=new Contact(contacts[i]);
+						$scope.clientContacts.push(currentContact);
 					}
 				});				
 			}			
 		}
 		// console.log("../AJAX/fetchClientProjects.php?clientEmail="+$scope.selectedClient.contactEmail);
-		httpCx.open('GET', "../AJAX/fetchClientProjects.php?clientEmail",true);
+		httpCx.open('GET', "../AJAX/fetchClientContacts.php?clientEmail="+encodeURIComponent($scope.selectedClient.email),true);
 		httpCx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCx.send(null);
 	

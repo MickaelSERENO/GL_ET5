@@ -25,6 +25,7 @@ CREATE TABLE Contact
 	name    VARCHAR(64) NOT NULL,
 	surname VARCHAR(64) NOT NULL,
 	email   VARCHAR(128),
+	telephone    VARCHAR(32),
 	PRIMARY KEY(email)
 );
 
@@ -43,6 +44,7 @@ CREATE TABLE Client
 	email       VARCHAR(128),
 	name        VARCHAR(64) NOT NULL,
 	description TEXT,
+	telephone   VARCHAR(32),
 	PRIMARY KEY(email)
 
 );
@@ -51,7 +53,6 @@ CREATE TABLE ClientContact
 (
 	contactEmail VARCHAR(128) NOT NULL,
 	clientEmail  VARCHAR(128) NOT NULL,
-	telephone    VARCHAR(32),
 	FOREIGN KEY(contactEmail) REFERENCES Contact(email),
 	FOREIGN KEY(clientEmail)  REFERENCES Client(email),
 	PRIMARY KEY(contactEmail)
@@ -610,7 +611,7 @@ CREATE TRIGGER triggerDeleteProjectCollaborator BEFORE DELETE
 
 \echo 'create an administrator. Password : password'
 
-INSERT INTO Contact VALUES ('Anna', 'Demars', 'administrator@email.com');
+INSERT INTO Contact VALUES ('Anna', 'Demars', 'administrator@email.com', '0152349281');
 INSERT INTO EndUser VALUES ('administrator@email.com', '$2y$10$ZRffHRCZxBuD545YelpwS.bTFhxFogn7yxfIMuBhBIrZUcXorVKl2', TRUE);
 INSERT INTO Administrator(userEmail) VALUES ('administrator@email.com');
 

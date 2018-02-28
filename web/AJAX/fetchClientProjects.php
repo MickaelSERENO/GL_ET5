@@ -3,8 +3,9 @@
 	session_start();
 	
 	$clientProjectRqst = new ClientProjectsRqst();
-	$allClientProjects = $clientProjectRqst->getClientProjects();
+	$allClientProjects = $clientProjectRqst->getClientProjects($_GET['clientEmail']);
 	
 	echo (json_encode($allClientProjects));
+	return;
 
 ?>

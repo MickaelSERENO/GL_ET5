@@ -6,8 +6,7 @@
 		public $email;
 		public $name;
 		public $description;
-		public $contactEmail;
-		public $contactTelephone;
+		public $telephone;
 	}
 
 	class ClientRqst extends PSQLDatabase
@@ -17,11 +16,10 @@
 			$clients = array();
 
             //Fetch clients information
-			$script = "SELECT email, name, description,
-								contactEmail, telephone
+			$script = "SELECT Client.email, Client.name, description, Client.telephone
 						FROM Client
-						INNER JOIN ClientContact
-						ON email=clientEmail";
+						INNER JOIN ClientContact ON Client.email=clientEmail 
+						INNER JOIN Contact ON contactEmail = Contact.email";
 
 			if (!($this->_conn))			{
 				echo "Erreur lors de la connexion.\n";
@@ -39,8 +37,7 @@
 				$client->email			= $row[0];
 				$client->name        	= $row[1];
 				$client->description    = $row[2];
-				$client->contactEmail   = $row[3];
-				$client->contactTelephone= $row[4];
+				$client->telephone      = $row[3];
 				
 				array_push($clients,$client);
 
