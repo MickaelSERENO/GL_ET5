@@ -34,7 +34,7 @@
 								<li class="list-inline-item"> <a href="/listProject"> <div class="menuItem"> Projets </div></a></li>
 							</div>
 							<div class="col-md-3">
-								<li class="list-inline-item"> <div class="menuItem"> Clients </div></li>
+								<li class="list-inline-item"> <a href="/Client"> <div class="menuItem"> Clients </div></a></li>
 							</div>
 							<div class="col-md-3">
 								<li class="list-inline-item"> <a href="/listContact"><div class="menuItem"> Contacts </div></a></li>
