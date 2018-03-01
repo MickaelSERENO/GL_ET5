@@ -12,10 +12,6 @@
 	$notifRequest = new NotifRqst();
 	$listeNotifs = $notifRequest->getNotifs($_SESSION["email"],false);
 	
-	if(isset($_GET["notifId"]))
-	{
-		$Notif = $notifRequest->getNotifByID($_GET["notifId"]);
-	}
 ?>
   <!DOCTYPE html>
   <html>
@@ -66,7 +62,7 @@
 		                <tbody>
 		                    <tr ng-repeat="notif in listNotifJS" ng-class="{unread : !notif.read}" ng-click="openNotif(notif)">
                                 <td>
-			                        {{ notif.theDate }}
+			                        {{ notif.theDate | date:'dd/MM/yyyy' }}
                                 </td>
                                 <td>
                                     {{ notif.title }}
@@ -80,17 +76,15 @@
             	<table class="table tableContenuNotif ">
         		    <tbody>
     			      <tr>
-						<td><h2>{{ openedNotif.title }}</h2></td>
+						<td class="title" colspan=3><h2>{{ openedNotif.title }}</h2></td>
     			      </tr>
     			      <tr>
-        				<td>{{ "Expéditeur : " +  openedNotif.senderFirstName + " " + openedNotif.senderLastName }}</td>
-        				<td>{{ openedNotif.theDate }}</td>
-    			      </tr>
-    			      <tr>
-        				<td>{{ openedNotif.projectName }}</td>
+        				<td ng-if="openedNotif">{{ "Expéditeur : " +  openedNotif.senderFirstName + " " + openedNotif.senderLastName }}</td>
+        				<td ng-if="openedNotif">{{ "Reçu le " +  (openedNotif.theDate | date:'dd/MM/yyyy')}}</td>
+        				<td ng-if="openedNotif">Projet : <a href="/Project/infoProject.php?projectID={{openedNotif.projectID}}">{{ openedNotif.projectName }}</a></td>
     			      </tr>			
            			<tr class="table bordering">
-			    	 <td><p>{{ openedNotif.message }}</p></td>
+			    	 <td class="message" colspan=3><p>{{ openedNotif.message }}</p></td>
 			        </tr>
 				   </tbody>	
                 </table>

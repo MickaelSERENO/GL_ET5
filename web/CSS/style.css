@@ -64,6 +64,11 @@
 	font-size: 1.325em;
 }
 
+#centralPart a, a:hover
+{
+	color:white;
+}
+
 .alignElem
 {
 	text-align: center;
@@ -194,22 +199,27 @@
 .tableContenuNotif {
 	margin: 10px 10px 10px 0px;
 	background-color: #F5F5F5;
-	color:black;
+	color:black !important;
 	border-radius: 10px;
-	text-align: left;
+	text-align: center;
 }
 
 .tableContenuNotif td {
 	border: none !important;
 }
+
+.tableContenuNotif td.message{
+	text-align:left;
+}
+
+.tableContenuNotif a, a:hover{
+	color:black !important;
+}
+
 .unread{
 	font-weight:bold !important;
 }
 
-a, a:hover
-{
-	color:white;
-}
 
 .bordering{
 	border-top: 1px solid #ccccb3;
