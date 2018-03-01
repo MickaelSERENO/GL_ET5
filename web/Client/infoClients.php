@@ -28,10 +28,6 @@
 
 	<body ng-app="myApp">
 		<div ng-controller="globalClientsCtrl">
-		    <div id="topBanner">
-				<p>PoPS2017  -  {{loggerInfo.contactemail}}</p>
-			</div>
-			
 			<div id="centralPart">
 					<!-- <h1 class="mainTitle">Clients</h1> -->
 		

@@ -7,8 +7,8 @@
 
 	if(!isset($_GET['projectID']) || !canModifyProject($_GET['projectID']))
 	{
-		http_response_code(403);
-		die('Forbidden Access');
+		echo '-1';
+		return;
 	}
 
 	//Change advancement, chargeConsumed, remaining

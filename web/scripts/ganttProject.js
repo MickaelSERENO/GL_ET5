@@ -511,6 +511,10 @@ function getFontSize()
 
 function drawRoundRect(x, y, w, h, r)
 { 
+	if(w < 0)
+		w=0;
+	if(h < 0)
+		h=0;
 	if (w < 2 * r)
 		r = w / 2;
 	if (h < 2 * r)
@@ -1022,7 +1026,8 @@ $scope.projectClosed = function()
 									if(allTasks[k].id === tasks.children[i].idChild)
 									{
 										allTasks[j].children.push(allTasks[k]);
-										allTasks[k].mother = allTasks[j];
+										allTasks[k].mother  = allTasks[j];
+										allTasks[k].counted = tasks.children[i].isCounted;
 									}
 
 					//Fill the successors

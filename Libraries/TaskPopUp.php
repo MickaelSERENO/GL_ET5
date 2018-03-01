@@ -5,7 +5,7 @@
 <script type="text/javascript" src="/scripts/taskModal.js"></script>
 <script type="text/ng-template" id="modalTask.html">
 <div class="modal-header">
-	<h3 class="modal-title">Gestion tâche : {{task.name}}</h3>
+	<h3 class="modal-title">Gestion tâche : {{name}}</h3>
 </div>
 <div class="modal-body">
 	<uib-tabset>
@@ -16,7 +16,7 @@
 					<div class="col-lg-9">
 						<div class="input-group">
 							<span class="input-group-addon" id="basic-addon2">Nom de la tâche :</span>
-							<input type="text" class="form-control" ng-disabled="inactive"  placeholder="taskname" aria-describedby="basic-addon2" value="{{task.name}}"></input>
+							<input type="text" class="form-control" ng-disabled="inactive"  placeholder="taskname" aria-describedby="basic-addon2" ng-model="name" ng-change="changeName(name)"></input>
 
 						</div>
 						
@@ -34,7 +34,7 @@
 					</div>
 
 					<div class="col-md-4" ng-show = "IsVisible">
-						Jalon : <input type="checkbox" ng-model="isMarker"></input>
+						Jalon : <input type="checkbox" ng-model="isMarker" ng-disable=true></input>
 					</div>
 				</div>
 
@@ -43,15 +43,15 @@
 					<div class="col-md-8">
 						<div class="input-group">
 							<span class="input-group-addon" id="basic-addon2">Responsable de la tâche :</span>
-							<input type="text" class="form-control" ng-disabled="inactive" value="{{currentColl.email}}"></input>
+							<input type="text" class="form-control" ng-disabled="true" value="{{collaborators[currentColl].email}}"></input>
 						</div>
 					</div>
-					<div class="col-md-4 btn-group" uib-dropdown dropdown-append-to-body ng-show="!inactive">
+					<div class="col-md-4 btn-group" uib-dropdown dropdown-append-to-body ng-show="!inactive && children.length==0">
 						<button type="button" class="btn btn-primary" uib-dropdown-toggle>
 							<span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
 						</button>
 						<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-							<li role="menuitem" ng-repeat="c in collaborators" ng-click="currentColl = collaborators[$index]"><a href="">{{c.name}}</a></li>
+							<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}}</a></li>
 						</ul>
 					</div>
 					
@@ -62,9 +62,9 @@
 					<div class="col-md-4">
 						Début :
 						<p class="input-group">
-							<input type="text" class="form-control" ng-disabled="inactive" uib-datepicker-popup="{{dateFormat}}" ng-model="task.startDate" is-open="popupStartDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+							<input type="text" class="form-control" ng-disabled="inactive || children.length > 0" uib-datepicker-popup="{{dateFormat}}" ng-model="task.startDate" is-open="popupStartDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
 							<span class="input-group-btn">
-								<button type="button" class="btn btn-default" ng-show = "!inactive" ng-click="openStartDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+								<button type="button" class="btn btn-default" ng-show = "!(inactive || children.length > 0)" ng-click="openStartDate()"><i class="glyphicon glyphicon-calendar"></i></button>
 							</span>
 						</p>
 					</div>
@@ -72,15 +72,15 @@
 					<div class="col-md-4" ng-show="!isMarker">
 						Fin :
 						<p class="input-group">
-							<input type="text" class="form-control" ng-disabled="inactive" uib-datepicker-popup="{{dateFormat}}" ng-model="task.endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+							<input type="text" class="form-control" ng-disabled="inactive || children.length > 0" uib-datepicker-popup="{{dateFormat}}" ng-model="task.endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
 							<span class="input-group-btn">
-								<button type="button" class="btn btn-default" ng-show = "!inactive" ng-click="openEndDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+								<button type="button" class="btn btn-default" ng-show = "!(inactive || children.length > 0)" ng-click="openEndDate()"><i class="glyphicon glyphicon-calendar"></i></button>
 							</span>
 						</p>
 					</div>
 				</div>
 
-				<div class="row topSpace">
+				<div class="row topSpace" ng-show="!isMarker">
 					<div class="col-lg-7">
 						<div class="input-group">
 							<span class="input-group-addon"  id="basic-addon2">Charge totale estimée :</span>
@@ -95,17 +95,38 @@
 					<div class="col-lg-10">
 						<div class="input-group">
 							<span class="input-group-addon" id="basic-addon2">Description :</span>
-							<textarea class="form-control" id="descriptionTextarea" rows="3" ng-disabled="inactive">{{task.description}}</textarea>
+							<textarea class="form-control" id="descriptionTextarea" rows="3" ng-disabled="inactive" ng-model="description"ng-change="changeDesc(description)"></textarea>
 						</div>
 					</div>
 				</div>
 
 				<!-------->
-				<div class="row topSpace">
+				<div class="row topSpace" ng-show="!isMarker">
 					<div class="col-md-12">
-						<div class="col-xs-3">Sous-tâche(s) :</div>
+						<div>Tâche parente :</div>
+						<div class="btn-group" uib-dropdown dropdown-append-to-body ng-show="!inactive">
+							<button type="button" class="btn btn-primary" uib-dropdown-toggle>
+							{{fullTasks[mother].name}}<span class="caret sortList"></span>
+							</button>
+							<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
+								<li role="menuitem" ng-repeat="t in fullTasks" ng-click="clickMother($index)"><a href="">{{t.name}}</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<!-------->
+				<div class="row topSpace" ng-show="!isMarker">
+					<div class="col-md-12">
+						<div>Sous-tâche(s) :</div>
 
 						<ul class="list-inline listSpaceRight">
+							<li ng-repeat="t in fixChildren track by $index">
+								<div>
+									<div>{{t.name}}</div>
+								</div>
+							</li>
+
 							<li ng-repeat="t in children track by $index">
 								<div class="closeWrapper">
 									<div>{{taskMother[t].name}}</div>
@@ -130,7 +151,7 @@
 
 			<div class="row topSpace">
 				<div class="col-md-12">
-					<div class="col-xs-3">Prédecesseur(s) :</div>
+					<div>Prédecesseur(s) :</div>
 
 					<ul class="list-inline listSpaceRight">
 						<li ng-repeat="t in predecessors track by $index">
@@ -156,7 +177,8 @@
 		</div>
 
 		<div class="modal-footer" ng-show="isManager">
-		<button type="button" class="btn btn-primary" ng-click="modify();">{{ modifyText }} </button>
+			<div ng-show="showMsg">{{errorMsg}}</div>
+			<button type="button" class="btn btn-primary" ng-click="modify();">{{ modifyText }} </button>
 			<button type="button" class="btn btn-warning" ng-click="delete()">Supprimer</button>
 		</div>
 	</uib-tab>

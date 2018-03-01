@@ -2,11 +2,11 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 {
 	$scope.collaborators = [new EndUser({name : "\"Vide\"", surname : "", email : "NULL"})].concat(colls);
 
-	$scope.currentColl = $scope.collaborators[0];
+	$scope.currentColl = 0;
 	for(var i = 0; i < $scope.collaborators.length; i++)
 		if($scope.collaborators[i].email == task.collaboratorEmail)
 		{
-			$scope.currentColl = $scope.collaborators[i];
+			$scope.currentColl = i;
 			break;
 		}
 
@@ -22,33 +22,41 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 		minDate: project.startDate,
 		startingDay: 1
 	};
-	$scope.currentDate = task.startDate;
-	$scope.startDate   = new Date();
-	$scope.endDate     = new Date();
+	$scope.currentDate = new Date();
+	$scope.startDate   = task.startDate;
+	$scope.endDate     = task.endDate;
 
 	$scope.popupStartDate = {opened : false};
 	$scope.popupEndDate   = {opened : false};
 
 	$scope.isMarker     = false;
 
-	$scope.name         = "";
-	$scope.description  = "";
+	$scope.name         = task.name;
+	$scope.description  = task.description;
 
-	$scope.currentCol   = 0;
 	$scope.forms = {};
 
-	$scope.fullTasks     = [{name : "\"Vide\"", id:"NULL"}];
-	$scope.fullTasksPred = [{name : "\"Vide\"", id:"NULL"}];
-	$scope.taskMother    = [{name : "\"Vide\"", id:"NULL"}].concat(task.children);
+	$scope.fullTasks     = [{name : "\"Vide\"", id:"-1"}];
+	$scope.fullTasksPred = [{name : "\"Vide\"", id:"-1"}];
+	$scope.taskMother    = [{name : "\"Vide\"", id:"-1"}];
+	for(var i = 0; i < task.children.length; i++)
+		if(task.children[i].counted)
+			$scope.taskMother.push(task.children[i]);
+
 	for(var i = 0; i < tasks.length; i++)
 		if(!tasks[i].isMarker)
 			$scope.taskMother.push(tasks[i]);
+
+	console.log($scope.taskMother);
 
 	$scope.predecessors  = [];
 	$scope.mother        = 0;
 	$scope.children      = [];
 
-	$scope.currentCol    = 0;
+	$scope.fixChildren   = [];
+	for(var i = 0; i < task.children.length; i++)
+		if(task.children[i].counted == false)
+			$scope.fixChildren.push(task.children[i]);
 
 	$scope.errorMsg      = "";
 	$scope.showMsg       = false;
@@ -95,9 +103,65 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 			$scope.modifyText = "Valider";
 			$scope.inactive = false;
 		}else if($scope.modifyIndex == 1){
+			$scope.modifyTask();
+		}
+	};
+
+	$scope.modifyTask = function()
+	{
+		if(!$scope.canAdd())
+		{
+			$scope.showMsg = true;
+			console.log("arf");
+			$scope.inactive = false;
+		}
+		else
+		{
+			$scope.inactive = true;
 			$scope.modifyIndex = 2;
 			$scope.modifyText = "Sauvegarde en cours...";
-			$scope.inactive = true;
+
+			var startTime    = ($scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000)/1000; 
+			var endTime      = ($scope.endDate.getTime()   - $scope.endDate.getTimezoneOffset()*60*1000)/1000; 
+			var predList     = [];
+			var childrenList = [];
+			for(var i = 0; i < $scope.predecessors.length; i++)
+				predList.push($scope.fullTasksPred[$scope.predecessors[i]].id);
+
+			for(var i = 0; i < $scope.children.length; i++)
+				childrenList.push($scope.taskMother[$scope.children[i]].id);
+
+			var pred         = encodeURIComponent(JSON.stringify(predList));
+			var children     = encodeURIComponent(JSON.stringify(childrenList));
+
+			var httpCtx = new XMLHttpRequest();
+			httpCtx.onreadystatechange = function()
+			{
+				//Check for errors
+				if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+				{
+					$scope.modifyIndex = 0;
+					$scope.modifyText  = "Modifier";
+					if(httpCtx.responseText != "-1")
+					{
+					}
+					else
+						$uibModalInstance.dismiss();
+				}
+			};
+
+			console.log($scope.description);
+
+			if($scope.isMarker)
+			{
+				httpCtx.open('GET', "/AJAX/changeTask.php?isMarker=1&projectID="+$scope.project.id+"&startDate="+startTime+"&name="+encodeURIComponent($scope.name)+"&description="+encodeURIComponent($scope.description)+"&predecessors="+pred+"&taskID="+$scope.task.id, true);
+			}
+			else
+			{
+				httpCtx.open('GET', "/AJAX/changeTask.php?isMarker=0&projectID="+$scope.project.id+"&name="+encodeURIComponent($scope.name)+"&startDate="+startTime+"&endDate="+endTime+"&collEmail="+encodeURIComponent($scope.collaborators[$scope.currentColl].email)+"&mother="+$scope.taskMother[$scope.mother].id+"&description="+encodeURIComponent($scope.description)+"&predecessors="+pred+"&children="+children+"&taskID="+$scope.task.id, true);
+			}
+			httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			httpCtx.send(null);
 		}
 	};
 
@@ -146,7 +210,7 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 
 	$scope.clickCollaborators = function(i)
 	{
-		$scope.currentCol = i;
+		$scope.currentColl = i;
 	};
 
 	$scope.clickMother = function(i)
@@ -167,12 +231,43 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 	$scope.delChild = function(i)
 	{
 		$scope.children.splice(i, 1);
+		$scope.updateDate();
 	};
 
 	$scope.clickChildren = function(i)
 	{
 		if(i != 0)
-		$scope.children.push(i);
+			$scope.children.push(i);
+		$scope.updateDate();
+	};
+
+	$scope.updateDate = function()
+	{
+		var startTime = $scope.startDate.getTime();
+		var endTime   = $scope.endDate.getTime();
+
+		for(var i = 0; i < $scope.children.length; i++)
+		{
+			if(startTime > $scope.taskMother[$scope.children[i]].startDate.getTime())
+				$scope.startTime = $scope.taskMother[$scope.children[i]].startDate.getTime();
+
+			if(endTime < $scope.taskMother[$scope.children[i]].endDate.getTime())
+				$scope.endTime = $scope.taskMother[$scope.children[i]].endDate.getTime();
+		}
+
+		for(var i = 0; i < $scope.fixChildren.length; i++)
+		{
+			if(startTime > $scope.fixChildren[i].startDate.getTime())
+				$scope.startTime = $scope.fixChildren[i].startDate.getTime();
+
+			if(endTime < $scope.fixChildren[i].endDate.getTime())
+				$scope.endTime = $scope.fixChildren[i].endDate.getTime();
+		}
+
+
+		$scope.startDate = new Date(startTime);
+		$scope.endDate   = new Date(endTime);
+		
 	};
 
 	$scope.containDuplicate = function(arr, index=0)
@@ -254,12 +349,22 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 					return false;
 				}
 
-				if(levelHierarchy($scope.taskMother[$scope.children[i]]) <= 2)
+				if(levelHierarchy($scope.taskMother[$scope.children[i]]) >= 2)
 				{
 					$scope.errorMsg = "Une sous-tâche ne peut avoir un niveau de hiérarchie supérieur à 3";
 					return false;
 				}
 			}
+
+			//Check if a predecessor is not a child
+			for(var i=0; i < $scope.children.length; i++)
+				for(var j=0; j < $scope.predecessors.length; j++)
+					if($scope.taskMother[$scope.children[i]] == $scope.fullTasksPred[$scope.predecessors[i]])
+					{
+						$scope.errorMsg = "Une sous-tâche ne peut être prédécesseur";
+						return false;
+					}
+
 
 			//Check if the predecessor is not in the mother succession list
 			if($scope.mother > 0)
@@ -309,13 +414,19 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 			if(currentTask.successors[i].id == taskToDelete.id)
 				currentTask.successors.splice(i, 1);
 
+		if(currentTask.mother == taskToDelete)
+			currentTask.mother = null;
+
 		for(var i = 0; i < currentTask.children.length; i++)
 		{
 			if(currentTask.children[i].id == taskToDelete.id)
+			{
 				currentTask.children.splice(i, 1);
+			}
 			else
 				$scope.deleteTask(currentTask.children[i], taskToDelete);
 		}
+
 	};
 
 	//Need to delete this task in the tree task
@@ -333,9 +444,15 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 
 	//Fill children
 	for(var i =0; i < $scope.task.children.length; i++)
-		for(var j=0; j < $scope.taskMother.length; j++)
-			if($scope.task.children[i].id == $scope.taskMother[j].id)
-				$scope.children.push(j);
+		if($scope.task.children[i].counted)
+			for(var j=0; j < $scope.taskMother.length; j++)
+				if($scope.task.children[i].id == $scope.taskMother[j].id)
+					$scope.children.push(j);
+
+	if($scope.task.mother != null)
+		for(var i = 0; i < $scope.fullTasks.length; i++)
+			if($scope.task.mother.id == $scope.fullTasks[i].id)
+				$scope.mother = i;
 
 	$scope.isManager = (rank==2 || project.managerEmail == email);
 
@@ -435,4 +552,16 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 		modifyIndexAdv = 0;
 		modifyText     = "Modifier";
 	};
+
+	$scope.changeDesc = function(newValue)
+	{
+		$scope.description = newValue;
+	};
+
+	$scope.changeName = function(newValue)
+	{
+		$scope.name = newValue;
+	};
+
+	console.log($scope.children);
 });
