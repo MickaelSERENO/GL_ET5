@@ -54,8 +54,13 @@
 		//Check if the user is connected
 		if(!isset($_SESSION["email"]))
 			return false;
-
-		//...
+		$notifR = new NotifRqst();
+		$n = $notifR->getNotifByID($id);
+		if($n->receiver == $_SESSION["email"])
+		{
+			return true;
+		}
+		return false;
 	}
 	
 ?>

@@ -4,8 +4,7 @@ app.controller('formController', function($scope)
 {
 	$scope.count = 0;
 	$scope.listNotifJS = listNotifJS;
-	$scope.openedNotif;
- 
+	
 	$scope.openNotif = function(notif)
 	{
 		console.log(notif);
@@ -17,11 +16,22 @@ app.controller('formController', function($scope)
 			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
 			{
 				if(httpCtx.responseText != '1')
+				{
+
+					alert(httpCtx.responseText);
 					alert("An unknown error occured");
+				}
 			}
 		}
 		$scope.openedNotif.read = true;
-		//httpCtx.open('GET', "/", true);
+		httpCtx.open('GET', "/AJAX/readNotif.php?notifID="+notif.id, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 		console.log($scope.openedNotif);
 	};
+	if(notifID)
+	{
+		console.log(listNotifJS.map(function(e){return e.id;}).indexOf(notifID));
+		$scope.openNotif(listNotifJS[listNotifJS.map(function(e){return e.id;}).indexOf(notifID)]);
+	}
 });

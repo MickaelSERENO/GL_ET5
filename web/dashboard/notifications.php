@@ -11,6 +11,11 @@
 //	$_SESSION["email"] = "jean.dupont@email.com";
 	$notifRequest = new NotifRqst();
 	$listeNotifs = $notifRequest->getNotifs($_SESSION["email"],false);
+	
+	if(isset($_GET["notifId"]))
+	{
+		$Notif = $notifRequest->getNotifByID($_GET["notifId"]);
+	}
 ?>
   <!DOCTYPE html>
   <html>
@@ -28,11 +33,16 @@
     <link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/CSS/style.css">
 	<script type="text/javascript" src="/scripts/notif.js"></script>	
-	<?php file_put_contents('php://stderr', '\''.json_encode($listeNotifs).'\''); ?>
     <script type="text/javascript">
 	var listNotifJS = JSON.parse(<?php echo '\''.json_encode($listeNotifs, JSON_HEX_APOS).'\''; ?>); 
 	console.log(listNotifJS);
+	var notifID = null;
     </script>
+<?php if(isset($_GET["notifId"])): ?>
+	<script type="text/javascript">
+		notifID = <?= $_GET["notifId"] ?>; 
+	</script>
+<?php endif ?>
   </head>
 
   <body ng-app="myApp">
@@ -70,13 +80,11 @@
             	<table class="table tableContenuNotif ">
         		    <tbody>
     			      <tr>
-        				<td><b>{{ openedNotif.title }}</b></td>
-       			      </tr>
-    			      <tr>
-        				<td>{{ openedNotif.theDate }}</td>
+						<td><h2>{{ openedNotif.title }}</h2></td>
     			      </tr>
     			      <tr>
-        				<td>{{ openedNotif.send }}</td>
+        				<td>{{ "Expéditeur : " +  openedNotif.senderFirstName + " " + openedNotif.senderLastName }}</td>
+        				<td>{{ openedNotif.theDate }}</td>
     			      </tr>
     			      <tr>
         				<td>{{ openedNotif.projectName }}</td>
