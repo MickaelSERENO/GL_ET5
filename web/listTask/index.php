@@ -2,6 +2,8 @@
 session_start();
 
 //$_SESSION["email"] = 'jean.dupont@email.com';
+//$_SESSION["email"] = 'stacy.gromat@email.com';
+//$_SESSION["email"] = 'karine.legros@woodcorp.com';
 
 if(!isset($_SESSION["email"]))
 {
@@ -124,16 +126,7 @@ if(!isset($_SESSION["email"]))
                                 <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
                                     &nbsp; </label>
                                 <label>
-                                    <input type="checkbox" ng-model="user.taskFinishedProjectInTime" ng-click="goFilter()">
-                                    terminées dans projets en cours
-                                </label>
-                            </div>
-
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    &nbsp; </label>
-                                <label>
-                                    terminées dans projet terminé depuis </label>
+                                    dans projet terminé depuis </label>
                                 <br />
                                 <select ng-model="user.taskProjectFinishedFor" ng-change="goFilter()">
                                     <option></option>
@@ -141,23 +134,6 @@ if(!isset($_SESSION["email"]))
                                 </select>
                                 <label> mois</label>
                             </div>
-
-                            <div>
-                                <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                    &nbsp; </label>
-                                <label>
-                                    <input type="checkbox" ng-model="user.myTasks" ng-click="goFilter()">
-                                    mes tâches
-                                </label>
-                            </div>
-                        </div>
-                        <div ng-show="isManager">
-                            <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                                &nbsp; </label>
-                            <label>
-                                <input type="checkbox" ng-model="user.taskInMyProjects" ng-click="goFilter()">
-                                lié à un de mes projets
-                            </label>
                         </div>
                     </div>
                 </div>

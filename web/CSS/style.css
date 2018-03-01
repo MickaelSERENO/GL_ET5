@@ -213,7 +213,7 @@
 }
 .pagination a:hover:not(.active) {background-color: #ddd;}
 
-#filter_box{position:fixed;_position:absolute;right:0;top:20%;border:1px solid #789;background:#fff;z-index:10;color:black;border-radius: 10px}
+#filter_box{position:fixed;_position:absolute;right:5px;top:20%;border:1px solid #789;background:#fff;z-index:10;color:black;border-radius: 10px}
 
 #cli_on{width:15px;float:left;cursor:pointer;background:#CCFF0E;text-align:center;line-height:300px;border-radius: 10px}
 

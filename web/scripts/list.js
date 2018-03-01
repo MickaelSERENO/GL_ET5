@@ -62,17 +62,18 @@ var categories = {
             computedcharge: {label: "computedcharge"},
             remaining: {label: "remaining"},
             chargeconsumed: {label: "chargeconsumed"},
-            advancement: {label: "Status(% Adavancement)"},
+            advancement: {label: "Adavancement"},
             collaboratoremail: {label: "collaboratoremail"},
             collaborator:{label:"Collaborator"},
-            projectenddate: {label: "projectenddate"}
-
+            projectenddate: {label: "projectenddate"},
+            projectstatus: {label: "projectstatus"}
         },
         showFields: [
             "status",
             "name",
-            "collaborator",
+            "projectname",
             "startdate",
+            "advancement",
             "enddate"
         ],
         allSearchFields : [
@@ -163,8 +164,8 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
     self.pagination = {};
     self.pagination.nbPages = 1;
     self.pagination.current = 1;
-    self.pagination.perPage = "3";
-    self.pagination.perPageOptions = ["1","2","3"]; // doesn't work using int
+    self.pagination.perPage = "5";
+    self.pagination.perPageOptions = ["3","5","10"]; // doesn't work using int
     self.pagination.nbPagesForSelect = 6;
     self.pagination.pagesForSelect = [1];
     self.goPage = function (number) {
@@ -208,12 +209,11 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
                 break;
             case "task":
                 return self.satisfyFilterTaskStatus(row.status)
-                    && self.satisfyFilterTaskFinished(row.enddate,row.projectenddate)
-                    && self.satisfyFilterMyTasks(row.collaboratoremail)
-                    && self.satisfyFilterTaskInMyProjects(row.projectmanageremail);
+                    && self.satisfyFilterTaskProjectFinished(row.enddate,row.projectstatus,row.projectenddate)
+                    && self.satisfyFilterMyTasks(row.collaboratoremail);
             case "contact":
                 return self.satisfyFilterContactActive(row.isActive)
-                    && self.satisfyFilterContactHasProjects(row.itsProjects)
+                    && self.satisfyFilterContactRole(row.role)
                     && self.satisfyFilterRelatedToMyProjects(row.itsProjects);
             default:
                 break;
@@ -265,35 +265,28 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
 
     //      filter tasks: status
     self.taskStatus = [
-        'NOT_STARTED', 'STARTED', 'LATE'
+        'NOT_STARTED', 'STARTED', 'LATE_STARTED', 'LATE_UNSTARTED'
     ];
-    self.user.taskStatus = ['NOT_STARTED', 'STARTED', 'LATE'];
+    self.user.taskStatus = ['NOT_STARTED', 'STARTED', 'LATE_STARTED', 'LATE_UNSTARTED'];
     self.satisfyFilterTaskStatus = function (status) {
         return self.user.taskStatus.includes(status);
     };
 
-    //      filter tasks: finshed task 1. terminées dans projets en cours 2. terminées dans projet terminé depuis X mois
-    self.user.taskFinishedProjectInTime = false;
+    //      filter tasks: finshed task : dans projet terminé depuis X mois
     self.taskProjectFinishedFor = [
         1, 3, 6, 12, 24
     ];
     self.user.taskProjectFinishedFor = '';
     var _MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
-    self.satisfyFilterTaskFinished = function (enddate, projectenddate) {
+    self.satisfyFilterTaskProjectFinished = function (enddate, projectstatus, projectenddate) {
+        if(self.user.taskProjectFinishedFor == '')
+            return true;
+
+        if(projectstatus != 'CLOSED_VISIBLE' && projectstatus != 'CLOSED_INVISIBLE')
+            return false;
         var currentDate = new Date();
-
-        if(self.user.taskFinishedProjectInTime || self.user.taskProjectFinishedFor != '')
-            if(currentDate <= new Date(enddate))
-                return false;
-
         var projectEndDate = new Date(projectenddate);
 
-        // filter 1: terminées dans projets en cours
-        if(self.user.taskFinishedProjectInTime)
-            if(currentDate > projectEndDate)
-                return false;
-
-        // filter 2: terminées dans projet terminé depuis X mois
         if(self.user.taskProjectFinishedFor == '')
             return true;
         var monthDiff =  Math.floor((currentDate - projectEndDate) / _MS_PER_MONTH);
@@ -301,27 +294,14 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
 
     };
 
-
-
     //      filter tasks: my tasks
-    self.user.myTasks = false;
+    self.user.myTasks = true;
     self.satisfyFilterMyTasks = function (collaboratoremail) {
         if(self.user.myTasks)
             return self.loggerInfo.contactemail == collaboratoremail;
         else
             return true;
     };
-
-    //      filter tasks: related to one of my projects
-    self.user.taskInMyProjects = false;
-    self.satisfyFilterTaskInMyProjects = function (manageremail) {
-        if(self.user.taskInMyProjects)
-            return self.loggerInfo.contactemail == manageremail;
-        else
-            return true;
-    };
-
-
 
     //      filter contact: active
     self.contactActive = [
@@ -336,25 +316,29 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
         return self.user.contactActive.includes(status);
     };
 
-    //      filter contact: has projects in progress
-    self.user.contactHasProjects = false;
-    self.satisfyFilterContactHasProjects = function (itsProjects) {
-        if(self.user.contactHasProjects)
-            return itsProjects.some(function (p) {
-                return p.status == "STARTED";
-            });
-        else
-            return true;
-    };
+    //      filter contact: role : administrator, collaborator, responsable, client
+    self.contactRole = [
+        'administrator', 'collaborator', 'manager', 'client'
+    ];
+    self.user.contactRole = ['administrator','collaborator', 'manager', 'client'];
+    self.satisfyFilterContactRole = function (role) {
 
+        return self.user.contactRole.some(function (v) {
+            return role.indexOf(v) >= 0;
+        });
+    };
 
     //      filter contact:  related to one of my projects
     self.user.relatedToMyProjects = false;
     self.satisfyFilterRelatedToMyProjects = function (itsProjects) {
-        if(self.user.relatedToMyProjects)
+        if(self.user.relatedToMyProjects || self.isCollaborator)
             return itsProjects.some(function (p) {
                 return p.manageremail == self.loggerInfo.contactemail;
-            });
+            }) || itsProjects.some(function (p) {
+                    return p.contactemail == self.loggerInfo.contactemail;
+                }) || itsProjects.some(function (p) {
+                    return p.collaborateurs.includes(self.loggerInfo.contactemail);
+                });
         else
             return true;
     };
@@ -407,22 +391,13 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
     $http.get("/AJAX/list.php", {params: {function: 'getLoggerInfo'}})
         .then(function (response) {
             self.loggerInfo = response.data;
-            $http.get("/AJAX/list.php", {params: {function: 'getCollaborator'}})
-                .then(function (response) {
-                    var allCollaborators = response.data;
-                    self.isCollaborator = allCollaborators.some(function (v) {
-                        return v.useremail == self.loggerInfo.contactemail;
-                    });
-                    self.selectCategory(self.category);
-                });
-            $http.get("/AJAX/list.php", {params: {function: 'getManager'}})
-                .then(function (response) {
-                    var allManagers = response.data;
-                    self.isManager = allManagers.some(function (v) {
-                        return v.useremail == self.loggerInfo.contactemail;
-                    });
-                    self.selectCategory(self.category);
-                });
+            // console.log(self.loggerInfo);
+            var role = self.loggerInfo.role;
+            if(role.includes("manager") || role.includes("administrator")) //same for the filters
+                self.isManager = true;
+            if(role.includes("collaborator"))
+                self.isCollaborator = true;
+            self.selectCategory(self.category);
         });
 
 
