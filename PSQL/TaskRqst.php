@@ -838,6 +838,8 @@
 
 		public function addTask($idProject, $name, $collEmail, $initCharge, $mother, $startDate, $endDate, $description, $predecessors, $children, $isAdmin)
 		{
+			$name        = str_replace("'", "''", $name);
+			$description = str_replace("'", "''", $description);
 			$startTime   = new DateTime();
 			$startTime->setTimestamp($startDate);
 			$startFormat = $startTime->format("Y-m-d");
