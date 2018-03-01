@@ -206,6 +206,11 @@
 	font-weight:bold !important;
 }
 
+a, a:hover
+{
+	color:white;
+}
+
 .bordering{
 	border-top: 1px solid #ccccb3;
 	background-color: #F5F5F5 !important;
