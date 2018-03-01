@@ -911,6 +911,8 @@
 
 		public function updateMarker($idTask, $name, $startDate, $description, $predecessors)
 		{
+			$name        = str_replace("'", "''", $name);
+			$description = str_replace("'", "''", $description);
 			$startTime   = new DateTime();
 			$startTime->setTimestamp($startDate);
 			$startFormat = $startTime->format("Y-m-d");
@@ -922,7 +924,7 @@
 			for($i=0; $i < count($predecessors); $i++)
 			{
 				$pred = $predecessors[$i];
-				$script = $script. "INSERT INTO TaskOrder(predecessorID, successorID) VALUES ($pred, $idTask));";
+				$script = $script. "INSERT INTO TaskOrder(predecessorID, successorID) VALUES ($pred, $idTask);";
 			}
 
 			//Update the other value
@@ -932,6 +934,8 @@
 
 		public function updateTask($idTask, $name, $startDate, $endDate, $collEmail, $description, $idMother, $predecessors, $children)
 		{
+			$name        = str_replace("'", "''", $name);
+			$description = str_replace("'", "''", $description);
 			$startTime   = new DateTime();
 			$startTime->setTimestamp($startDate);
 			$startFormat = $startTime->format("Y-m-d");
@@ -950,12 +954,12 @@
 			for($i=0; $i < count($predecessors); $i++)
 			{
 				$pred = $predecessors[$i];
-				$script = $script. "INSERT INTO TaskOrder(predecessorID, successorID) VALUES ($pred, $idTask));";
+				$script = $script. "INSERT INTO TaskOrder(predecessorID, successorID) VALUES ($pred, $idTask);";
 			}
 
 			//Insert mother
 			if($idMother != -1)
-				$script = $script . "INSERT INTO TaskHierarchy(idMother, idChild) VALUES ($idMother, $idTask);";
+				$script = $script . "INSERT INTO TaskHierarchy(idMother, idChild, counted) VALUES ($idMother, $idTask, true);";
 
 			//Insert new children
 			for($i=0; $i < count($children); $i++)
