@@ -43,7 +43,7 @@
 					<div class="col-md-8">
 						<div class="input-group">
 							<span class="input-group-addon" id="basic-addon2">Responsable de la tâche :</span>
-							<input type="text" class="form-control" ng-disabled="true" value="{{collaborators[currentColl].email}}"></input>
+							<input type="text" class="form-control" ng-disabled="true" value="{{collaborators[currentColl].name}} {{collaborators[currentColl].surname}}"></input>
 						</div>
 					</div>
 					<div class="col-md-4 btn-group" uib-dropdown dropdown-append-to-body ng-show="!inactive && children.length==0">

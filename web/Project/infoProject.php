@@ -30,9 +30,12 @@
 		<meta charset="UTF-8">
 		<title>Projet GL</title>	
 		<script type="text/javascript">
-			var projectID = <?= $_GET["projectID"] ?>; 
-			var rank      = <?= $_SESSION["rank"] ?>;
-			var email     = <?= "'".$_SESSION["email"]."'" ?>;
+			var projectID         = <?= $_GET["projectID"] ?>;
+			var rank              = <?= $_SESSION["rank"] ?>;
+			var email             = <?= "'".$_SESSION["email"]."'" ?>;
+			var projectInfo       = <?= json_encode($projectInfo) ?>;
+			projectInfo.startDate = new Date(<?= $projectInfo->startDate->getTimestamp() ?>*1000);
+			projectInfo.endDate   = new Date(<?= $projectInfo->endDate->getTimestamp() ?>*1000);
 		</script>
 		<script type="text/javascript" src="/scripts/bower_components/xmlhttprequest/XMLHttpRequest.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular/angular.js"></script>
@@ -63,7 +66,7 @@
 					<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
 						<div ng-controller="infoProjectCtrl">
 							<div class="infoProject whiteProject">
-								<h3> <?= $projectInfo->name ?> </h3>
+								<h3> <input type="text" ng-model="name" ng-disabled="!inModifyStats"></input> </h3>
 								<div class="container-fluid">
 									<div class="row">
 										<div class="descriptionProject col-md-8">
@@ -71,33 +74,44 @@
 												<div class="col-md-6">
 													<div class="flexDiv">
 														<div> Client : </div>
-														<div> &nbsp; <?= $projectInfo->clientName ?> </div>
+														<div> &nbsp; {{projectInfo.clientName}} </div>
+														<img ng-click="openClient()" class="settingImg" src="/CSS/img/settings.svg" alt="Modifier client" ng-show="inModifyStats">
 													</div>
 												</div>
 												<div class="col-md-6">
 													<div class="flexDiv">
 														<div> Contact client : </div>
-														<div> &nbsp; <?= $projectInfo->contactFirstName ?> <?= $projectInfo->contactLastName ?> </div>
+														<div> &nbsp; {{contactFirstName}} {{contactLastName}} </div>
+														<img ng-click="openClientContact()" class="settingImg" src="/CSS/img/settings.svg" alt="Modifier contact client" ng-show="inModifyStats">
 													</div>
 												</div>
 											</div>
 											<div class="row smallTopSpace">
 												<div class="col-md-12 flexDiv">
 													<div> Responsable de projet : </div>
-													<div> &nbsp; <?= $projectInfo->managerFirstName ?> <?= $projectInfo->managerLastName ?> </div>
+													<div> &nbsp; {{managerFirstName}} {{managerLastName}} </div>
+<?php if($rank == 2) : ?>
+													<img ng-click="openProjectManager()" class="settingImg" src="/CSS/img/settings.svg" alt="Modifier contact client" ng-show="inModifyStats">
+<?php endif; ?>
 												</div>
 											</div>
 											<div class="row smallTopSpace">
 												<div class="col-md-6">
 													<div class="flexDiv">
 														<div> Début : </div>
-														<div> &nbsp;  </div>
+                                                        <p class="flexDiv">
+                                                            <input type="text" class="form-control" ng-disabled="!inModifyStats" uib-datepicker-popup="{{dateFormat}}" ng-model="startDate" is-open="popupStartDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+                                                            <button type="button" class="btn btn-default" ng-show = "inModifyStats" ng-click="openStartDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+                                                        </p>
 													</div>
 												</div>
 												<div class="col-md-6">
 													<div class="flexDiv">
 														<div> Fin : </div>
-														<div> &nbsp;  </div>
+                                                        <p class="flexDiv">
+                                                            <input type="text" class="form-control" ng-disabled="!inModifyStats" uib-datepicker-popup="{{dateFormat}}" ng-model="endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+                                                            <button type="button" class="btn btn-default" ng-show = "inModifyStats" ng-click="openEndDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+                                                        </p>
 													</div>
 												</div>
 											</div>
@@ -108,25 +122,30 @@
 											</div>
 											<div class="row smallTopSpace smallBottomSpace">
 												<div class="col-md-12">
-													<div> &nbsp; &nbsp; &nbsp; <?= $projectInfo->description ?> </div>
+													<div> <textarea style="width:100%" rows="3" ng-model="description" ng-disabled="!inModifyStats"></textarea></div>
 												</div>
 											</div>
 										</div>
 										<div class="collabProject col-md-4">
-											<p> Collaborateurs : </p>
+                                            <div class="flexDiv">
+                                                Collaborateurs :
+                                                <img ng-show="inModifyStats" src="/Resources/Images/add_icon.png" width=20 height=20 class="mousePointer smallBottomSpace smallLeftSpace" ng-click="openAddCollaborators()">
+                                                </div>
 											
-											<div class="listCollabProject">
-												<?php
-												foreach($projectInfo->listCollab as $collab)
-												{
-													echo "<div>".$collab->name." ".$collab->surname."</div>";
-												}
-												?>
+											<div class="listCollabProject" ng-class="{'modifyColl' : inModifyStats}">
+                                                <div class="row" ng-repeat="coll in collaborators">
+                                                    <div class="closeWrapper">
+                                                        <div>{{coll.name}} {{coll.surname}}</div>
+                                                        <span class="close" ng-click="delColl($index)" ng-show="inModifyStats && coll.email != managerEmail"></span>
+                                                    </div>
+                                                </div>
 											</div>
 										</div>
 									</div>
 								</div>
 							</div>
+<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
+		  $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>
 							<div>
 								<!-- bouton -->
 								<div class="buttonInfo">
@@ -135,11 +154,17 @@
 											<div class="container-fluid">
 												<div class="row">
 													<div class="col-md-4"> </div>
-													<div class="col-md-2">
-														<li class="list-inline-item"> <div class="buttonItem"> Modifier </div></li>
+													<div class="col-md-2" ng-show="!inModifyStats">
+														<li class="list-inline-item"> <div class="buttonItem" ng-click="modify()"> Modifier </div></li>
 													</div>
-													<div class="col-md-2">
-														<li class="list-inline-item"> <div class="buttonItem"> Supprimer </div></li>
+													<div class="col-md-2" ng-show="inModifyStats">
+														<li class="list-inline-item"> <div class="buttonItem" ng-click="validate()"> Valider </div></li>
+                                                    </div>
+													<div class="col-md-2" ng-show="inModifyStats">
+														<li class="list-inline-item"> <div class="buttonItem" ng-click="cancel()"> Annuler </div></li>
+                                                    </div>
+													<div class="col-md-2" ng-show="inModifyStats==false">
+														<li class="list-inline-item"> <div class="buttonItem" ng-click="delete()"> Supprimer </div></li>
 													</div>
 													<div class="col-md-4"> </div>
 												</div>
@@ -147,12 +172,13 @@
 										</ul>
 									</div>
 								</div>
+<?php endif; ?>
 							</div>
 						</div>
 					</uib-tab>
 
 					<!-- Gantt tab -->
-					<uib-tab id="ganttHeader" index="$index+1" heading="Planning" deselect="deselectTab()">
+					<uib-tab id="ganttHeader" index="$index+1" heading="Planning" ng-click="goToGanttHeader()">
 						<div ng-controller="ganttProjectCtrl" id="ganttDiv" class="whiteProject">
 
 							<!-- Pop ups -->

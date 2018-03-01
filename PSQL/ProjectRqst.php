@@ -126,10 +126,10 @@
 			
 			if($rowProject != null)
 			{
-				$project->name = $rowProject[0];
-				$project->description = $rowProject[1];
-				$project->startDate = DateTime::createFromFormat("Y-m-d H:i:s", $rowProject[2] . " 00:00:00", new DateTimeZone("UTC"));
-				$project->endDate = DateTime::createFromFormat("Y-m-d H:i:s", $rowProject[3] . " 00:00:00", new DateTimeZone("UTC"));
+				$project->name         = $rowProject[0];
+				$project->description  = $rowProject[1];
+				$project->startDate    = DateTime::createFromFormat("Y-m-d H:i:s", $rowProject[2] . " 00:00:00", new DateTimeZone("UTC"));
+				$project->endDate      = DateTime::createFromFormat("Y-m-d H:i:s", $rowProject[3] . " 00:00:00", new DateTimeZone("UTC"));
 				$project->managerEmail = $rowProject[4];
 				$project->contactEmail = $rowProject[5];
 			}
