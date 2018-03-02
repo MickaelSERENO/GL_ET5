@@ -23,7 +23,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-repeat="row in dataList | orderBy: orderColumn track by $index" ng-show="inPage($index)" ng-click="selectColl($index)" ng-style="(row == currentColl) ? {'background-color': 'grey'}:{}">
+				<tr ng-repeat="row in dataList | orderBy: orderColumn track by $index" ng-show="inPage($index)" ng-dblclick="ok()" ng-click="selectColl($index)" ng-style="(row == currentColl) ? {'background-color': 'grey'}:{}">
 					<td ng-repeat="field in showFields">
 						{{row[field]}}
 					</td>

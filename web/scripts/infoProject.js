@@ -98,6 +98,55 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 
 	$scope.openProjectManager = function()
 	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					var data = JSON.parse(httpCtx.responseText);
+					$scope.opts = 
+					{
+						backdrop : true,
+						backdropClick : true,
+						dialogFade : false,
+						keyboard : true,
+						templateUrl : "modalAddColl.html",
+						controller : "SelectData",
+						controllerAs : "$ctrl",
+						resolve : {
+									data       : function() {return data;},
+									showFields : function() {return showFields = ["name", "surname", "email"];},
+									fields     : function() {return fields =
+												{
+													name    : {label: "Nom"},
+													surname : {label: "Prénom"},
+													email   : {label:"Email"}
+												};},
+									okText     : function() {return "Ajouter";}
+								  }
+					};
+
+					var modalInstance = $uibModal.open($scope.opts);
+					modalInstance.result.then(
+						function(coll) //ok
+						{
+							$scope.managerEmail     = coll;
+							$scope.managerFirstName = coll.surname;
+							$scope.managerLastName  = coll.name;
+						},
+						function() //cancel
+						{
+						});
+				}
+			}
+		}
+
+
+		httpCtx.open('GET', "/AJAX/getActivePM.php", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 	};
 
 	$scope.openAddCollaborators = function()

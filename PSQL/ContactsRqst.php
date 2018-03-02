@@ -77,5 +77,16 @@
 				array_push($contacts, $row);
 			return $contacts;
 		}
+
+		public function getActivePM()
+		{
+			$script = "SELECT name, surname, email FROM Contact INNER JOIN ProjectManager ON email = userEmail INNER JOIN EndUser ON userEmail = contactEmail WHERE isActive = TRUE;";
+			$resultScript = pg_query($this->_conn, $script);
+
+			$contacts  = array();
+			while($row = pg_fetch_object($resultScript))
+				array_push($contacts, $row);
+			return $contacts;
+		}
 	}
 ?>
