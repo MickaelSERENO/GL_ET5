@@ -863,8 +863,10 @@
             foreach($children as $child)
                 $script = $script . "INSERT INTO TaskHierarchy VALUES($id, $child, TRUE);";
 
-			$script = $script . "INSERT INTO TaskHierarchy VALUES($mother, $id, TRUE);";
+			if($mother != "NULL")
+				$script = $script . "INSERT INTO TaskHierarchy VALUES($mother, $id, TRUE);";
 
+			error_log($script);
 			$resultScript = pg_query($this->_conn, $script);
 
 			$timerRqst = new TimerRqst();

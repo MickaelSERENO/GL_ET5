@@ -109,11 +109,14 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 	{
 		var startTime = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000; 
 		for(var i = 0; i < $scope.predecessors.length; i++)
-			if($scope.fullTasksPred[$scope.predecessors].endDate.getTime() > startTime)
+		{
+			var endT = $scope.fullTasksPred[$scope.predecessors[i]].endDate.getTime() - $scope.fullTasksPred[$scope.predecessors[i]].endDate.getTimezoneOffset()*60*1000;
+			if(endT > startTime)
 			{
 				$scope.errorMsg = "Un des prédécesseur se termine avant la date de début de la tâche";
 				return false;
 			}
+		}
 
 		if($scope.isMarker)
 		{
@@ -219,7 +222,6 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 					}
 				}
 			}
-
 		}
 
 		return true;
