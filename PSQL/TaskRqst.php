@@ -195,7 +195,7 @@
 
 			$resultScript = pg_query($this->_conn, $script);
 			while($row = pg_fetch_row($resultScript))
-                array_push($children, new TaskHierarchy($row[0], $row[1], $row[2]));
+                array_push($children, new TaskHierarchy($row[0], $row[1], $row[2] == "t"));
 
             //Fetch project information
 			$script = "SELECT id, managerEmail, contactEmail, name, description, startDate, endDate, status
@@ -279,13 +279,17 @@
 				$script       = "INSERT INTO AbstractTask(idProject, name, description, startDate) 
 								 VALUES($task->idProject, '$name2', '$desc2', '$middleFormat')
 								 RETURNING id;";
+				$endTime      = $middleTimestamp + $task->remaining*24*3600;
+				$endDate      = new DateTime();
+				$endDate->setTimestamp((int)($endTime));
+				$endFormat    = $endDate->format("Y-m-d");
+
 				$resultScript = pg_query($this->_conn, $script);
 				$rowInsert    = pg_fetch_row($resultScript);
 				$script		  =	"INSERT INTO Task(id, endDate, initCharge, computedCharge, remaining, chargeConsumed, advancement, collaboratorEmail, status) 
-								 VALUES($rowInsert[0], '$task->endDate', $initCharge, $computedCharge, $computedCharge, 0, 0, $collEmail, 'STARTED');
+								 VALUES($rowInsert[0], '$endFormat', $initCharge, $computedCharge, $computedCharge, 0, 0, $collEmail, 'STARTED');
 								 INSERT INTO TaskHierarchy VALUES($idTask, $rowInsert[0], false);
 								 ";
-				error_log($script);
 				$resultScript = pg_query($this->_conn, $script);
 
 				//TODO notification changement of collaborators
@@ -834,6 +838,8 @@
 
 		public function addTask($idProject, $name, $collEmail, $initCharge, $mother, $startDate, $endDate, $description, $predecessors, $children, $isAdmin)
 		{
+			$name        = str_replace("'", "''", $name);
+			$description = str_replace("'", "''", $description);
 			$startTime   = new DateTime();
 			$startTime->setTimestamp($startDate);
 			$startFormat = $startTime->format("Y-m-d");
@@ -876,6 +882,102 @@
 			$timerRqst = new TimerRqst();
 			$timerRqst->updateProject($row[0]);
 
+		}
+
+		public function deleteTask($idTask)
+		{
+			//DELETE PREDECESSORS, CHILDREN and Task
+			$script = "DELETE FROM TaskOrder     WHERE predecessorID = $idTask OR successorID = $idTask;
+					   DELETE FROM TaskHierarchy WHERE idMother      = $idTask OR idChild     = $idTask;
+					   DELETE FROM Marker        WHERE id            = $idTask;
+					   DELETE FROM Task          WHERE id            = $idTask;
+					   DELETE FROM AbstractTask  WHERE id            = $idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+			//TODO maybe send notification
+		}
+
+		public function setTaskInitCharge($idTask, $initCharge)
+		{
+			$script = "UPDATE Task SET initCharge=$initCharge WHERE id=$idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+		}
+
+		public function setTaskCharge($idTask, $chargeConsumed, $remaining)
+		{
+			$computedCharge = $remaining + $chargeConsumed;
+			$advancement    = (int)((1.0*$chargeConsumed)/($computedCharge)*100);
+
+			$script         = "UPDATE Task SET advancement=$advancement, remaining=$remaining, chargeConsumed=$chargeConsumed, computedCharge=$computedCharge WHERE id=$idTask;";
+			$resultScript = pg_query($this->_conn, $script);
+		}
+
+		public function updateMarker($idTask, $name, $startDate, $description, $predecessors)
+		{
+			$name        = str_replace("'", "''", $name);
+			$description = str_replace("'", "''", $description);
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			//Delete predecessors for this task
+			$script = "BEGIN; DELETE FROM TaskOrder WHERE successorID = $idTask;";
+
+			//Insert new predecessors
+			for($i=0; $i < count($predecessors); $i++)
+			{
+				$pred = $predecessors[$i];
+				$script = $script. "INSERT INTO TaskOrder(predecessorID, successorID) VALUES ($pred, $idTask);";
+			}
+
+			//Update the other value
+			$script = $script . "UPDATE AbstractTask SET name='$name', description='$description', startDate='$startFormat' WHERE id=$idTask; COMMIT;";
+			$resultScript = pg_query($this->_conn, $script);
+		}
+
+		public function updateTask($idTask, $name, $startDate, $endDate, $collEmail, $description, $idMother, $predecessors, $children)
+		{
+			$name        = str_replace("'", "''", $name);
+			$description = str_replace("'", "''", $description);
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$endTime   = new DateTime();
+			$endTime->setTimestamp($endDate);
+			$endFormat = $endTime->format("Y-m-d");
+
+			//Delete predecessors for this task
+			$script = "BEGIN; DELETE FROM TaskOrder WHERE successorID = $idTask;";
+
+			//Delete task hierarchy
+			$script = $script . "DELETE FROM TaskHierarchy WHERE counted = TRUE AND (idMother = $idTask OR idChild = $idTask);";
+
+			//Insert new predecessors
+			for($i=0; $i < count($predecessors); $i++)
+			{
+				$pred = $predecessors[$i];
+				$script = $script. "INSERT INTO TaskOrder(predecessorID, successorID) VALUES ($pred, $idTask);";
+			}
+
+			//Insert mother
+			if($idMother != -1)
+				$script = $script . "INSERT INTO TaskHierarchy(idMother, idChild, counted) VALUES ($idMother, $idTask, true);";
+
+			//Insert new children
+			for($i=0; $i < count($children); $i++)
+			{
+				$child = $children[$i];
+				$script = $script . "INSERT INTO TaskHierarchy(idMother, idChild, counted) VALUES ($idTask, $child, true);";
+			}
+
+			//Update the other value
+			if($collEmail != "NULL")
+				$collEmail = "'".$collEmail."'";
+			$script = $script . "UPDATE AbstractTask SET name='$name', description='$description', startDate='$startFormat' WHERE id=$idTask; 
+								 UPDATE Task SET endDate='$endFormat' WHERE id=$idTask;
+							     COMMIT;";
+			error_log($script);
+			$resultScript = pg_query($this->_conn, $script);
 		}
 	}
 ?>

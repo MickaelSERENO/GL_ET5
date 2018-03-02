@@ -22,7 +22,7 @@
 
 	else if($_GET['requestID'] == 1) //Set collaborator
 	{
-		if($taskRqst->setCollaborator((int)($_GET['taskID']), $_GET['collEmail'], (int)($_GET['middleDate'])))
+		if($taskRqst->setCollaborator((int)($_GET['taskID']), $_GET['collEmail'], -1))
 			echo '1';
 		else
 			echo '-1';

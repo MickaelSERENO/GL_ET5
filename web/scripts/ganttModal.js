@@ -186,6 +186,16 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 				}
 			}
 
+			//Check if a predecessor is not a child
+			for(var i=0; i < $scope.children.length; i++)
+				for(var j=0; j < $scope.predecessors.length; j++)
+					if($scope.taskMother[$scope.children[i]] == $scope.fullTasksPred[$scope.predecessors[i]])
+					{
+						$scope.errorMsg = "Une sous-tâche ne peut être prédécesseur";
+						return false;
+					}
+
+
 			//Check if the predecessor is not in the mother succession list
 			if($scope.mother > 0)
 			{
@@ -217,7 +227,6 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 
 	$scope.ok        = function()
 	{
-		console.log("ok");
 		//Verify if we can add all of this
 		if(!$scope.canAdd())
 		{
@@ -236,8 +245,8 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 			for(var i = 0; i < $scope.children.length; i++)
 				children.push($scope.taskMother[$scope.children[i]].id);
 
-			var pred         = JSON.stringify(predList);
-			var children     = JSON.stringify(childrenList);
+			var pred         = encodeURIComponent(JSON.stringify(predList));
+			var children     = encodeURIComponent(JSON.stringify(childrenList));
 
 			var httpCtx = new XMLHttpRequest();
 			httpCtx.onreadystatechange = function()
@@ -261,9 +270,8 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 			}
 			else
 			{
-				httpCtx.open('GET', "/AJAX/addTask.php?isMarker=0&projectID="+$scope.project.id+"&requestID=0&name="+encodeURIComponent($scope.name)+"&collEmail=" + $scope.collaborators[$scope.currentCol].email+"&startDate="+startTime+"&endDate="+endTime+"&mother="+$scope.taskMother[$scope.mother].id+"&description="+encodeURIComponent($scope.description)+"&predecessors="+pred+"&children="+children+"&initCharge="+$scope.initCharge, true);
+				httpCtx.open('GET', "/AJAX/addTask.php?isMarker=0&projectID="+$scope.project.id+"&requestID=0&name="+encodeURIComponent($scope.name)+"&collEmail=" + encodeURIComponent($scope.collaborators[$scope.currentCol].email)+"&startDate="+startTime+"&endDate="+endTime+"&mother="+$scope.taskMother[$scope.mother].id+"&description="+encodeURIComponent($scope.description)+"&predecessors="+pred+"&children="+children+"&initCharge="+$scope.initCharge, true);
 			}
-			console.log(httpCtx.responseURL);
 			httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			httpCtx.send(null);
 		}
