@@ -2,11 +2,15 @@
 	require_once __DIR__.'/PSQLDatabase.php';
 	require_once __DIR__.'/ConnectionRqst.php';
 
-	class Contact
+	class BasicContact
 	{
 		public $name;
 		public $surname;
 		public $email;
+	}
+
+	class Contact extends BasicContact
+	{
 		public $telephone;
 		public $entreprise;
 		public $status;
@@ -61,6 +65,17 @@
 
             return $contact;
 			
+		}
+
+		public function getActiveCollaborators()
+		{
+			$script = "SELECT name, surname, email FROM Contact INNER JOIN EndUser ON email = contactEmail WHERE isActive = TRUE;";
+			$resultScript = pg_query($this->_conn, $script);
+
+			$contacts  = array();
+			while($row = pg_fetch_object($resultScript))
+				array_push($contacts, $row);
+			return $contacts;
 		}
 	}
 ?>

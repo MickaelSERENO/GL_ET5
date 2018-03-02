@@ -563,5 +563,10 @@ myApp.controller("TaskModal", function($scope, $uibModalInstance, task, project,
 		$scope.name = newValue;
 	};
 
+	$scope.cancel = function()
+	{
+		$uibModalInstance.dismiss();
+	};
+
 	console.log($scope.children);
 });

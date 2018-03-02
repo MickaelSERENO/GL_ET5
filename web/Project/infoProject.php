@@ -65,6 +65,7 @@
 					<!-- Information tab -->
 					<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
 						<div ng-controller="infoProjectCtrl">
+							<?php include('../../Libraries/ProjectModal.php'); ?>
 							<div class="infoProject whiteProject">
 								<h3> <input type="text" ng-model="name" ng-disabled="!inModifyStats"></input> </h3>
 								<div class="container-fluid">

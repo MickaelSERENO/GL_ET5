@@ -51,7 +51,7 @@
 							<span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
 						</button>
 						<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
-							<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.name}}</a></li>
+							<li role="menuitem" ng-repeat="c in collaborators" ng-click="clickCollaborators($index)"><a href="">{{c.surname}} {{c.name}}</a></li>
 						</ul>
 					</div>
 					
@@ -179,7 +179,8 @@
 		<div class="modal-footer" ng-show="isManager">
 			<div ng-show="showMsg">{{errorMsg}}</div>
 			<button type="button" class="btn btn-primary" ng-click="modify();">{{ modifyText }} </button>
-			<button type="button" class="btn btn-warning" ng-click="delete()">Supprimer</button>
+			<button type="button" class="btn btn-warning" ng-show="!inactive" ng-click="cancel()">Annuler</button>
+			<button type="button" class="btn btn-danger" ng-show="inactive" ng-click="delete()">Supprimer</button>
 		</div>
 	</uib-tab>
 

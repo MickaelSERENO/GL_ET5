@@ -1,4 +1,4 @@
-myApp.controller("infoProjectCtrl", function($scope, $timeout)
+myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 {
 	$scope.projectInfo      = projectInfo;
 	$scope.name             = "";
@@ -7,6 +7,7 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout)
 	$scope.contactLastName  = "";
 	$scope.managerFirstName = "";
 	$scope.managerLastName  = "";
+	$scope.managerEmail     = "";
 	$scope.description      = "";
 	$scope.collaborators    = [];
 	$scope.startDate        = new Date();
@@ -49,7 +50,7 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout)
 		$scope.managerFirstName = (" " + $scope.projectInfo.managerFirstName).slice(1);
 		$scope.managerLastName  = (" " + $scope.projectInfo.managerLastName).slice(1);
 		$scope.description      = (" " + $scope.projectInfo.description).slice(1);
-		$scope.managerEmail     = (" " + $scope.projectInfo.managerEmail);
+		$scope.managerEmail     = (" " + $scope.projectInfo.managerEmail).slice(1);
 		$scope.collaborators    = [];
 		$scope.startDate        = new Date($scope.projectInfo.startDate);
 		$scope.endDate          = new Date($scope.projectInfo.endDate);
@@ -101,6 +102,60 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout)
 
 	$scope.openAddCollaborators = function()
 	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					var data = JSON.parse(httpCtx.responseText);
+					for(var i = 0; i < $scope.collaborators.length; i++)
+						for(var j = 0; j < data.length; j++)
+							if(data[j].email == $scope.collaborators[i].email)
+							{
+								data.splice(j, 1);
+								break;
+							}
+					$scope.opts = 
+					{
+						backdrop : true,
+						backdropClick : true,
+						dialogFade : false,
+						keyboard : true,
+						templateUrl : "modalAddColl.html",
+						controller : "SelectData",
+						controllerAs : "$ctrl",
+						resolve : {
+									data       : function() {return data;},
+									showFields : function() {return showFields = ["name", "surname", "email"];},
+									fields     : function() {return fields =
+												{
+													name    : {label: "Nom"},
+													surname : {label: "Prénom"},
+													email   : {label:"Email"}
+												};},
+									okText     : function() {return "Ajouter";}
+								  }
+					};
+
+					var modalInstance = $uibModal.open($scope.opts);
+					modalInstance.result.then(
+						function(coll) //ok
+						{
+							$scope.collaborators.push(coll);
+						},
+						function() //cancel
+						{
+						});
+				}
+			}
+		}
+
+
+		httpCtx.open('GET', "/AJAX/getActiveColls.php", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
 	};
 
 	$scope.$on('clickGanttHeader', function(event, data)
