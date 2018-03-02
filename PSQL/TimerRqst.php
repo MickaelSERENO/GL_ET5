@@ -123,6 +123,9 @@
 			if($task->isMarker)
 				return;
 
+			if($task->advancement == 100)
+				$newStatus = 'FINISHED';
+
 			//If the status has not changed with predecessors or children, check by time
 			if($newStatus == "")
 			{

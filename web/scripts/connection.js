@@ -21,10 +21,10 @@ myApp.controller('formController', function($scope, $timeout)
 					$scope.$apply(function()
 								  {
 									  $scope.showMsg = true;
-									  $timeout(function()
+									  /*$timeout(function()
 										  {
 											  $scope.showMsg = false;
-										  }, 1000);
+										  }, 1000);*/
 								  });
 				}
 
