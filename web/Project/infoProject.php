@@ -144,8 +144,7 @@
 									</div>
 								</div>
 							</div>
-<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
-		  $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>
+<?php if($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) :?>
 							<div>
 								<!-- bouton -->
 								<div class="buttonInfo">
@@ -172,8 +171,8 @@
 										</ul>
 									</div>
 								</div>
-<?php endif; ?>
 							</div>
+<?php endif; ?>
 						</div>
 					</uib-tab>
 
@@ -527,13 +526,12 @@
 								<li>
 									<img src="/Resources/Images/reduce_icon.png" width=32 height=32 class="mousePointer" ng-click="reduceTasks()">
 								</li>
-	<?php if(canModifyProject($_GET['projectID']) && $projectStatus != 'CLOSED_INVISIBLE') : ?>
+
 								<li ng-hide="projectClosed()">
 									<button class="btn btn-primary" ng-click="onEditionClick()">
 										{{editionTxt}}
 									</button>
 								</li>
-	<?php endif; ?>	
 	<?php if(($rank == 1 || $rank == 2) && canModifyProject($_GET['projectID'])) : ?>
 								<li>
 									<button class="btn btn-primary" ng-click="onNotificationClick()">
@@ -621,8 +619,7 @@
 												<img src="/Resources/Images/progress_bar.png" alt="advancement" width="32" height="32">
 											</div>
 
-	<?php if(($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) &&
-			  $projectStatus != "CLOSED_INVISIBLE" && $projectStatus != "CLOSED_VISIBLE") : ?>
+	<?php if($projectRqst->isManager($_SESSION['email'], $_GET['projectID']) || $rank == 2) : ?>
 											<div class="actionButton" ng-click="openDateModal()" ng-show="taskSelected != null && secondTaskSelected == null && taskSelected.children.length == 0&& editionMode == true">
 												<img src="/Resources/Images/calendar_icon.png" alt="date" width="32" height="32">
 											</div>
