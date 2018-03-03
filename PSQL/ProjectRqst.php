@@ -266,6 +266,7 @@
 
 			$script    = "INSERT INTO Project(name, description, managerEmail, contactEmail, startDate, endDate, status) VALUES('$name', '$desc', '$manager', '$contactClient', '$startFormat', '$endFormat', 'NOT_STARTED') RETURNING id;";
 			$resultScript = pg_query($this->_conn, $script);
+			$row = pg_fetch_row($resultScript);
 			$idProject = $row[0];
 
 			$script = "";
