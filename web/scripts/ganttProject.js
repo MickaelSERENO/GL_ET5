@@ -292,6 +292,19 @@ class AbstractTask
 		return null;
 	}
 
+	getRecursiveChildren(id)
+	{
+		if(this.id == id)
+			return this;
+		for(var i = 0; i < this.children.length; i++)
+		{
+			var cID = this.children[i].getRecursiveChildren(id);
+			if(cID != null)
+				return cID;
+		}
+		return null;
+	}
+
 	getTaskSize(unit)
 	{
 		return {"yOffset": 0, "xOffset": 0, "width": 0};
@@ -671,6 +684,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 	$scope.editionMode        = false;
 	$scope.sortTask           = ["Date", "Nom"];
 	$scope.scale              = ["Jour", "Semaine"];
+	$scope.hasTaskUpdated     = false;
 
 	$scope.tasks              = [];
 	$scope.taskSelected       = null;
@@ -973,6 +987,7 @@ $scope.projectClosed = function()
 			{
 				$scope.$apply(function()
 				{
+					$scope.hasTaskUpdated = true;
 					var tasks = JSON.parse(httpCtx.responseText);
 
 					//Handle project
@@ -1382,7 +1397,7 @@ $scope.projectClosed = function()
 	{
 		$scope.canvasClick(event);
 		$scope.openTask($scope.taskSelected);
-	}
+	};
 
 	$scope.positionActionDiv = function()
 	{
@@ -1393,7 +1408,27 @@ $scope.projectClosed = function()
 			$scope.actionDiv.style.left = -$scope.actionDiv.offsetWidth/2 + size.xOffset + size.width / 2 + "px";
 			$scope.actionDiv.style.top  = -$scope.actionDiv.offsetHeight  + size.yOffset -5 + "px";
 		}
-	}
+	};
+
+	if(ganttTaskID != -1)
+	{
+		var openT = function()
+		{
+			console.log("ok");
+			if($scope.hasTaskUpdated)
+			{
+				console.log(ganttTaskID);
+				for(var i = 0; i < $scope.tasks.length; i++)
+				{
+					var tID = $scope.tasks[i].getRecursiveChildren(ganttTaskID);
+					if(tID != null)
+						$scope.openTask(tID);
+				}
+				clearInterval(refreshIntervalId);
+			}
+		}
+		var refreshIntervalId = setInterval(openT, 1000);
+	};
 
 	$interval(function()
 	{

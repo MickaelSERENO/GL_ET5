@@ -34,6 +34,7 @@
 			var rank              = <?= $_SESSION["rank"] ?>;
 			var email             = <?= "'".$_SESSION["email"]."'" ?>;
 			var projectInfo       = <?= json_encode($projectInfo) ?>;
+			var ganttTaskID       = <?= isset($_GET["taskID"]) ? $_GET["taskID"] : -1 ?>;
 			projectInfo.startDate = new Date(<?= $projectInfo->startDate->getTimestamp() ?>*1000);
 			projectInfo.endDate   = new Date(<?= $projectInfo->endDate->getTimestamp() ?>*1000);
 		</script>
