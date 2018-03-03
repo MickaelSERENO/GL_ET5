@@ -1,5 +1,6 @@
-myApp.controller("SelectData", function($scope, $uibModalInstance, $filter, data, showFields, fields, okText)
+myApp.controller("SelectData", function($scope, $uibModalInstance, $filter, data, showFields, fields, okText, title)
 {
+	$scope.title                       = title;
     $scope.okText                      = okText;
     $scope.dataList                    = [];
     $scope.dataListAll                 = data;

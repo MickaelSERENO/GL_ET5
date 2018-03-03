@@ -111,7 +111,7 @@
 													<div class="flexDiv">
 														<div> Fin : </div>
                                                         <p class="flexDiv">
-                                                            <input type="text" class="form-control" ng-disabled="!inModifyStats" uib-datepicker-popup="{{dateFormat}}" ng-model="endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+                                                            <input type="text" class="form-control" ng-disabled="!inModifyStats" uib-datepicker-popup="{{dateFormat}}" ng-model="endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions2" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
                                                             <button type="button" class="btn btn-default" ng-show = "inModifyStats" ng-click="openEndDate()"><i class="glyphicon glyphicon-calendar"></i></button>
                                                         </p>
 													</div>
@@ -138,7 +138,7 @@
                                                 <div class="row" ng-repeat="coll in collaborators">
                                                     <div class="closeWrapper">
                                                         <div>{{coll.name}} {{coll.surname}}</div>
-                                                        <span class="close" ng-click="delColl($index)" ng-show="inModifyStats && coll.email != managerEmail"></span>
+                                                        <span class="close" ng-click="delColl($index)" ng-show="inModifyStats && coll.email != managerEmail && !inCollaborator(coll.email)"></span>
                                                     </div>
                                                 </div>
 											</div>

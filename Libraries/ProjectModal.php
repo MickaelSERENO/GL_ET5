@@ -2,7 +2,7 @@
 <script type="text/javascript" src="/scripts/projectModal.js"></script>
 <script type="text/ng-template" id="modalAddColl.html">
 	<div class="modal-header">
-		<h3 class="modal-title">Ajout de collaborateur</h3>
+		<h3 class="modal-title">{{title}}</h3>
 	</div>
 
 	<div class="modal-body">
@@ -14,7 +14,7 @@
 			<img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Research"/>
 		</div>
 
-		<table class="table tableList" style="table-layout: fixed;">
+		<table class="table tableList">
 			<thead>
 				<tr>
 					<th ng-repeat="field in showFields" ng-style="(field == orderColumn || '-'+field == orderColumn)?{'background': 'linear-gradient(to right, #00c1fc, #eaeaea)'}:{}">

@@ -24,6 +24,7 @@
 	class ProjectInfo extends Project
 	{
 		public $clientName;
+		public $clientEmail;
 		public $managerLastName;
 		public $managerFirstName;
 		public $contactLastName;
@@ -116,6 +117,7 @@
 		public function getInfoProject($idProject)
 		{
 			$project = new ProjectInfo();
+			$project->id = $idProject;
 			
 			$script = "SELECT id, managerEmail, contactEmail, name, description, startDate, endDate, status
 						FROM Project WHERE Project.id = $idProject;";
@@ -152,13 +154,14 @@
 				$project->contactFirstName = $rowContactClient[1];
 			}
 			
-			$scriptClient = "SELECT Client.name FROM ClientContact, Client 
+			$scriptClient = "SELECT Client.name, ClientContact.clientEmail FROM ClientContact, Client 
 						WHERE Client.email = ClientContact.clientEmail AND ClientContact.contactEmail = '$project->contactEmail'";
 			$resultScriptClient = pg_query($this->_conn, $scriptClient);
 			$rowClient = pg_fetch_row($resultScriptClient);
 			if($rowClient != null)
 			{
-				$project->clientName = $rowClient[0];
+				$project->clientName  = $rowClient[0];
+				$project->clientEmail = $rowClient[1];
 			}
 			
 			
@@ -213,6 +216,32 @@
 			if($row == null)
 				return -1;
 			return (int)($row[0]);
+		}
+
+		public function modifyProject($idProject, $name, $desc, $startDate, $endDate, $manager, $client, $contactClient, $collaborators)
+		{
+			$name        = pg_escape_string($name);
+			$desc        = pg_escape_string($desc);
+
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$endTime   = new DateTime();
+			$endTime->setTimestamp($endDate);
+			$endFormat = $endTime->format("Y-m-d");
+
+			$script    = "UPDATE Project SET name='$name', description='$desc', managerEmail='$manager', contactEmail='$contactClient', startDate='$startFormat', endDate='$endFormat' WHERE id=$idProject;
+						  DELETE FROM ProjectCollaborator WHERE idProject=$idProject;";
+
+			for($i = 0; $i < count($collaborators); $i++)
+			{
+				$cEmail = $collaborators[$i];
+				$script = $script."INSERT INTO ProjectCollaborator VALUES ($idProject, '$cEmail');";
+			}
+
+			$resultScript = pg_query($this->_conn, $script);
+			error_log($script);
 		}
 	}
 ?>

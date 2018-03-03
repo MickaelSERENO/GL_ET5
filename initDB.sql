@@ -386,10 +386,7 @@ CREATE OR REPLACE FUNCTION checkProjectCollaborator() RETURNS TRIGGER AS $trigge
 
 CREATE OR REPLACE FUNCTION checkDeleteProjectCollaborator() RETURNS TRIGGER AS $triggerDeleteProjectCollaborator$ 
 	BEGIN
-		IF (SELECT COUNT(*) FROM Project WHERE managerEmail = New.collaboratorEmail AND Project.id = New.projectID) = 1 THEN 
-			RAISE EXCEPTION 'Cannot delete the project manager from the list of the collaborator for this project';
-		END IF;
-		RETURN New;
+		RETURN Old;
 	END
 	$triggerDeleteProjectCollaborator$ LANGUAGE plpgsql;
 
@@ -443,8 +440,13 @@ CREATE OR REPLACE FUNCTION updateTaskDate(mother Task, out startDate DATE, out e
 		endDate    := mother.endDate;
 		startDate  := (SELECT AbstractTask.startDate FROM AbstractTask WHERE mother.id = AbstractTask.id);
 
+		IF (SELECT COUNT(*) FROM Task, TaskHierarchy WHERE id = mother.id AND id = idMother) > 0 THEN
+			UPDATE Task SET collaboratorEmail = NULL WHERE id = mother.id;
+		END IF;
+
 		FOR r IN SELECT idChild FROM TaskHierarchy WHERE idMother = mother.id
 		LOOP
+
 			SELECT * INTO subTask FROM Task WHERE id = r;
 			SELECT TD.endDate, TD.startDate INTO _endDate, _startDate FROM updateTaskDate(subTask) AS TD;
 			IF endDate < _endDate THEN

@@ -1056,6 +1056,8 @@ $scope.projectClosed = function()
 										allTasks[k].predecessors.push(allTasks[j]);
 									}
 					$scope.changeSorting(0);
+					if(infoScope != undefined)
+						infoScope.updateDate();
 				});
 			}
 		}
