@@ -12,6 +12,7 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 	$scope.collaborators    = collList;
 	$scope.startDate        = new Date();
 	$scope.endDate          = new Date();
+	$scope.errorMsg         = "";
 
 	$scope.popupStartDate = {opened : false};
 	$scope.popupEndDate   = {opened : false};
@@ -63,8 +64,19 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 		$scope.collaborators.splice(index, 1);
 	};
 
-	$scope.validate = function()
+	$scope.ok = function()
 	{
+		if($scope.name == "")
+		{
+			$scope.errorMsg = "Le nom ne peut pas être vide";
+			return;
+		}
+
+		else if($scope.managerEmail == "")
+		{
+			$scope.errorMsg = "Le projet doit avoir un manager";
+			return;
+		}
 		var httpCtx = new XMLHttpRequest();
 		httpCtx.onreadystatechange = function()
 		{
@@ -73,7 +85,21 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 				if(httpCtx.responseText != '-1')
 				{
 					//TODO send the new project object
-					$uibModalInstance.close();
+					var proj = 
+						{
+							id: httpCtx.responseText,
+							manageremail: $scope.managerEmail,
+							managername: $scope.managerFirstName,
+							contactemail: $scope.contactEmail,
+							contactname: $scope.contactFirstName,
+							clientname: $scope.clientName,
+							name: $scope.name,
+							description: $scope.description,
+							startdate: $scope.formatDate($scope.startDate),
+							enddate: $scope.formatDate($scope.endDate)
+							status: "NOT_STARTED"
+						}
+					$uibModalInstance.close(proj);
 				}
 			}
 		};
@@ -328,6 +354,19 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 
 	$scope.cancel = function()
 	{
-		$uibModalInstance.close();
+		$uibModalInstance.dismiss();
 	};
+
+	function formatDate(date) 
+	{
+		var d = new Date(date),
+			month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear();
+
+		if (month.length < 2) month = '0' + month;
+		if (day.length < 2) day = '0' + day;
+
+		return [year, month, day].join('-');
+	}
 });

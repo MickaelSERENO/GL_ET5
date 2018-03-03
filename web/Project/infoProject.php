@@ -159,6 +159,7 @@
 									<div class="centerItem">
 										<ul class="list-inline text-center">
 											<div class="container-fluid">
+												<div class="row errorMsg" ng-show="errorMsg != ''"><div class="col-md-12">{{errorMsg}}</div></div>
 												<div class="row">
 													<div class="col-md-4"> </div>
 													<div class="col-md-2" ng-show="!inModifyStats">

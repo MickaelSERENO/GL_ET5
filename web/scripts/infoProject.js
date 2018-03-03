@@ -20,6 +20,8 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 	$scope.minDate          = null;
 	$scope.maxDate          = null;
 
+	$scope.errorMsg         = "";
+
 	$scope.taskMinDate = function()
 	{
 		console.log("ok");
@@ -153,6 +155,11 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 
 	$scope.validate = function()
 	{
+		if($scope.name == "")
+		{
+			$scope.errorMsg = "Le nom du projet ne peut être vide";
+			return;
+		}
 		var httpCtx = new XMLHttpRequest();
 		httpCtx.onreadystatechange = function()
 		{

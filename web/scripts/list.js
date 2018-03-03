@@ -3,7 +3,6 @@
  */
 var myApp = angular.module('myApp', ['checklist-model', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
-
 var categories = {
     project: {
         label: "Project",
@@ -430,6 +429,8 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
 			templateUrl : "modalAddProject.html",
 			controller : "addProjectModal",
 			controllerAs : "$ctrl",
+			size: 'lg',
+			windowClass: 'my-modal-popup',
 			resolve : {
 						collList : function(){return arr=[];}
 					  }
@@ -439,14 +440,11 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
 		modalInstance.result.then(
 			function(project) //ok
 			{
+				self.dataListAll.push(project);
+				self.arrangeList();
 			},
 			function() //cancel
 			{
 			});
-
-
 	};
 });
-
-
-

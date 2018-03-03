@@ -249,7 +249,36 @@
 			}
 
 			$resultScript = pg_query($this->_conn, $script);
-			error_log($script);
+		}
+
+		public function createProject($name, $desc, $startDate, $endDate, $manager, $client, $contactClient, $collaborators)
+		{
+			$name        = pg_escape_string($name);
+			$desc        = pg_escape_string($desc);
+
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$endTime   = new DateTime();
+			$endTime->setTimestamp($endDate);
+			$endFormat = $endTime->format("Y-m-d");
+
+			$script    = "INSERT INTO Project(name, description, managerEmail, contactEmail, startDate, endDate, status) VALUES('$name', '$desc', '$manager', '$contactClient', '$startFormat', '$endFormat', 'NOT_STARTED') RETURNING id;";
+			$resultScript = pg_query($this->_conn, $script);
+			$idProject = $row[0];
+
+			$script = "";
+
+			for($i = 0; $i < count($collaborators); $i++)
+			{
+				$cEmail = $collaborators[$i];
+				$script = $script."INSERT INTO ProjectCollaborator VALUES ($idProject, '$cEmail');";
+			}
+
+			if($script != "")
+				$resultScript = pg_query($this->_conn, $script);
+			return $idProject;
 		}
 
 		public function deleteProject($idProject)

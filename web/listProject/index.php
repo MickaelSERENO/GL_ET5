@@ -47,6 +47,12 @@
 	<div class="modal-body">
 		<div class="container-fluid">
 			<div class="row">
+				<div class="col-md-12 flexDiv">
+					<div> Nom : </div> 
+					<input type="text" ng-model="name"></input>
+				</div>
+			</div>
+			<div class="row">
 				<div class="descriptionProject col-md-8">
 					<div class="row smallTopSpace">
 						<div class="col-md-6">
@@ -85,7 +91,7 @@
 							<div class="flexDiv">
 								<div> Fin : </div>
 								<p class="flexDiv">
-									<input type="text" class="form-control" ng-disabled="!inModifyStats" uib-datepicker-popup="{{dateFormat}}" ng-model="endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions2" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
+									<input type="text" class="form-control" uib-datepicker-popup="{{dateFormat}}" ng-model="endDate" is-open="popupEndDate.opened" datepicker-options="dateOptions2" ng-required="true" close-text="Fermer" clear-text="Effacer" current-text="Aujourd'hui"/>
 									<button type="button" class="btn btn-default" ng-click="openEndDate()"><i class="glyphicon glyphicon-calendar"></i></button>
 								</p>
 							</div>
@@ -108,7 +114,7 @@
 						<img src="/Resources/Images/add_icon.png" width=20 height=20 class="mousePointer smallBottomSpace smallLeftSpace" ng-click="openAddCollaborators()">
 						</div>
 					
-					<div class="listCollabProject inModifyStats">
+					<div class="listCollabProject modifyColl">
 						<div class="row" ng-repeat="coll in collaborators">
 							<div class="closeWrapper">
 								<div>{{coll.name}} {{coll.surname}}</div>
@@ -122,6 +128,7 @@
 	</div>
 
 	<div class="modal-footer">
+		<div class="row errorMsg" ng-show="errorMsg != ''"><div class="col-md-12">{{errorMsg}}</div></div>
 		<button type="button" class="btn btn-primary" ng-click="ok();">Ajouter</button>
 		<button type="button" class="btn btn-warning" ng-click="cancel()">Annuler</button>
 	</div>
