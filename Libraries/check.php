@@ -8,10 +8,10 @@
 			return false;
 
 		//Check the rank of this user
+		$projectRqst = new ProjectRqst();
 		$rank = $_SESSION["rank"];
 		if($rank != 2 && $rank != 1) //If not admin
 		{
-			$projectRqst = new ProjectRqst();
 
 			//Get the status of the project
 			$status = $projectRqst->getProjectStatus($id);
@@ -23,8 +23,7 @@
 					return false;
 			}
 		}
-
-		return true;
+		return $projectRqst->projectExists($id);
 	}
 
 	function canModifyProject($id)
@@ -34,13 +33,13 @@
 			return false;
 
 		//Check the rank of this user
+		$projectRqst = new ProjectRqst();
 		$rank = $_SESSION["rank"];
 		if($rank == 2)
-			return true;
+			return $projectRqst->projectExists($id);
 
 		else if($rank == 1) //If not admin
 		{
-			$projectRqst = new ProjectRqst();
 			if($projectRqst->isManager($_SESSION["email"], $id))
 				return true;
 		}

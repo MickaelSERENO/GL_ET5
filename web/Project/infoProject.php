@@ -23,6 +23,12 @@
 	$projectStatus = $projectRqst->getProjectStatus($_GET['projectID']);
 	
 	$projectInfo = $projectRqst->getInfoProject($_GET['projectID']);
+	if($projectInfo == null)
+	{
+		http_response_code(403);
+		die('Forbidden Access');
+	}
+		
 ?>
 <!DOCTYPE html>
 <html>

@@ -71,6 +71,14 @@
 			return $row[0] == '1';
 		}
 
+		public function projectExists($id)
+		{
+			$script = "SELECT COUNT(*) FROM Project WHERE id = $id";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			return $row[0] == 1;
+		}
+
 		public function isManager($email, $id)
 		{
 			$script = "SELECT COUNT(*) FROM Project WHERE id=$id AND managerEmail='$email';";
@@ -242,6 +250,23 @@
 
 			$resultScript = pg_query($this->_conn, $script);
 			error_log($script);
+		}
+
+		public function deleteProject($idProject)
+		{
+			$script = "BEGIN;
+					   DELETE FROM TaskOrder     USING AbstractTask WHERE (AbstractTask.id = TaskOrder.predecessorID OR AbstractTask.id = TaskOrder.successorID) AND AbstractTask.idProject=$idProject;
+					   DELETE FROM TaskHierarchy USING AbstractTask WHERE (AbstractTask.id = TaskHierarchy.idMother  OR AbstractTask.id = TaskHierarchy.idChild) AND AbstractTask.idProject=$idProject;
+					   DELETE FROM Marker        USING AbstractTask WHERE Marker.id = AbstractTask.id AND idProject=$idProject;
+					   DELETE FROM Task          USING AbstractTask WHERE Task.id   = AbstractTask.id AND idProject=$idProject;
+					   DELETE FROM AbstractTask                     WHERE idProject=$idProject;    
+					   DELETE FROM ProjectCollaborator              WHERE idProject=$idProject;
+					   DELETE FROM ProjectNotification              WHERE projectID=$idProject;
+					   DELETE FROM Project                          WHERE id = $idProject;
+					   COMMIT;";
+			$resultScript = pg_query($this->_conn, $script);
+
+			//TODO send notif
 		}
 	}
 ?>
