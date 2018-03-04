@@ -10,6 +10,7 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 	$scope.clientEmail      = "";
 	$scope.contactFirstName = "";
 	$scope.contactLastName  = "";
+	$scope.contactEmail     = "";
 	$scope.managerFirstName = "";
 	$scope.managerLastName  = "";
 	$scope.managerEmail     = "";

@@ -595,8 +595,13 @@ function redraw()
 		var taskNode = document.getElementsByClassName('taskNode'); 
 		if(taskNode  != null)
 		{
-			var todayY   = taskNode[0].offsetTop;
-			var endY     = taskNode[taskNode.length - 1].offsetTop;
+			var todayY = 20;
+			if(scope.tasks.length > 0)
+				todayY   = taskNode[0].offsetTop;
+
+			var endY = canvas.height;
+			if(scope.tasks.length > 1)
+				endY     = taskNode[taskNode.length - 1].offsetTop;
 
 //			canvasCtx.beginPath();
 //			canvasCtx.strokeStyle = "red";
@@ -618,10 +623,9 @@ function redraw()
 		canvasCtx.fill();
 	}
 
-	if(scope.tasks.length == 0)
-		return;
-
-	var fontSize = getFontSize();
+	var fontSize = 12;
+	if(scope.tasks.length > 0)
+		fontSize = getFontSize();
 
 	drawDate(fontSize, currentUnit);
 	drawTasks(fontSize, currentUnit);

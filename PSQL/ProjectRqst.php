@@ -274,6 +274,8 @@
 			for($i = 0; $i < count($collaborators); $i++)
 			{
 				$cEmail = $collaborators[$i];
+				if($cEmail == $manager)
+					continue;
 				$script = $script."INSERT INTO ProjectCollaborator VALUES ($idProject, '$cEmail');";
 			}
 

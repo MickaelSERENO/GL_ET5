@@ -5,6 +5,7 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 	$scope.clientEmail      = "";
 	$scope.contactFirstName = "";
 	$scope.contactLastName  = "";
+	$scope.contactEmail     = "";
 	$scope.managerFirstName = "";
 	$scope.managerLastName  = "";
 	$scope.managerEmail     = "";
@@ -96,7 +97,7 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 							name: $scope.name,
 							description: $scope.description,
 							startdate: $scope.formatDate($scope.startDate),
-							enddate: $scope.formatDate($scope.endDate)
+							enddate: $scope.formatDate($scope.endDate),
 							status: "NOT_STARTED"
 						}
 					$uibModalInstance.close(proj);
@@ -357,7 +358,7 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 		$uibModalInstance.dismiss();
 	};
 
-	function formatDate(date) 
+	$scope.formatDate = function(date) 
 	{
 		var d = new Date(date),
 			month = '' + (d.getMonth() + 1),
