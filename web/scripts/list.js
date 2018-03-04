@@ -1,8 +1,7 @@
 /**
  * Created by Miao1 on 14/01/2018.
  */
-var myApp = angular.module("myApp", ['angular-notification-icons','ngAnimate',"checklist-model"]);
-
+var myApp = angular.module('myApp', ['checklist-model', 'ngAnimate','angular-notification-icons', 'ngSanitize', 'ui.bootstrap']);
 
 var categories = {
     project: {
@@ -117,7 +116,7 @@ var categories = {
     }
 };
 
-myApp.controller("listControler", function ($scope, $http,$filter, $window) {
+myApp.controller("listControler", function ($scope, $uibModal, $filter, $window) {
     var self = $scope;
 
     // get all data refering to the category
@@ -134,13 +133,22 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
 
         self.orderColumn = '';
 
-        $http.get("/AJAX/list.php", {params: {function: categories[self.category].requestDB}})
-            .then(function (response) {
-                self.dataListAll = response.data;
-                // console.log(self.dataListAll);
-                self.arrangeList();
-            });
-
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				$scope.$apply(function()
+				{
+					self.dataListAll = JSON.parse(httpCtx.responseText);
+					console.log(self.dataListAll);
+					self.arrangeList();
+				});
+			}
+		}
+		httpCtx.open('GET', "/AJAX/list.php?function="+categories[self.category].requestDB, true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
     };
 
     // Get the datalist refering to filters and research demand
@@ -388,19 +396,55 @@ myApp.controller("listControler", function ($scope, $http,$filter, $window) {
     self.loggerInfo = {};
     self.isCollaborator = false;
     self.isManager = false;
-    $http.get("/AJAX/list.php", {params: {function: 'getLoggerInfo'}})
-        .then(function (response) {
-            self.loggerInfo = response.data;
-            // console.log(self.loggerInfo);
-            var role = self.loggerInfo.role;
-            if(role.includes("manager") || role.includes("administrator")) //same for the filters
-                self.isManager = true;
-            if(role.includes("collaborator"))
-                self.isCollaborator = true;
-            self.selectCategory(self.category);
-        });
+	var httpCtx = new XMLHttpRequest();
+	httpCtx.onreadystatechange = function()
+	{
+		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+		{
+			$scope.$apply(function()
+			{
+				self.loggerInfo = JSON.parse(httpCtx.responseText);
+				var role = self.loggerInfo.role;
+				if(role.includes("manager") || role.includes("administrator")) //same for the filters
+					self.isManager = true;
+				if(role.includes("collaborator"))
+					self.isCollaborator = true;
+				self.selectCategory(self.category);
+			});
+		}
+	}
+	httpCtx.open('GET', "/AJAX/list.php?function=getLoggerInfo", true);
+	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	httpCtx.send(null);
 
+	self.createProject = function()
+	{
+		var data = JSON.parse(httpCtx.responseText);
+		$scope.opts = 
+		{
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "modalAddProject.html",
+			controller : "addProjectModal",
+			controllerAs : "$ctrl",
+			size: 'lg',
+			windowClass: 'my-modal-popup',
+			resolve : {
+						collList : function(){return arr=[];}
+					  }
+		};
 
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function(project) //ok
+			{
+				self.dataListAll.push(project);
+				self.arrangeList();
+			},
+			function() //cancel
+			{
+			});
+	};
 });
-
-

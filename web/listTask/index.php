@@ -17,8 +17,13 @@ if(!isset($_SESSION["email"]))
 <head>
     <meta charset="UTF-8">
     <title>Projet GL</title>
+	<script type="text/javascript" src="/scripts/bower_components/xmlhttprequest/XMLHttpRequest.js"></script>
     <script type="text/javascript" src="/scripts/bower_components/angular/angular.js"></script>
     <script type="text/javascript" src="/scripts/bower_components/angular/checklist-model.js"></script>
+	<script type="text/javascript" src="/scripts/bower_components/angular-animate/angular-animate.js"></script>
+	<script type="text/javascript" src="/scripts/bower_components/angular-sanitize/angular-sanitize.js"></script>
+	<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap.js"></script>
+	<script type="text/javascript" src="/scripts/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
     <script type="text/javascript" src="/scripts/connection.js"></script>
     <script type="text/javascript" src="/scripts/list.js"></script>
 

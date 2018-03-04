@@ -29,6 +29,15 @@
 	margin-right:auto;
 }
 
+
+@media(min-width: 1400px)
+{
+    .my-modal-popup > .modal-lg
+	{
+        width: 1308px;
+    }
+}
+
 .menuItem
 {
 	background-color: white;

@@ -71,6 +71,14 @@
 			return $row[0] == '1';
 		}
 
+		public function projectExists($id)
+		{
+			$script = "SELECT COUNT(*) FROM Project WHERE id = $id";
+			$resultScript = pg_query($this->_conn, $script);
+			$row          = pg_fetch_row($resultScript);
+			return $row[0] == 1;
+		}
+
 		public function isManager($email, $id)
 		{
 			$script = "SELECT COUNT(*) FROM Project WHERE id=$id AND managerEmail='$email';";
@@ -241,7 +249,56 @@
 			}
 
 			$resultScript = pg_query($this->_conn, $script);
-			error_log($script);
+		}
+
+		public function createProject($name, $desc, $startDate, $endDate, $manager, $client, $contactClient, $collaborators)
+		{
+			$name        = pg_escape_string($name);
+			$desc        = pg_escape_string($desc);
+
+			$startTime   = new DateTime();
+			$startTime->setTimestamp($startDate);
+			$startFormat = $startTime->format("Y-m-d");
+
+			$endTime   = new DateTime();
+			$endTime->setTimestamp($endDate);
+			$endFormat = $endTime->format("Y-m-d");
+
+			$script    = "INSERT INTO Project(name, description, managerEmail, contactEmail, startDate, endDate, status) VALUES('$name', '$desc', '$manager', '$contactClient', '$startFormat', '$endFormat', 'NOT_STARTED') RETURNING id;";
+			$resultScript = pg_query($this->_conn, $script);
+			$row = pg_fetch_row($resultScript);
+			$idProject = $row[0];
+
+			$script = "";
+
+			for($i = 0; $i < count($collaborators); $i++)
+			{
+				$cEmail = $collaborators[$i];
+				if($cEmail == $manager)
+					continue;
+				$script = $script."INSERT INTO ProjectCollaborator VALUES ($idProject, '$cEmail');";
+			}
+
+			if($script != "")
+				$resultScript = pg_query($this->_conn, $script);
+			return $idProject;
+		}
+
+		public function deleteProject($idProject)
+		{
+			$script = "BEGIN;
+					   DELETE FROM TaskOrder     USING AbstractTask WHERE (AbstractTask.id = TaskOrder.predecessorID OR AbstractTask.id = TaskOrder.successorID) AND AbstractTask.idProject=$idProject;
+					   DELETE FROM TaskHierarchy USING AbstractTask WHERE (AbstractTask.id = TaskHierarchy.idMother  OR AbstractTask.id = TaskHierarchy.idChild) AND AbstractTask.idProject=$idProject;
+					   DELETE FROM Marker        USING AbstractTask WHERE Marker.id = AbstractTask.id AND idProject=$idProject;
+					   DELETE FROM Task          USING AbstractTask WHERE Task.id   = AbstractTask.id AND idProject=$idProject;
+					   DELETE FROM AbstractTask                     WHERE idProject=$idProject;    
+					   DELETE FROM ProjectCollaborator              WHERE idProject=$idProject;
+					   DELETE FROM ProjectNotification              WHERE projectID=$idProject;
+					   DELETE FROM Project                          WHERE id = $idProject;
+					   COMMIT;";
+			$resultScript = pg_query($this->_conn, $script);
+
+			//TODO send notif
 		}
 	}
 ?>

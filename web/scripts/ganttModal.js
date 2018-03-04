@@ -107,6 +107,11 @@ myApp.controller("AddModal", function($scope, $uibModalInstance, project, colls,
 
 	$scope.canAdd = function()
 	{
+		if($scope.name == "")
+		{
+			$scope.errorMsg = "Le nom de la tâche ne peut pas être vide";
+			return false;
+		}
 		var startTime = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000; 
 		for(var i = 0; i < $scope.predecessors.length; i++)
 		{
