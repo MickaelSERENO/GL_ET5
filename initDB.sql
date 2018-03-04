@@ -87,11 +87,11 @@ CREATE TABLE Administrator
 --------------------------------------------
 CREATE TABLE Notification
 (
-	id      SERIAL  PRIMARY KEY,
-	theDate DATE    NOT NULL,
-	title   TEXT    NOT NULL,
-	message TEXT    NOT NULL,
-	read    BOOLEAN NOT NULL
+	id      SERIAL		PRIMARY KEY,
+	theDate TIMESTAMP	NOT NULL,
+	title   TEXT		NOT NULL,
+	message TEXT		NOT NULL,
+	read    BOOLEAN		NOT NULL
 );
 
 CREATE TABLE Sender
@@ -102,7 +102,8 @@ CREATE TABLE Sender
 	FOREIGN KEY(idNotification) REFERENCES Notification(id),
 	FOREIGN KEY(emailSender)    REFERENCES EndUser(contactEmail),
 	FOREIGN KEY(emailReceiver)  REFERENCES EndUser(contactEmail),
-	PRIMARY KEY(idNotification, emailSender, emailReceiver)
+	--PRIMARY KEY(idNotification, emailSender, emailReceiver)
+	PRIMARY KEY(idNotification)
 );
 
 ------------------------------------------------------------------------------------

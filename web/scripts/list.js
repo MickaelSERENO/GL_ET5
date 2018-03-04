@@ -1,7 +1,7 @@
 /**
  * Created by Miao1 on 14/01/2018.
  */
-var myApp = angular.module("myApp", ["checklist-model"]);
+var myApp = angular.module("myApp", ['angular-notification-icons','ngAnimate',"checklist-model"]);
 
 
 var categories = {

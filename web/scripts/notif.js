@@ -1,13 +1,27 @@
-
-var app = angular.module('myApp', []);
-app.controller('formController', function($scope) 
+var myApp = angular.module('myApp', ['angular-notification-icons', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+myApp.controller('formController', function($scope, $timeout, $interval) 
 {
-	$scope.count = 0;
 	$scope.listNotifJS = listNotifJS;
-	
+
+	$scope.fetchNotifs = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				$scope.listNotifJS = JSON.parse(httpCtx.responseText);
+			}
+		}
+		httpCtx.open('GET', "/AJAX/fetchNotifs.php?unread=false", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	}
+
+	$scope.fetchNotifs();
+
 	$scope.openNotif = function(notif)
 	{
-		console.log(notif);
 		$scope.openedNotif = notif;
 		var httpCtx = new XMLHttpRequest();
 
@@ -17,21 +31,22 @@ app.controller('formController', function($scope)
 			{
 				if(httpCtx.responseText != '1')
 				{
-
-					alert(httpCtx.responseText);
 					alert("An unknown error occured");
 				}
 			}
 		}
-		$scope.openedNotif.read = true;
 		httpCtx.open('GET', "/AJAX/readNotif.php?notifID="+notif.id, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
-		console.log($scope.openedNotif);
 	};
+
 	if(notifID)
 	{
-		console.log(listNotifJS.map(function(e){return e.id;}).indexOf(notifID));
-		$scope.openNotif(listNotifJS[listNotifJS.map(function(e){return e.id;}).indexOf(notifID)]);
+		$scope.openNotif($scope.listNotifJS[$scope.listNotifJS.map(function(e){return e.id;}).indexOf(notifID)]);
 	}
+
+	$interval(function()
+	{
+		$scope.fetchNotifs();
+	}, 500);
 });

@@ -43,14 +43,14 @@ INSERT INTO TaskHierarchy VALUES (3, 6, true);
 INSERT INTO TaskOrder     VALUES (2, 3);
 
 --Add Notifications 
-INSERT INTO notification VALUES (1, '2018-06-02','Test 1', 'message du test 1', false);
-INSERT INTO notification VALUES (2, '2018-06-04','Test 2', 'message du test 2', true);
-INSERT INTO notification VALUES (3, '2018-06-06','Test 3', 'message du test 3', true);
-INSERT INTO notification VALUES (4, '2018-02-25','Test 4', 'message du test 4', false);
-INSERT INTO notification VALUES (5, '2018-02-26','Test 5', 'message du test 5', false);
-INSERT INTO notification VALUES (6, '2018-06-11','Test 6', 'message du test 6', false);
-INSERT INTO notification VALUES (7, '2018-06-12','Test 7', 'message du test 7', false);
-INSERT INTO notification VALUES (8, '2018-06-13','Test 8', 'message du test 8', false);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-06-02','Test 1', 'message du test 1', false);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-06-04','Test 2', 'message du test 2', true);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-06-06','Test 3', 'message du test 3', true);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-02-25','Test 4', 'message du test 4', false);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-02-26','Test 5', 'message du test 5', false);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-06-11','Test 6', 'message du test 6', false);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-06-12','Test 7', 'message du test 7', false);
+INSERT INTO notification (thedate, title, message, read) VALUES ('2018-06-13','Test 8', 'message du test 8', false);
 
 
 INSERT INTO sender VALUES (1, 'stacy.gromat@email.com', 'jean.dupont@email.com');

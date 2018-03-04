@@ -1,4 +1,4 @@
-var myApp       = angular.module('myApp', ['ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+var myApp = angular.module('myApp', ['angular-notification-icons', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
 myApp.controller("globalProjectCtrl", function($scope, $timeout)
 {

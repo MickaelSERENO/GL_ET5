@@ -16,13 +16,12 @@ $notifs				= $notifRqst->getNotifs($user, true);
 if($rank == 1)
 {
 	$projetRsqt = new ProjectRqst();
-	$projects	= $projetRsqt->getManagedProjects($user, false);
+	$projects	= $projetRsqt->getManagedProjects($user, true);
 }
 if($rank != 2)
 {
 	$taskRqst = new TaskRqst();
-	//TODO true
-	$tasks = $taskRqst->getTasksOfUser($user, false);
+	$tasks = $taskRqst->getTasksOfUser($user, true);
 }
 ?>
 
@@ -32,20 +31,19 @@ if($rank != 2)
 		<meta charset="UTF-8">
 		<title>Tableau de bord</title>	
 
-<script type="text/javascript">
-var rank = <?=$rank?>;
-var notifs = JSON.parse(<?= '\''.json_encode($notifs,JSON_HEX_APOS).'\''?>);
-</script>
+		<script type="text/javascript">
+			var rank = <?=$rank?>;
+			var notifs = JSON.parse(<?= '\''.json_encode($notifs,JSON_HEX_APOS).'\''?>);
+		</script>
 <?php if($rank == 1): ?>
-<script type="text/javascript">
-var projects = JSON.parse(<?= '\''.json_encode($projects,JSON_HEX_APOS).'\''?>);
-</script>
+		<script type="text/javascript">
+			var projects = JSON.parse(<?= '\''.json_encode($projects,JSON_HEX_APOS).'\''?>);
+		</script>
 <?php endif?>
 <?php if($rank != 2): ?>
-<script type="text/javascript">
-var tasks = JSON.parse(<?= '\''.json_encode($tasks,JSON_HEX_APOS).'\''?>);
-console.log(tasks);
-</script>
+		<script type="text/javascript">
+			var tasks = JSON.parse(<?= '\''.json_encode($tasks,JSON_HEX_APOS).'\''?>);
+		</script>
 <?php endif?>
 
 		<script type="text/javascript" src="/scripts/bower_components/angular/angular.js"></script>
@@ -64,7 +62,6 @@ console.log(tasks);
 		<header class="headerConnected">
 			<?php include('../Header/header.php'); ?>
 		</header>
-		
 		<div ng-controller="dashboardController">
 			<div id="centralPart">
 				<div class="alignElem">
@@ -73,64 +70,64 @@ console.log(tasks);
 						<!-- Notif -->
 						<div class="row">
 							<div class="col-sm-6 col-sm-offset-3">
-							<h2><a href="/dashboard/notifications.php">Notifications</a></h2>
-							<table class="table tableList">
-								<thead>
-									<tr>
-										<td>Titre</td>
-										<td>Expéditeur</td>
-										<td>Date</td>
-										<td>Projet</td>
+								<h2><a href="/dashboard/notifications.php">Notifications</a></h2>
+								<table class="table tableList">
+									<thead>
+										<tr>
+											<td>Titre</td>
+											<td>Expéditeur</td>
+											<td>Date</td>
+											<td>Projet</td>
+										</tr>
+									</thead>
+									<tbody>
+	<?php if(count($notifs) != 0) : ?>
+									<tr ng-repeat="notif in notifs" ng-click="linkTo(notif.id,'notif')">
+											<td>{{ notif.title }}</td>
+											<td>{{ notif.senderFirstName + " " + notif.senderLastName}}</td>
+											<td>{{ notif.theDate | date:'dd/MM/yyyy' }}</td>
+											<td>{{ notif.projectName }}</td>
 									</tr>
-								</thead>
-								<tbody>
-<?php if(count($notifs) != 0) : ?>
-								<tr ng-repeat="notif in notifs" ng-click="linkTo(notif.id,'notif')">
-										<td>{{ notif.title }}</td>
-										<td>{{ notif.sender }}</td>
-										<td>{{ notif.theDate | date:'dd/MM/yyyy' }}</td>
-										<td>{{ notif.project}}</td>
-								</tr>
-<?php else: ?>
-								<tr>
-									<td colspan=4>Pas de nouvelles notifications</td>
-								</tr>
-<?php endif; ?>
-								</tbody>
-							</table>
-						</div>
+	<?php else: ?>
+									<tr>
+										<td colspan=4>Pas de nouvelles notifications</td>
+									</tr>
+	<?php endif; ?>
+									</tbody>
+								</table>
+							</div>
 						</div>
 						<!-- Projet -->
 <?php if($rank==1): ?>
 						<div class="row">
 							<div class="col-sm-6 col-sm-offset-3">
-							<h2><a href="/listProject">Projets</a></h2>
-							<table class="table tableList">
-								<thead>
-									<tr>
-										<td>Nom</td>
-										<td>Début</td>
-										<td>Fin</td>
-										<td>Client</td>
-										<td>Statut</td>
-									</tr>
-								</thead>
-								<tbody>
+								<h2><a href="/listProject">Projets</a></h2>
+								<table class="table tableList">
+									<thead>
+										<tr>
+											<td>Statut</td>
+											<td>Nom</td>
+											<td>Début</td>
+											<td>Fin</td>
+											<td>Client</td>
+										</tr>
+									</thead>
+									<tbody>
 <?php if(count($projects)==0): ?>
-									<tr>
-										<td colspan=5>Vous n'avez aucun projet en cours</td>
-									</tr>
+										<tr>
+											<td colspan=5>Vous n'avez aucun projet en cours</td>
+										</tr>
 <?php else:?>
-									<tr ng-repeat="project in projects" ng-click="linkTo(project.id, 'project')">
-										<td>{{ project.name }}</td>
-										<td>{{ project.startDate | date:'dd/MM/yyyy'}}</td>
-										<td>{{ project.endDate | date:'dd/MM/yyyy'}}</td>
-										<td>{{ project.clientName}}</td>
-										<td>{{ project.status }}</td>
-									</tr>
+										<tr ng-repeat="project in projects" ng-click="linkTo(project.id, 'project')">
+											<td>{{ project.status }}</td>
+											<td>{{ project.name }}</td>
+											<td>{{ project.startDate | date:'dd/MM/yyyy'}}</td>
+											<td>{{ project.endDate | date:'dd/MM/yyyy'}}</td>
+											<td>{{ project.clientName}}</td>
+										</tr>
 <?php endif; ?>
-								</tbody>
-							</table>
+									</tbody>
+								</table>
 							</div>
 						</div>
 <?php endif; ?>
@@ -140,40 +137,40 @@ console.log(tasks);
 							<div class="col-sm-6 col-sm-offset-3">
 						<h2><a href="/listTask">Tâches</a></h2>
 						<table class="table tableList">
-						<thead>
-							<tr>
-								<td>Nom</td>
-								<td>Statut</td>
-								<td>Projet</td>
-								<td>Début</td>
-								<td>Avancement</td>
-								<td>Fin</td>
-							</tr>
-						</thead>
-						<tbody>
+							<thead>
+								<tr>
+									<td>Statut</td>
+									<td>Nom</td>
+									<td>Projet</td>
+									<td>Début</td>
+									<td>Fin</td>
+									<td>Avancement</td>
+								</tr>
+							</thead>
+							<tbody>
 <?php if(count($tasks)==0): ?>
-							<tr>
-								<td colspan=6>Vous n'avez aucune tâche en cours</td>
-							</tr>
+								<tr>
+									<td colspan=6>Vous n'avez aucune tâche en cours</td>
+								</tr>
 <?php else: ?>
-							<tr ng-repeat="itask in tasks" ng-click="openTask(itask)">
-								<td>{{ itask.task.name }}</td>
-								<td>{{ itask.task.stats }}</td>
-								<td>{{ itask.project.name }}</td>
-								<td>{{ itask.task.startDate | date:'dd/MM/yyyy' }}</td>
-								<td>{{ itask.task.advancement }}%</td>
-								<td>{{ itask.task.endDate | date:'dd/MM/yyyy'}}</td>
-							</tr>
+								<tr ng-repeat="task in tasks" ng-click="openTask(task)">
+									<td>{{ task.stats }}</td>
+									<td>{{ task.name }}</td>
+									<td>{{ project.name }}</td>
+									<td>{{ task.startDate | date:'dd/MM/yyyy' }}</td>
+									<td>{{ task.endDate | date:'dd/MM/yyyy'}}</td>
+									<td>{{ task.advancement }}%</td>
+								</tr>
 <?php endif; ?>			
-						</tbody>
+							</tbody>
 						</table>
 							<?php include('../../Libraries/TaskPopUp.php'); ?>
 					</div>
-					</div>
-<?php endif; ?>			
-					</div>
 				</div>
+<?php endif; ?>			
 			</div>
-		<div>
+		</div>
+		</div>
+		</div>
 	</body>
 </html>

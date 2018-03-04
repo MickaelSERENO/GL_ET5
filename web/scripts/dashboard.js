@@ -1,8 +1,8 @@
 var project;
 
-var myApp = angular.module('myApp', ['ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+var myApp = angular.module('myApp', ['angular-notification-icons', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
-myApp.controller('dashboardController', function($scope, $uibModal)
+myApp.controller('dashboardController', function($scope, $uibModal, $interval)
 {
 	$scope.rank = rank;
 	$scope.notifs = notifs;
@@ -12,9 +12,9 @@ myApp.controller('dashboardController', function($scope, $uibModal)
 	}
 	if(rank != 2)
 	{
-		$scope.tasks = tasks;
+		$scope.itasks = tasks;
 	}
-
+	
 	$scope.linkTo = function(id, place)
 	{
 		switch(place)
@@ -30,12 +30,27 @@ myApp.controller('dashboardController', function($scope, $uibModal)
 				var a=1;
 		}
 	};
-	$scope.openTask = function(itask)
+
+	$scope.fetchNotifs = function()
 	{
-		project = new Project(itask.project);
-		task = new Task(itask.task);
-		console.log(task)
-		console.log(project)
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				$scope.notifs = JSON.parse(httpCtx.responseText);
+			}
+		}
+		httpCtx.open('GET', "/AJAX/fetchNotifs.php?unread=true", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	}
+
+	$scope.openTask = function(task)
+	{
+		console.log(task);
+		project = new Project($scope.itasks[0].project);
+		task = new Task(task);
 		if(task == null)
 			return;
 
@@ -48,8 +63,9 @@ myApp.controller('dashboardController', function($scope, $uibModal)
 			templateUrl : "modalTask.html",
 			controller : "TaskModal",
 			controllerAs : "$ctrl",
-			resolve : {task    : function() {return task;},
-						project    : function() {return project;},
+			resolve : {task		: function() {return task;},
+						project : function() {return project;},
+						tasks   : function() {return null;},
 					  }
 		};
 
@@ -62,4 +78,9 @@ myApp.controller('dashboardController', function($scope, $uibModal)
 			{
 			});
 	};
+
+	$interval(function()
+	{
+		$scope.fetchNotifs();
+	}, 500);
 });

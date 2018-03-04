@@ -29,9 +29,8 @@
     <link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/CSS/style.css">
 	<script type="text/javascript" src="/scripts/notif.js"></script>	
-    <script type="text/javascript">
-	var listNotifJS = JSON.parse(<?php echo '\''.json_encode($listeNotifs, JSON_HEX_APOS).'\''; ?>); 
-	console.log(listNotifJS);
+	<script type="text/javascript">
+	var listNotifJS = JSON.parse('<?php include('..//AJAX/fetchNotifs.php');?>');
 	var notifID = null;
     </script>
 <?php if(isset($_GET["notifId"])): ?>
@@ -62,7 +61,7 @@
 		                <tbody>
 		                    <tr ng-repeat="notif in listNotifJS" ng-class="{unread : !notif.read}" ng-click="openNotif(notif)">
                                 <td>
-			                        {{ notif.theDate | date:'dd/MM/yyyy' }}
+			                        {{ notif.theDate | date:'dd/MM/yyyy HH:mm'}}
                                 </td>
                                 <td>
                                     {{ notif.title }}
@@ -84,7 +83,7 @@
         				<td ng-if="openedNotif">Projet : <a href="/Project/infoProject.php?projectID={{openedNotif.projectID}}">{{ openedNotif.projectName }}</a></td>
     			      </tr>			
            			<tr class="table bordering">
-			    	 <td class="message" colspan=3><p>{{ openedNotif.message }}</p></td>
+			    	 <td class="message" colspan=3><p ng-bind-html="openedNotif.message"></p></td>
 			        </tr>
 				   </tbody>	
                 </table>
