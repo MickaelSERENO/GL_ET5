@@ -599,16 +599,6 @@ function redraw()
 			if(scope.tasks.length > 0)
 				todayY   = taskNode[0].offsetTop;
 
-			var endY = canvas.height;
-			if(scope.tasks.length > 1)
-				endY     = taskNode[taskNode.length - 1].offsetTop;
-
-//			canvasCtx.beginPath();
-//			canvasCtx.strokeStyle = "red";
-//			canvasCtx.moveTo(todayX, todayY);
-//			canvasCtx.lineTo(todayX, endY);
-//			canvasCtx.stroke();
-
 			canvasCtx.beginPath();
 			canvasCtx.fillStyle = "#EEEEEE";
 			canvasCtx.fillRect(0, 0, todayX, canvas.height);
