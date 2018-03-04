@@ -64,6 +64,7 @@
 
 		public function isCollaborator($email, $projectID)
 		{
+			$email  = pg_escape_string($email);
 			$script = "SELECT COUNT(*) FROM ProjectCollaborator WHERE idProject='$projectID' AND collaboratorEmail='$email';";
 
 			$resultScript = pg_query($this->_conn, $script);
@@ -81,6 +82,7 @@
 
 		public function isManager($email, $id)
 		{
+			$email  = pg_escape_string($email);
 			$script = "SELECT COUNT(*) FROM Project WHERE id=$id AND managerEmail='$email';";
 
 			$resultScript = pg_query($this->_conn, $script);
@@ -144,7 +146,8 @@
 				$project->contactEmail = $rowProject[5];
 			}
 			
-			$scriptManager = "SELECT surname, name FROM Contact WHERE Contact.email = '$project->managerEmail'";
+			$managerEmail = pg_escape_string($project->managerEmail);
+			$scriptManager = "SELECT surname, name FROM Contact WHERE Contact.email = '$managerEmail'";
 			$resultScriptManager = pg_query($this->_conn, $scriptManager);
 			$rowManager = pg_fetch_row($resultScriptManager);
 			if($rowManager != null)
@@ -153,7 +156,8 @@
 				$project->managerFirstName = $rowManager[1];
 			}
 			
-			$scriptContactClient = "SELECT surname, name FROM Contact WHERE Contact.email = '$project->contactEmail'";
+			$contactEmail = pg_escape_string($project->contactEmail);
+			$scriptContactClient = "SELECT surname, name FROM Contact WHERE Contact.email = '$contactEmail'";
 			$resultScriptContactClient = pg_query($this->_conn, $scriptContactClient);
 			$rowContactClient = pg_fetch_row($resultScriptContactClient);
 			if($rowContactClient != null)
@@ -163,7 +167,7 @@
 			}
 			
 			$scriptClient = "SELECT Client.name, ClientContact.clientEmail FROM ClientContact, Client 
-						WHERE Client.email = ClientContact.clientEmail AND ClientContact.contactEmail = '$project->contactEmail'";
+						WHERE Client.email = ClientContact.clientEmail AND ClientContact.contactEmail = '$contactEmail'";
 			$resultScriptClient = pg_query($this->_conn, $scriptClient);
 			$rowClient = pg_fetch_row($resultScriptClient);
 			if($rowClient != null)
@@ -192,6 +196,7 @@
 
 		public function getManagedProjects($email, $started)
 		{
+			$email = pg_escape_string($email);
 			$projects = array();
 			$script = "SELECT id
 						FROM project 
@@ -244,7 +249,7 @@
 
 			for($i = 0; $i < count($collaborators); $i++)
 			{
-				$cEmail = $collaborators[$i];
+				$cEmail = pg_escape_string($collaborators[$i]);
 				$script = $script."INSERT INTO ProjectCollaborator VALUES ($idProject, '$cEmail');";
 			}
 
@@ -255,6 +260,9 @@
 		{
 			$name        = pg_escape_string($name);
 			$desc        = pg_escape_string($desc);
+			$manager     = pg_escape_string($manager);
+			$client      = pg_escape_string($client);
+			$contactClient = pg_escape_string($contactClient);
 
 			$startTime   = new DateTime();
 			$startTime->setTimestamp($startDate);
@@ -273,8 +281,8 @@
 
 			for($i = 0; $i < count($collaborators); $i++)
 			{
-				$cEmail = $collaborators[$i];
-				if($cEmail == $manager)
+				$cEmail = pg_escape_string($collaborators[$i]);
+				if($collaboratorEmail[$i] == $manager)
 					continue;
 				$script = $script."INSERT INTO ProjectCollaborator VALUES ($idProject, '$cEmail');";
 			}

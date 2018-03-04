@@ -1,5 +1,9 @@
 <?php
 	session_start();
+	if(!isset($_SESSION['email']))
+	{
+		header('Location: /connection.php');
+	}
 ?>
 
 
@@ -9,6 +13,9 @@
 	
 		<meta charset="UTF-8">
 		<title>Projet GL</title>
+		<script type="text/javascript">
+			var rank = <?= $_SESSION['rank'] ?>;
+		</script>
 		<script type="text/javascript" src="/scripts/bower_components/xmlhttprequest/XMLHttpRequest.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular/angular.js"></script>
 		<script type="text/javascript" src="/scripts/bower_components/angular-animate/angular-animate.js"></script>
@@ -28,6 +35,41 @@
 		<header class="headerConnected">
 			<?php include('../Header/header.php'); ?>
 		</header>
+
+		<script type="text/ng-template" id="modalAddClient.html">
+			<div class="modal-header">
+				<h3 class="modal-title">Ajout d&apos;un nouveau client</h3>
+			</div>
+
+			<div class="modal-body">
+				<div class="container-fluid">
+					<div class="row smallTopSpace">
+						Nom : <input type="text" ng-model="name"></input>
+					</div>
+
+					<div class="row smallTopSpace">
+						Email : <input type="text" ng-model="email"></input>
+					</div>
+
+					<div class="row smallTopSpace">
+						Téléphone : <input type="text" ng-model="telephone"></input>
+					</div>
+
+					<div class="row smallTopSpace">
+						Description :
+					</div>
+					<div class="row">
+						<textarea rows="3" ng-model="description" style="width:100%"></textarea>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<div class="errorMsg" ng-show="errorMsg!=''">{{errorMsg}}</div>
+				<button type="button" class="btn btn-primary" ng-click="add()">Ajouter</button>
+				<button type="button" class="btn btn-warning" ng-click="cancel()">Annuler</button>
+			</div>
+		</script>
 	
 		<div ng-controller="globalClientsCtrl">
 			<div id="centralPart">
@@ -38,7 +80,12 @@
 							<div class="col-md-4" id="listClients" >
 								<table class="table tableList">
 									<thead>
-										<tr><td><h2>Clients</h2></td></tr>
+										<tr>
+											<td>
+												<h2 style="float:left;vertical-align:top">Clients</h2> 
+												<div style="float:right"><img ng-show="rank == 1 || rank == 2" src="/Resources/Images/add_icon.png" ng-click="openAddClient()" width=32 height=32/></div>
+											</td>
+										</tr>
 									</thead>
 									<tbody>
 										<tr ng-repeat="client in clients">

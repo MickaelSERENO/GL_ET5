@@ -17,9 +17,7 @@
 
             //Fetch clients information
 			$script = "SELECT Client.email, Client.name, description, Client.telephone
-						FROM Client
-						INNER JOIN ClientContact ON Client.email=clientEmail 
-						INNER JOIN Contact ON contactEmail = Contact.email";
+						FROM Client;";
 
 			if (!($this->_conn))			{
 				echo "Erreur lors de la connexion.\n";
@@ -45,6 +43,17 @@
 
             return $clients;
 			
+		}
+
+		public function createClient($name, $email, $telephone, $description)
+		{
+			$name        = pg_escape_string($name);
+			$email       = pg_escape_string($email);
+			$telephone   = pg_escape_string($telephone);
+			$description = pg_escape_string($description);
+
+            $script = "INSERT INTO Client(email, name, telephone, description) VALUES ('$email', '$name', '$telephone', '$description');";
+            $resultScript = pg_query($this->_conn, $script);
 		}
 	}
 ?>
