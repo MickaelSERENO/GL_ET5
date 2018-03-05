@@ -131,7 +131,7 @@
 			
 			$script = "SELECT id, managerEmail, contactEmail, name, description, startDate, endDate, status
 						FROM Project WHERE Project.id = $idProject;";
-			$scriptProject = "SELECT name, description, startDate, endDate, managerEmail, contactEmail
+			$scriptProject = "SELECT name, description, startDate, endDate, managerEmail, contactEmail, status
 						FROM Project WHERE Project.id = $idProject;";
 			$resultScriptProject = pg_query($this->_conn, $scriptProject);
 			$rowProject = pg_fetch_row($resultScriptProject);
@@ -144,6 +144,7 @@
 				$project->endDate      = DateTime::createFromFormat("Y-m-d H:i:s", $rowProject[3] . " 00:00:00", new DateTimeZone("UTC"));
 				$project->managerEmail = $rowProject[4];
 				$project->contactEmail = $rowProject[5];
+				$project->status       = $rowProject[6];
 			}
 			
 			$managerEmail = pg_escape_string($project->managerEmail);
@@ -231,7 +232,7 @@
 			return (int)($row[0]);
 		}
 
-		public function modifyProject($idProject, $name, $desc, $startDate, $endDate, $manager, $client, $contactClient, $collaborators)
+		public function modifyProject($idProject, $name, $desc, $startDate, $endDate, $manager, $client, $contactClient, $collaborators, $status)
 		{
 			$name        = pg_escape_string($name);
 			$desc        = pg_escape_string($desc);
@@ -244,7 +245,7 @@
 			$endTime->setTimestamp($endDate);
 			$endFormat = $endTime->format("Y-m-d");
 
-			$script    = "UPDATE Project SET name='$name', description='$desc', managerEmail='$manager', contactEmail='$contactClient', startDate='$startFormat', endDate='$endFormat' WHERE id=$idProject;
+			$script    = "UPDATE Project SET name='$name', description='$desc', managerEmail='$manager', contactEmail='$contactClient', startDate='$startFormat', endDate='$endFormat', status='$status' WHERE id=$idProject;
 						  DELETE FROM ProjectCollaborator WHERE idProject=$idProject;";
 
 			for($i = 0; $i < count($collaborators); $i++)

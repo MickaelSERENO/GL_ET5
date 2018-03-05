@@ -70,12 +70,15 @@
 			<div ng-controller="globalProjectCtrl" id="ganttBody">
 				<uib-tabset active="activeTab">
 					<!-- Information tab -->
-					<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()">
+					<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()" ng-click="goToInfoProject()">
 						<div ng-controller="infoProjectCtrl">
 							<?php include('../../Libraries/ProjectModal.php'); ?>
 							<div class="infoProject whiteProject">
-								<h3> <input type="text" ng-model="name" ng-disabled="!inModifyStats"></input> </h3>
 								<div class="container-fluid">
+									<div class="row">
+										<h3 class="col-md-6"> <input type="text" ng-model="name" ng-disabled="!inModifyStats"></input> </h3>
+										<div class="col-md-6" style="vertical-align:middle"> Visible : <input type="checkbox" ng-disabled="status=='STARTED' || status == 'NOT_STARTED' || !inModifyStats" ng-model="projectIsVisible"></input></div>
+									</div>
 									<div class="row">
 										<div class="descriptionProject col-md-8">
 											<div class="row smallTopSpace">

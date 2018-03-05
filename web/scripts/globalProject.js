@@ -7,6 +7,11 @@ myApp.controller("globalProjectCtrl", function($scope, $timeout)
 	{
 		$scope.$broadcast('clickGanttHeader');
 	};
+
+	$scope.goToInfoProject = function()
+	{
+		$scope.$broadcast('clickInfoProject');
+	};
 	if(ganttTaskID != -1)
 	{
 		$scope.activeTab = 1;

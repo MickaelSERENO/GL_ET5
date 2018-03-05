@@ -30,7 +30,7 @@
     <link rel="stylesheet" type="text/css" href="/CSS/style.css">
 	<script type="text/javascript" src="/scripts/notif.js"></script>	
 	<script type="text/javascript">
-	var listNotifJS = JSON.parse('<?php include('..//AJAX/fetchNotifs.php');?>');
+	var listNotifJS = JSON.parse("'"<?php include('../AJAX/fetchNotifs.php'); ?>"'");
 	var notifID = null;
     </script>
 <?php if(isset($_GET["notifId"])): ?>

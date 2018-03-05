@@ -720,6 +720,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 						$scope.$apply(function()
 						{
 							$scope.closeStatus = 1;
+							project.stats      = "CLOSED_INVISIBLE";
 							$scope.closeTxt    = "Démarrer";
 						});
 					}
@@ -741,6 +742,7 @@ myApp.controller("ganttProjectCtrl", function($scope, $uibModal, $timeout, $inte
 					{
 						$scope.$apply(function()
 						{
+							project.stats      = "STARTED";
 							$scope.closeStatus = 0;
 							$scope.closeTxt    = "Clôturer";
 						});

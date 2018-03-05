@@ -13,7 +13,7 @@
 	$projectRqst   = new ProjectRqst();
 	$collaborators = json_decode($_GET['collaborators']);
 
-	$projectRqst->modifyProject($_GET['projectID'], $_GET['name'], $_GET['description'], (int)$_GET['startTime'], (int)$_GET['endTime'], $_GET['managerEmail'], $_GET['clientEmail'], $_GET['contactClientEmail'], $collaborators);
+	$projectRqst->modifyProject($_GET['projectID'], $_GET['name'], $_GET['description'], (int)$_GET['startTime'], (int)$_GET['endTime'], $_GET['managerEmail'], $_GET['clientEmail'], $_GET['contactClientEmail'], $collaborators, $_GET['status']);
 
 	echo '1';
 	return;
