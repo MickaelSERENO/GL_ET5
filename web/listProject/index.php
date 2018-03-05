@@ -144,8 +144,8 @@
 					<label>
 						<input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Research ... " name="Research"  maxlength="10"/>
 					</label>
-					<img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Research"/>
-					<img ng-click="showSearchSetting = !showSearchSetting" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/settings.svg" alt="Paramètre de research"/>
+					<img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Recherche"/>
+					<img ng-click="showSearchSetting = !showSearchSetting" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/settings.svg" alt="Paramètre de recherche"/>
 				</div>
 				<img ng-click="createProject()" style="float:right;cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/Resources/Images/add_icon.png" alt="Ajout de projet"/>
             </div>
@@ -161,7 +161,7 @@
                 <tbody>
                 <tr ng-repeat="row in dataList | orderBy: orderColumn track by $index" ng-show="inPage($index)" ng-click="goToDetail(row[detailField])">
                     <td ng-repeat="field in showFields">
-                        {{row[field]}}
+                        {{row[field] | date:'dd/MM/yyyy'}}
                     </td>
                 </tr>
                 </tbody>
@@ -197,7 +197,7 @@
                 <div style="font-size: 10px;">
                     <div>
                         <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                            Researche dans les champs suivants
+                            Recherche dans les champs suivants
                         </label>
                         <label ng-repeat="field in allSearchFields">
                             <input type="checkbox" checklist-model="userSearchFields" checklist-value="field" style="margin-left: 15px">

@@ -40,10 +40,10 @@ if(!isset($_SESSION["email"]))
         <div style="margin: 10px">
             <div style="margin: 10px 10px">
                 <label>
-                    <input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Research ... " name="Research"  maxlength="10">
+                    <input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Recherche ... " name="Recherche"  maxlength="10">
                 </label>
-                <img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Research">
-                <img ng-click="showSearchSetting = !showSearchSetting" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/settings.svg" alt="Paramètre de research">
+                <img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="recherche">
+                <img ng-click="showSearchSetting = !showSearchSetting" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/settings.svg" alt="Paramètre de recherche">
             </div>
 
             <table class="table tableList" style="table-layout: fixed;">
@@ -87,17 +87,17 @@ if(!isset($_SESSION["email"]))
 
             <div id="search_box" ng-show="showSearchSetting" style="background-color:#f8efc0;border-radius:10px; padding: 10px; width: 30%;">
                 <div style="text-align: center">
-                    <label> Paramètres de research</label>
+                    <label> Paramètres de recherche</label>
                 </div>
                 <hr style="margin: 0px">
                 <div style="font-size: 10px;">
                     <div>
                         <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                            Researche dans les champs suivants
+                            recherche dans les champs suivants
                         </label>
                         <label ng-repeat="field in allSearchFields">
                             <input type="checkbox" checklist-model="userSearchFields" checklist-value="field" style="margin-left: 15px">
-                            {{fileds[field].label}}
+                            {{fileds[field].label | date:'dd/MM/yyyy'}}
                         </label>
                     </div>
                 </div>

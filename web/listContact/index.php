@@ -33,23 +33,89 @@ if(!isset($_SESSION["email"]))
 </head>
 
 <body ng-app="myApp" ng-init="category='contact';">
-		<header class="headerConnected">
-			<?php include('../Header/header.php'); ?>
-		</header>
+<header class="headerConnected">
+    <?php include('../Header/header.php'); ?>
+</header>
+
+<?php include('../../Libraries/ProjectModal.php'); ?>
+<!-- The add project pop up-->
+<script type="text/ng-template" id="modalAddContact.html">
+    <div class="modal-dialog" style="width: 50%">
+    <div class="modal-header">
+        <h3 class="modal-title">Création de contact</h3>
+    </div>
+    <div class="modal-body" >
+        <div class="container-fluid">
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-12 flexDiv">
+                    <div> Nom : </div>
+                    <input type="text" ng-model="newContact.name"></input>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-12 flexDiv">
+                    <div> Prénom : </div>
+                    <input type="text" ng-model="newContact.surname"></input>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-12 flexDiv">
+                    <div> Émail : </div>
+                    <input type="text" ng-model="newContact.email"></input>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-12 flexDiv">
+                    <div> Téléphone : </div>
+                    <input type="text" ng-model="newContact.telephone"></input>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-12 flexDiv">
+                    <div> Statut : </div>
+                    <select ng-model="newContact.role" ng-change="goFilter()">
+                        <option ng-repeat="x in roles">{{x}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px" ng-show="newContact.role == 'manager' || newContact.role == 'collaborator'">
+                <div class="col-md-12 flexDiv">
+                    <div> Mot de passe: </div>
+                    <input type="password" ng-model="newContact.pwd"></input>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px" ng-show="newContact.role == 'client'">
+                <div class="col-md-12">
+                    <div class="flexDiv">
+                        <div> Client : </div>
+                        <div> &nbsp; {{newContact.clientname}} </div>
+                        <img ng-click="openClient()" width="16px" height="16px" class="settingImg" src="/CSS/img/settings.svg" alt="Modifier client">
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="row errorMsg" ng-show="errorMsg != ''"><div class="col-md-12">{{errorMsg}}</div></div>
+        <button type="button" class="btn btn-primary" ng-click="ok();">Ajouter</button>
+        <button type="button" class="btn btn-warning" ng-click="cancel()">Annuler</button>
+    </div>
+    </div>
+</script>
+
 <div ng-controller="listControler">
     <div id="centralPart">
         <div style="margin: 10px">
             <div style="margin: 10px 10px">
                 <label>
-                    <input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Research ... " name="Research"  maxlength="10">
+                    <input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Recherche ... " name="Recherche"  maxlength="10">
                 </label>
-                <img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Research">
-                <img ng-click="showSearchSetting = !showSearchSetting" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/settings.svg" alt="Paramètre de research">
+                <img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Recherche">
+                <img ng-click="showSearchSetting = !showSearchSetting" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/settings.svg" alt="Paramètre de recherche">
+                <img ng-click="createContact()" style="float:right;cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/Resources/Images/add_icon.png" alt="Ajout de projet"/>
             </div>
-
             <table class="table tableList" style="table-layout: fixed;">
                 <thead>
-                <tr>
                     <th ng-repeat="field in showFields" ng-style="(field == orderColumn || '-'+field == orderColumn)?{'background': 'linear-gradient(to right, #00c1fc, #eaeaea)'}:{}">
                         <label ng-click="order(field)" style="cursor:pointer">{{fileds[field].label}}</label>
                     </th>
@@ -88,13 +154,13 @@ if(!isset($_SESSION["email"]))
 
             <div id="search_box" ng-show="showSearchSetting" style="background-color:#f8efc0;border-radius:10px; padding: 10px; width: 30%;">
                 <div style="text-align: center">
-                    <label> Paramètres de research</label>
+                    <label> Paramètres de recherche</label>
                 </div>
                 <hr style="margin: 0px">
                 <div style="font-size: 10px;">
                     <div>
                         <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
-                            Researche dans les champs suivants
+                            Recherche dans les champs suivants
                         </label>
                         <label ng-repeat="field in allSearchFields">
                             <input type="checkbox" checklist-model="userSearchFields" checklist-value="field" style="margin-left: 15px">

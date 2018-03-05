@@ -31,12 +31,12 @@ class ListRqst extends PSQLDatabase
         $role = array();
         if($this->isCollaborator($email))
             array_push($role,"collaborator");
+        if($this->isClient($email))
+            array_push($role,"client");
         if($this->isManager($email))
             array_push($role,"manager");
         if($this->isAdministrator($email))
             array_push($role,"administrator");
-        if($this->isClient($email))
-            array_push($role,"client");
         return $role;
     }
 
@@ -147,6 +147,8 @@ class ListRqst extends PSQLDatabase
             $row->isActive = $this->getEnduser($row->email)->isactive;
             $row->itsProjects = $this->getContactProjects($row->email);
             $row->role = $this->getRole($row->email);
+            if(sizeof($row->role)>0)
+            $row->roleUnique = $this->getRole($row->email)[0];
             array_push($result, $row);
         }
         return $result;
@@ -261,6 +263,34 @@ class ListRqst extends PSQLDatabase
                     WHERE  e.contactemail = '$email' and e.contactemail = c.email;";
         $resultScript = pg_query($this->_conn, $script);
         return pg_fetch_object($resultScript);
+    }
+
+    public function addContact($data)
+    {
+        $data_decode = json_decode($data);
+        $script = "INSERT INTO Contact VALUES ('$data_decode->name', '$data_decode->surname', '$data_decode->email', '$data_decode->telephone');";
+        pg_query($this->_conn, $script);
+        switch ($data_decode->role){
+            case "manager":
+                $pwd_hash = password_hash($data_decode->pwd,PASSWORD_BCRYPT);
+                $script = "INSERT INTO enduser VALUES ('$data_decode->email','$pwd_hash',TRUE);";
+                pg_query($this->_conn, $script);
+                $script = "INSERT INTO projectmanager VALUES ('$data_decode->email');";
+                pg_query($this->_conn, $script);
+                break;
+            case "collaborator":
+                $pwd_hash = password_hash($data_decode->pwd,PASSWORD_BCRYPT);
+                $script = "INSERT INTO enduser VALUES ('$data_decode->email','$pwd_hash',TRUE);";
+                pg_query($this->_conn, $script);
+                $script = "INSERT INTO collaborator VALUES ('$data_decode->email');";
+                pg_query($this->_conn, $script);
+                break;
+            case "client":
+                $script = "INSERT INTO clientcontact VALUES ('$data_decode->email','$data_decode->clientemail');";
+                pg_query($this->_conn, $script);
+                break;
+        }
+        return;
     }
 
 }

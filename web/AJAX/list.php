@@ -21,6 +21,10 @@
 			case 'getContacts':
                 echo json_encode($rsqt->getContacts());
                 break;
+            case 'addContact':
+            	if($_GET['data'])
+                echo json_encode($rsqt->addContact($_GET['data']));
+                break;
             case 'getTasks':
                 echo json_encode($rsqt->getTasks());
                 break;

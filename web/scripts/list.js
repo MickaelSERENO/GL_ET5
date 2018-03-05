@@ -97,12 +97,15 @@ var categories = {
             name: {label: "Nom"},
             surname: {label: "Prénom"},
             email:{label:"Email"},
-            isActive: {label: "Active"}
+            isActive: {label: "Active"},
+            role: {label: "Role"},
+            roleUnique: {label: "Role"}
         },
         showFields: [
             "name",
             "surname",
-            "email"
+            "email",
+            "roleUnique"
         ],
         allSearchFields : [
             "name",
@@ -112,7 +115,9 @@ var categories = {
             "name",
             "surname"
         ],
-        requestDB: "getContacts"
+        requestDB: "getContacts",
+        detailField: "email",
+        detailPage:"/Contact/infoContact.php?contactID="
     }
 };
 
@@ -141,7 +146,7 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
 				$scope.$apply(function()
 				{
 					self.dataListAll = JSON.parse(httpCtx.responseText);
-					console.log(self.dataListAll);
+					// console.log(self.dataListAll);
 					self.arrangeList();
 				});
 			}
@@ -330,7 +335,6 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
     ];
     self.user.contactRole = ['administrator','collaborator', 'manager', 'client'];
     self.satisfyFilterContactRole = function (role) {
-
         return self.user.contactRole.some(function (v) {
             return role.indexOf(v) >= 0;
         });
@@ -447,4 +451,133 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
 			{
 			});
 	};
+
+    self.createContact = function()
+    {
+        var data = JSON.parse(httpCtx.responseText);
+        $scope.opts =
+            {
+                backdrop : true,
+                backdropClick : true,
+                dialogFade : false,
+                keyboard : true,
+                templateUrl : "modalAddContact.html",
+                controller : "addContactModal",
+                controllerAs : "$ctrl",
+                size: 'lg',
+                windowClass: 'my-modal-popup',
+                resolve : {
+                    collList : function(){return arr=[];}
+                }
+            };
+
+        var modalInstance = $uibModal.open($scope.opts);
+        modalInstance.result.then(
+            function() //ok
+            {
+                self.selectCategory(self.category);
+            },
+            function() //cancel
+            {
+            });
+    };
 });
+
+myApp.controller("addContactModal", function($scope, $uibModalInstance, $uibModal, $filter, collList)
+{
+    var self = $scope;
+
+    self.roles = [
+        "manager", "collaborator", "client"
+    ];
+
+    self.newContact = {
+        name:"",
+        surname:"",
+        email:"",
+        telephone:"",
+        role:"manager",
+        clientemail: "",
+        clientname: "",
+        clientdesciption: "",
+        clienttelephone: ""
+    }
+    self.errorMsg = "";
+
+    self.ok = function()
+    {
+        var httpCtx = new XMLHttpRequest();
+        httpCtx.onreadystatechange = function()
+        {
+            if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+            {
+                $uibModalInstance.close();
+            }
+        };
+
+        httpCtx.open('GET', "/AJAX/list.php?function=addContact&data="+encodeURIComponent(JSON.stringify(self.newContact)), true);
+        httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpCtx.send(null);
+    };
+
+    $scope.cancel = function()
+    {
+        $uibModalInstance.dismiss();
+    };
+
+    $scope.openClient = function()
+    {
+        var httpCtx = new XMLHttpRequest();
+        httpCtx.onreadystatechange = function()
+        {
+            if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+            {
+                if(httpCtx.responseText != '-1')
+                {
+                    var data = JSON.parse(httpCtx.responseText);
+                    $scope.opts =
+                        {
+                            backdrop : true,
+                            backdropClick : true,
+                            dialogFade : false,
+                            keyboard : true,
+                            templateUrl : "modalAddColl.html",
+                            controller : "SelectData",
+                            controllerAs : "$ctrl",
+                            resolve : {
+                                data       : function() {return data;},
+                                showFields : function() {return showFields = ["name", "email", "telephone"];},
+                                fields     : function() {return fields =
+                                    {
+                                        name      : {label: "Nom"},
+                                        email     : {label: "Email"},
+                                        telephone : {label: "Téléphone"}
+                                    };},
+                                okText     : function() {return "Ajouter";},
+                                title      : function() {return "Changement de client";}
+                            }
+                        };
+
+                    var modalInstance = $uibModal.open($scope.opts);
+                    modalInstance.result.then(
+                        function(client) //ok
+                        {
+                            $scope.newContact.clientemail = client.email;
+                            $scope.newContact.clientname  = client.name;
+                        },
+                        function() //cancel
+                        {
+                        });
+                }
+            }
+        }
+
+        httpCtx.open('GET', "/AJAX/fetchClientsInfo.php", true);
+        httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpCtx.send(null);
+    };
+
+
+});
+
+
