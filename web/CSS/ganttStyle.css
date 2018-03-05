@@ -63,7 +63,7 @@
 .close::before
 {
 	content:'x';
-	color:rgba(0,0,0,255);
+	color:rgba(255,0,0,255);
 	opacity:10;
 	font-weight:bold;
 }
