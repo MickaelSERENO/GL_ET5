@@ -247,7 +247,7 @@
 		<div class="modal-footer">
 			<button type="button" class="btn btn-primary" ng-show="isManager" ng-click="modifyAdv();">{{ modifyTextAdv }} </button>
 			<button type="button" class="btn btn-primary" ng-show="modifyIndexAdv == 0 && (isManager || task.collaboratorEmail == email)" ng-click="grab()">Saisir</button>
-			<button type="button" class="btn btn-warning" ng-show="modifyIndexAdv == 1" ng-click="cancelModifyAdv();">Annulé</button>
+			<button type="button" class="btn btn-warning" ng-show="modifyIndexAdv == 1" ng-click="cancelModifyAdv();">Annuler</button>
 		</div>
 	</uib-tab>
 </uib-tabset>

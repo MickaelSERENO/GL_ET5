@@ -20,6 +20,8 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 	$scope.endDate          = new Date();
 	$scope.minDate          = null;
 	$scope.maxDate          = null;
+	$scope.projectIsVisible = true;
+	$scope.status           = "";
 
 	$scope.errorMsg         = "";
 
@@ -110,6 +112,7 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 
 	$scope.cancel   = function()
 	{
+		console.log($scope.projectInfo.status);
 		$scope.name             = (" " + $scope.projectInfo.name).slice(1);
 		$scope.clientName       = (" " + $scope.projectInfo.clientName).slice(1);
 		$scope.clientEmail      = (" " + $scope.projectInfo.clientEmail).slice(1);
@@ -123,6 +126,9 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 		$scope.collaborators    = [];
 		$scope.startDate        = new Date($scope.projectInfo.startDate);
 		$scope.endDate          = new Date($scope.projectInfo.endDate);
+		$scope.projectIsVisible = ($scope.projectInfo.status != "CLOSED_INVISIBLE");
+		$scope.status           = $scope.projectInfo.status;
+
 		for(var i = 0; i < $scope.projectInfo.listCollab.length; i++)
 			$scope.collaborators.push($scope.projectInfo.listCollab[i]);
 
@@ -161,6 +167,17 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 			$scope.errorMsg = "Le nom du projet ne peut être vide";
 			return;
 		}
+
+		var stats = "";
+		if($scope.status == 'STARTED' || $scope.status == 'NOT_STARTED')
+			stats = $scope.projectInfo.status;
+		else if($scope.projectIsVisible)
+			stats = "CLOSED_VISIBLE";
+		else
+			stats = "CLOSED_INVISIBLE";
+
+
+
 		var httpCtx = new XMLHttpRequest();
 		httpCtx.onreadystatechange = function()
 		{
@@ -180,6 +197,7 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 					$scope.projectInfo.managerEmail     = (" " + $scope.managerEmail);
 					$scope.projectInfo.description      = (" " + $scope.description).slice(1);
 					$scope.projectInfo.listCollab       = [];
+					$scope.projectInfo.status           = stats;
 					for(var i = 0; i < $scope.collaborators.length; i++)
 						$scope.projectInfo.listCollab.push($scope.collaborators[i]);
 				}
@@ -194,7 +212,7 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 			collaborators.push($scope.collaborators[i].email);
 		collaborators = JSON.stringify(collaborators);
 
-		httpCtx.open('GET', "/AJAX/modifyProject.php?projectID="+$scope.projectInfo.id+"&name="+encodeURIComponent($scope.name)+"&description="+encodeURIComponent($scope.description)+"&startTime="+startTime+"&endTime="+endTime+"&collaborators="+collaborators+"&managerEmail="+$scope.managerEmail+"&clientEmail="+$scope.clientEmail+"&contactClientEmail="+$scope.contactEmail, true);
+		httpCtx.open('GET', "/AJAX/modifyProject.php?projectID="+$scope.projectInfo.id+"&name="+encodeURIComponent($scope.name)+"&description="+encodeURIComponent($scope.description)+"&startTime="+startTime+"&endTime="+endTime+"&collaborators="+collaborators+"&managerEmail="+$scope.managerEmail+"&clientEmail="+$scope.clientEmail+"&contactClientEmail="+$scope.contactEmail+"&status="+stats, true);
 		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCtx.send(null);
 	};
@@ -462,6 +480,15 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 
 	$scope.$on('clickGanttHeader', function(event, data)
 	{
+		$scope.projectInfo.status = project.stats;
+		console.log($scope.projectInfo.status);
 		$scope.cancel();
+	});
+
+	$scope.$on('clickInfoProject', function(event, data)
+	{
+		$scope.projectInfo.status = project.stats;
+		$scope.status             = project.stats;
+		$scope.projectIsVisible   = ($scope.projectInfo.status != "CLOSED_INVISIBLE");
 	});
 });

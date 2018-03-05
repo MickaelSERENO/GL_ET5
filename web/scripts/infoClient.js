@@ -33,7 +33,7 @@ class Contact
 	}
 }
 
-myApp.controller("ClientsCtrl", function($scope, $timeout)
+myApp.controller("ClientsCtrl", function($scope, $timeout, $uibModal)
 {		
 	//Variables
 	$scope.clients=[];
@@ -128,12 +128,95 @@ myApp.controller("ClientsCtrl", function($scope, $timeout)
 		httpCx.open('GET', "../AJAX/fetchClientContacts.php?clientEmail="+encodeURIComponent($scope.selectedClient.email),true);
 		httpCx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		httpCx.send(null);
-	
-	
 	};
 
-	console.log("client projects : "+$scope.clientProjects);
-	
+	$scope.openAddClient = function()
+	{
+		$scope.opts = 
+		{
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "modalAddClient.html",
+			controller : "AddClient",
+			controllerAs : "$ctrl",
+			resolve : {
+					  }
+		};
+
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function(client) //ok
+			{
+				$scope.clients.push(client);
+
+			},
+			function() //cancel
+			{
+			});
+	};
+
+    $scope.rank = rank;
 });
 
-		
+myApp.controller("AddClient", function($scope, $timeout, $uibModalInstance)
+{
+	$scope.name        = "";
+	$scope.description = "";
+	$scope.telephone   = "";
+	$scope.email       = "";
+    $scope.errorMsg    = "";
+
+    $scope.add = function()
+    {
+        if($scope.name == "")
+        {
+            $scope.errorMsg = "Le nom ne peut pas être vide";
+            return;
+        }
+
+        else if($scope.email == "")
+        {
+            $scope.errorMsg = "L'adresse email ne peut pas être vide";
+            return;
+        }
+
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+                    var client = new ClientInfo(
+                        {
+                            name : $scope.name,
+                            email : $scope.email,
+                            description : $scope.description,
+                            telephone : $scope.telephone
+                        });
+                    $uibModalInstance.close(client);
+                }
+                else
+                {
+                    $scope.errorMsg = "Une erreur inconnue est survenue";
+                    return;
+                }
+            }
+            else
+            {
+                $scope.errorMsg = "Une erreur inconnue est survenue";
+                return;
+            }
+        }
+		httpCtx.open('GET', "/AJAX/addClient.php?name="+encodeURIComponent($scope.name)+"&email="+encodeURIComponent($scope.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&description="+encodeURIComponent($scope.description), true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+    };
+
+    $scope.cancel = function()
+    {
+        $uibModalInstance.dismiss();
+    }
+});

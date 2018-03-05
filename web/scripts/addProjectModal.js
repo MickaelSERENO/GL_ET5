@@ -67,6 +67,8 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 
 	$scope.ok = function()
 	{
+		var sD = $scope.startDate.getTime() - $scope.startDate.getTimezoneOffset()*60*1000;
+		var eD = $scope.endDate.getTime()   - $scope.endDate.getTimezoneOffset()*60*1000;
 		if($scope.name == "")
 		{
 			$scope.errorMsg = "Le nom ne peut pas être vide";
@@ -76,6 +78,16 @@ myApp.controller("addProjectModal", function($scope, $uibModalInstance, $uibModa
 		else if($scope.managerEmail == "")
 		{
 			$scope.errorMsg = "Le projet doit avoir un manager";
+			return;
+		}
+		else if($scope.clientEmail == "")
+		{
+			$scope.errorMsg = "Il faut nécessairement un client pour créer un projet";
+			return;
+		}
+		else if($scope.contactEmail == "")
+		{
+			$scope.errorMsg = "Il faut nécessairement un contact client pour créer un projet";
 			return;
 		}
 		var httpCtx = new XMLHttpRequest();

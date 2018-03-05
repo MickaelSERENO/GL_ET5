@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html>
+	<link rel="stylesheet" href="/scripts/bower_components/angular-notification-icons/dist/angular-notification-icons.css">
+
+		<script type="text/javascript" src="/scripts/bower_components/angular-animate/angular-animate.js"></script>
+	<script type="text/javascript" src="/scripts/bower_components/angular-notification-icons/dist/angular-notification-icons.js"></script>
+	<script type="text/javascript" src="/scripts/header.js"></script>
 	<body>
+		<div ng-controller="headerController">
 		<div id="topBanner">
 			<ul class="list-inline">
 				<div class="container-fluid">
@@ -9,7 +15,7 @@
 							<li> <p>PoPS2017</p> </li>
 						</div>
 						<div class="col-md-2">
-							<li class="topBannerRight"> <p> Notif Rapide </p> </li>
+							<li class="topBannerRight"> <p><notification-icon count="countUnreadNotifs" animation="fade"><img src="/Resources/Images/enveloppe.jpg" width=100 height=50 ng-dblclick="goToNotif()"></img> </notification-icon></li>
 						</div>
 						<div class="col-md-2">
 							<a href="/disconnect.php">
@@ -43,6 +49,7 @@
 					</div>
 				</ul>
 			</div>
+		</div>
 		</div>
 	</body>
 </html>

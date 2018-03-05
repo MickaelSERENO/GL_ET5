@@ -1,4 +1,4 @@
-var myApp       = angular.module('myApp', ['ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+var myApp = angular.module('myApp', ['angular-notification-icons', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
 myApp.controller("globalProjectCtrl", function($scope, $timeout)
 {
@@ -6,6 +6,11 @@ myApp.controller("globalProjectCtrl", function($scope, $timeout)
 	$scope.goToGanttHeader = function()
 	{
 		$scope.$broadcast('clickGanttHeader');
+	};
+
+	$scope.goToInfoProject = function()
+	{
+		$scope.$broadcast('clickInfoProject');
 	};
 	if(ganttTaskID != -1)
 	{

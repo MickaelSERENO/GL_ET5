@@ -1,7 +1,7 @@
 /**
  * Created by Miao1 on 14/01/2018.
  */
-var myApp = angular.module('myApp', ['checklist-model', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+var myApp = angular.module('myApp', ['checklist-model', 'ngAnimate','angular-notification-icons', 'ngSanitize', 'ui.bootstrap']);
 
 var categories = {
     project: {
