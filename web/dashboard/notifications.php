@@ -6,9 +6,9 @@
 	if(!isset($_SESSION["email"]))
 	{
 		header('Location: /connection.php');
+		return;
 	}
 
-//	$_SESSION["email"] = "jean.dupont@email.com";
 	$notifRequest = new NotifRqst();
 	$listeNotifs = $notifRequest->getNotifs($_SESSION["email"],false);
 	
@@ -30,14 +30,15 @@
     <link rel="stylesheet" type="text/css" href="/CSS/style.css">
 	<script type="text/javascript" src="/scripts/notif.js"></script>	
 	<script type="text/javascript">
-	var listNotifJS = JSON.parse('<?php include('..//AJAX/fetchNotifs.php');?>');
+	var listNotifJS = JSON.parse('<?php $_GET["unread"] = 'false';
+		 include('../AJAX/fetchNotifs.php');?>');
 	var notifID = null;
     </script>
 <?php if(isset($_GET["notifId"])): ?>
 	<script type="text/javascript">
 		notifID = <?= $_GET["notifId"] ?>; 
 	</script>
-<?php endif ?>
+<?php endif; ?>
   </head>
 
   <body ng-app="myApp">
