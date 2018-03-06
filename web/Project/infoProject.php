@@ -55,6 +55,7 @@
 		<script type="text/javascript" src="/scripts/infoProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttProject.js"></script>
 		<script type="text/javascript" src="/scripts/ganttModal.js"></script>
+		<script type="text/javascript" src="/scripts/confirmModal.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
@@ -73,6 +74,7 @@
 					<uib-tab id="infoHeader" index="0" heading="Information" deselect="deselectTab()" ng-click="goToInfoProject()">
 						<div ng-controller="infoProjectCtrl">
 							<?php include('../../Libraries/ProjectModal.php'); ?>
+							<?php include('../../Libraries/confirmModal.php'); ?>
 							<div class="infoProject whiteProject">
 								<div class="container-fluid">
 									<div class="row">

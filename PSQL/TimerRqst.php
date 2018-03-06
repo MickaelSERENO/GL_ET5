@@ -27,15 +27,19 @@
 				$this->checkTaskStatus($task);
 
 			//Get project end date
-			$script       = "SELECT endDate FROM Project WHERE id = $id";
+			$script       = "SELECT endDate, startDate, status FROM Project WHERE id = $id";
 			$resultScript = pg_query($this->_conn, $script);
 			$row          = pg_fetch_row($resultScript);
 			$end          = DateTime::createFromFormat("Y-m-d H:i:s", $row[0] . " 00:00:00", new DateTimeZone("UTC"));
+			$start        = DateTime::createFromFormat("Y-m-d H:i:s", $row[1] . " 00:00:00", new DateTimeZone("UTC"));
+			$statusScript = "";
 
+			if($row[2] == "NOT_STARTED" && $start->getTimestamp() <= time()) 
+				$statusScript = ", status='STARTED'";
 			if($this->projectIsLate($treeTask, $end))
-				$script = "UPDATE Project SET isLate = TRUE  WHERE id=$id;";
+				$script = "UPDATE Project SET isLate = TRUE".$statusScript."  WHERE id=$id;";
 			else
-				$script = "UPDATE Project SET isLate = FALSE WHERE id=$id;";
+				$script = "UPDATE Project SET isLate = FALSE".$statusScript." WHERE id=$id;";
 			$resultScript = pg_query($this->_conn, $script);
 		}
 

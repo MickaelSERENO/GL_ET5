@@ -268,16 +268,6 @@ CREATE OR REPLACE FUNCTION checkTaskHierarchy() RETURNS TRIGGER AS $triggerTaskH
 
 CREATE OR REPLACE FUNCTION checkEndUser() RETURNS TRIGGER AS $triggerEndUser$ 
 	BEGIN
-		IF (SELECT COUNT(id) FROM Project WHERE Project.managerEmail = NEW.contactEmail AND 
-			(Project.status <> 'CLOSED_VISIBLE' AND Project.status <> 'CLOSED_INVISIBLE') AND 
-			New.isActive = FALSE) <> 0 THEN
-			RAISE EXCEPTION 'The project manager contains an unfinished project';
-		ELSIF (SELECT COUNT(id) FROM Project, ProjectCollaborator WHERE Project.id = ProjectCollaborator.projectID AND 
-			NEW.contactEmail = ProjectCollaborator.collaboratorEmail AND 
-			(Project.status <> 'CLOSED_VISIBLE' AND Project.status <> 'CLOSED_INVISIBLE') AND 
-			New.isActive = FALSE) <> 0 THEN
-			RAISE EXCEPTION 'The collaborator contains an unfinished project';
-		END IF;
 		RETURN New;
 	END
 	$triggerEndUser$ LANGUAGE plpgsql;

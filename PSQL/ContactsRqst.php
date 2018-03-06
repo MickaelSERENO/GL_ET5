@@ -14,16 +14,19 @@
 		public $telephone;
 		public $entreprise;
 		public $status;
+		public $rank;
+		public $active;
 	}
 
 	class ContactsRqst extends PSQLDatabase
 	{
 		public function getContact($email)
 		{			
+			$pgEmail = pg_escape_string($email);
 			$contact = new Contact;
 			
 			$script = "SELECT name, surname, email, telephone
-						FROM Contact WHERE '$email'=email;";
+						FROM Contact WHERE '$pgEmail'=email;";
 			$resultScript = pg_query($this->_conn, $script);
 			$row = pg_fetch_row($resultScript);
 			
@@ -47,6 +50,16 @@
 				{
 					$contact->status = "Contact Client";
 				}
+				if($rank == -1)
+					$rank = 2;
+				else
+				{
+					$activeScript       = "SELECT isActive FROM EndUser WHERE contactEmail='$pgEmail';";
+					$resultActiveScript = pg_query($this->_conn, $activeScript);
+					$activeRow          = pg_fetch_row($resultActiveScript);
+					$contact->active    = $activeRow[0] == 't';
+				}
+				$contact->rank       = $rank;
 			}
 			
 			$scriptEntreprise = "SELECT Client.name
@@ -87,6 +100,24 @@
 			while($row = pg_fetch_object($resultScript))
 				array_push($contacts, $row);
 			return $contacts;
+		}
+
+		public function setInactive($email)
+		{
+			$email        = pg_escape_string($email);
+			$script       = "UPDATE EndUser SET isActive='false' WHERE contactEmail='$email';";
+			$resultScript = pg_query($this->_conn, $script);
+
+			return true;
+		}
+
+		public function setActive($email)
+		{
+			$email        = pg_escape_string($email);
+			$script       = "UPDATE EndUser SET isActive='true' WHERE contactEmail='$email';";
+			$resultScript = pg_query($this->_conn, $script);
+
+			return true;
 		}
 	}
 ?>

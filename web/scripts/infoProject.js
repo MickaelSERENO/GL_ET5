@@ -139,20 +139,43 @@ myApp.controller("infoProjectCtrl", function($scope, $timeout, $uibModal)
 
 	$scope.delete = function()
 	{
-		var httpCtx = new XMLHttpRequest();
-		httpCtx.onreadystatechange = function()
+		$scope.opts = 
 		{
-			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			backdrop : true,
+			backdropClick : true,
+			dialogFade : false,
+			keyboard : true,
+			templateUrl : "confirmModal.html",
+			controller : "ConfirmModal",
+			controllerAs : "$ctrl",
+			resolve : {
+						title       : function() {return "Confirmation";},
+						textContent : function() {return "Voulez vous vraiment supprimer le projet ?";}
+					  }
+		};
+
+		var modalInstance = $uibModal.open($scope.opts);
+		modalInstance.result.then(
+			function() //ok
 			{
-				if(httpCtx.responseText != '-1')
+				var httpCtx = new XMLHttpRequest();
+				httpCtx.onreadystatechange = function()
 				{
-					document.location.href="/index.php";
+					if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+					{
+						if(httpCtx.responseText != '-1')
+						{
+							document.location.href="/index.php";
+						}
+					}
 				}
-			}
-		}
-		httpCtx.open('GET', "/AJAX/deleteProject.php?projectID="+$scope.projectInfo.id, true);
-		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-		httpCtx.send(null);
+				httpCtx.open('GET', "/AJAX/deleteProject.php?projectID="+$scope.projectInfo.id, true);
+				httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+				httpCtx.send(null);
+			},
+			function() //cancel
+			{
+			});
 	};
 
 	$scope.delColl = function(index)
