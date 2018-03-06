@@ -97,7 +97,7 @@ class ListRqst extends PSQLDatabase
 
     public function getProjectCollaborateurs($projectId)
     {
-        $script = "SELECT t.collaboratoremail
+        $script = "SELECT DISTINCT t.collaboratoremail
                   FROM abstracttask abt, task t 
                   WHERE abt.idproject = '$projectId' and t.id = abt.id;";
 
@@ -107,7 +107,7 @@ class ListRqst extends PSQLDatabase
         {
             array_push($result, $row->collaboratoremail);
         }
-        return array_unique($result);
+        return $result;
     }
 
     public function getCollaborator()
@@ -239,7 +239,9 @@ class ListRqst extends PSQLDatabase
             $row->projectmanageremail= $project->manageremail;
             $row->projectenddate= $project->enddate;
             $row->projectstatus= $project->status;
-            $row->collaborator = $this->getEnduserContact($row->collaboratoremail)->fullname;
+            $collaborator = $this->getEnduserContact($row->collaboratoremail);
+            if(is_object($collaborator))
+                $row->collaborator = $collaborator->fullname;
             array_push($result, $row);
         }
         return $result;
@@ -257,7 +259,6 @@ class ListRqst extends PSQLDatabase
 
     public function getEnduserContact($email)
     {
-
         $script = "SELECT e.*, c.*, concat(name, ' ', surname) as fullName
                     FROM enduser e, contact c
                     WHERE  e.contactemail = '$email' and e.contactemail = c.email;";
@@ -268,29 +269,38 @@ class ListRqst extends PSQLDatabase
     public function addContact($data)
     {
         $data_decode = json_decode($data);
+        $script = "select exists (select * from Contact where email = '$data_decode->email')";
+        $resultScript = pg_query($this->_conn, $script);
+        $row          = pg_fetch_row($resultScript);
+        if($row[0] == "t"){
+            return -1;
+        };
         $script = "INSERT INTO Contact VALUES ('$data_decode->name', '$data_decode->surname', '$data_decode->email', '$data_decode->telephone');";
         pg_query($this->_conn, $script);
         switch ($data_decode->role){
             case "manager":
                 $pwd_hash = password_hash($data_decode->pwd,PASSWORD_BCRYPT);
                 $script = "INSERT INTO enduser VALUES ('$data_decode->email','$pwd_hash',TRUE);";
-                pg_query($this->_conn, $script);
+                $resultScript = pg_query($this->_conn, $script);
                 $script = "INSERT INTO projectmanager VALUES ('$data_decode->email');";
-                pg_query($this->_conn, $script);
+                $resultScript = pg_query($this->_conn, $script);
                 break;
             case "collaborator":
                 $pwd_hash = password_hash($data_decode->pwd,PASSWORD_BCRYPT);
                 $script = "INSERT INTO enduser VALUES ('$data_decode->email','$pwd_hash',TRUE);";
-                pg_query($this->_conn, $script);
+                $resultScript = pg_query($this->_conn, $script);
                 $script = "INSERT INTO collaborator VALUES ('$data_decode->email');";
-                pg_query($this->_conn, $script);
+                $resultScript = pg_query($this->_conn, $script);
                 break;
             case "client":
                 $script = "INSERT INTO clientcontact VALUES ('$data_decode->email','$data_decode->clientemail');";
-                pg_query($this->_conn, $script);
+                $resultScript = pg_query($this->_conn, $script);
                 break;
         }
-        return;
+        if(!$resultScript){
+            return "Error lors l'ajout de role pour le contact";
+        };
+        return 1;
     }
 
 }
