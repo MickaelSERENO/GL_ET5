@@ -2,7 +2,7 @@
     session_start();
 
 //    $_SESSION["email"] = 'jean.dupont@email.com';
-//    $_SESSION["email"] = 'stacy.gromat@email.com';
+//    $_SESSION["email"] = 'administrator@email.com';
 
 	if(!isset($_SESSION["email"]))
 	{
@@ -226,8 +226,8 @@
                                 <label style="display: block;background: linear-gradient(to right, #00b3ee, white)">
                                     Status </label>
                                 <label ng-repeat="status in projectStatus">
-                                    <input type="checkbox"  checklist-model="user.projectStatus" checklist-value="status" ng-click="goFilter()">
-                                    {{status}}
+                                    <input type="checkbox"  checklist-model="user.projectStatus" checklist-value="status" ng-click="goFilter()" ng-hide="isCollaborator && status=='CLOSED_INVISIBLE'">
+                                    <span ng-hide="isCollaborator && status=='CLOSED_INVISIBLE'">{{status}}</span>
                                 </label>
                             </div>
                             <div>

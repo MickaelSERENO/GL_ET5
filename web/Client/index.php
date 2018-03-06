@@ -95,7 +95,7 @@
 								</table>
 							</div>
 							
-							<div class="col-md-8" id="infosClient">
+							<div class="col-md-8" id="infosClient" ng-show="selectedClient!=null">
 								<div class="row" id="descriptionClient">
 									<div class="row">
 										<h2> {{selectedClient.name}} </h2>

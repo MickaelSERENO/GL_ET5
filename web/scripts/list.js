@@ -145,6 +145,7 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
 			{
 				$scope.$apply(function()
 				{
+				    // console.log(httpCtx.responseText);
 					self.dataListAll = JSON.parse(httpCtx.responseText);
 					// console.log(self.dataListAll);
 					self.arrangeList();
@@ -241,7 +242,14 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
     ];
     self.user.projectStatus = ['NOT_STARTED', 'STARTED', 'CLOSED_VISIBLE', 'CLOSED_INVISIBLE'];
     self.satisfyFilterProjectStatus = function (status) {
+        if(self.isManager)
         return self.user.projectStatus.includes(status);
+        else if(self.isCollaborator) {
+            if(status == 'CLOSED_INVISIBLE')
+                return false;
+            else
+                return self.user.projectStatus.includes(status);
+        }
     };
 
     //      filter projects: terminés depuis X mois
@@ -278,9 +286,9 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
 
     //      filter tasks: status
     self.taskStatus = [
-        'NOT_STARTED', 'STARTED', 'LATE_STARTED', 'LATE_UNSTARTED'
+        'FINISHED', 'STARTED', 'NOT_STARTED', 'LATE_STARTED', 'LATE_UNSTARTED',
     ];
-    self.user.taskStatus = ['NOT_STARTED', 'STARTED', 'LATE_STARTED', 'LATE_UNSTARTED'];
+    self.user.taskStatus = ['FINISHED', 'STARTED', 'NOT_STARTED', 'LATE_STARTED', 'LATE_UNSTARTED'];
     self.satisfyFilterTaskStatus = function (status) {
         return self.user.taskStatus.includes(status);
     };
@@ -485,13 +493,13 @@ myApp.controller("listControler", function ($scope, $uibModal, $filter, $window)
 
 myApp.controller("addContactModal", function($scope, $uibModalInstance, $uibModal, $filter, collList)
 {
-    var self = $scope;
 
-    self.roles = [
+    $scope.roles = [
         "manager", "collaborator", "client"
     ];
 
-    self.newContact = {
+
+    $scope.newContact = {
         name:"",
         surname:"",
         email:"",
@@ -500,22 +508,54 @@ myApp.controller("addContactModal", function($scope, $uibModalInstance, $uibModa
         clientemail: "",
         clientname: "",
         clientdesciption: "",
-        clienttelephone: ""
-    }
-    self.errorMsg = "";
+        clienttelephone: "",
+        pwd:""
+    };
+    $scope.errorMsg = "";
 
-    self.ok = function()
+    $scope.ok = function()
     {
+        if($scope.newContact.name == "")
+        {
+            $scope.errorMsg = "Le nom ne peut pas être vide";
+            return;
+        }
+        else if($scope.newContact.surname == "")
+        {
+            $scope.errorMsg = "Le prénom ne peut pas être vide";
+            return;
+        }
+        else if($scope.newContact.email == "")
+        {
+            $scope.errorMsg = "Il faut nécessairement un email pour créer un contact";
+            return;
+        }
+        else if($scope.newContact.role == "manager" || $scope.newContact.role == "collaborator")
+        {
+            if($scope.newContact.pwd == "") {
+                $scope.errorMsg = "Il faut nécessairement un mot de passe pour accéder comme une responsable ou un collaborateur";
+                return;
+            }
+        } if($scope.newContact.role == "client") {
+            if($scope.newContact.clientemail == ""){
+                $scope.errorMsg = "Il faut nécessairement sélectioner un client";
+                return;
+            }
+        }
+
         var httpCtx = new XMLHttpRequest();
         httpCtx.onreadystatechange = function()
         {
             if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
             {
+                if(httpCtx.responseText == -1)
+                    $scope.errorMsg = "L'émail est déjà utilisé. Veuillez saisir un nouveau email;";
+                else
                 $uibModalInstance.close();
             }
         };
 
-        httpCtx.open('GET', "/AJAX/list.php?function=addContact&data="+encodeURIComponent(JSON.stringify(self.newContact)), true);
+        httpCtx.open('GET', "/AJAX/list.php?function=addContact&data="+JSON.stringify($scope.newContact), true);
         httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         httpCtx.send(null);
     };
