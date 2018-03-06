@@ -17,6 +17,7 @@ myApp.controller("ContactCtrl", function($scope, $timeout, $uibModal)
 	$scope.inactive      = "";
 	$scope.telephone     = "";
 	$scope.entreprise    = "";
+	$scope.clientEmail   = "";
 	$scope.status        = "";
 	$scope.rank          = 0;
 	$scope.isContact     = true;
@@ -43,8 +44,118 @@ myApp.controller("ContactCtrl", function($scope, $timeout, $uibModal)
 
     $scope.ok        = function()
     {
-        //TODO
+		if($scope.isContact)
+		{
+			var httpCtx = new XMLHttpRequest();
+			httpCtx.onreadystatechange = function()
+			{
+				if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+				{
+					if(httpCtx.responseText == '0')
+					{
+						$scope.validateValues();
+					}
+					else if(httpCtx.responseText == '1')
+					{
+						$scope.errorMsg = "Cet email existe déjà";
+					}
+				}
+			};
+			httpCtx.open('GET', "/AJAX/modifyClientContact.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&clientEmail="+encodeURIComponent($scope.clientEmail)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname), true);
+			console.log("/AJAX/modifyClientContact.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&clientEmail="+encodeURIComponent($scope.clientEmail)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname));
+			httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			httpCtx.send(null);
+		}
+		else
+		{
+			var httpCtx = new XMLHttpRequest();
+			httpCtx.onreadystatechange = function()
+			{
+				if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+				{
+					if(httpCtx.responseText == '0')
+					{
+						$scope.validateValues;
+					}
+					else if(httpCtx.responseText == '1')
+					{
+						$scope.errorMsg = "Cet email existe déjà";
+					}
+				}
+			};
+			httpCtx.open('GET', "/AJAX/modifyEndUser.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname)+"&rank="+$scope.rank, true);
+			console.log("/AJAX/modifyClientContact.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&clientEmail="+encodeURIComponent($scope.clientEmail)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname));
+			httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			httpCtx.send(null);
+		}
     };
+
+	$scope.validateValues = function()
+	{
+		$scope.errorMsg         = "";
+
+		$scope.contact.name        = $scope.name;
+		$scope.contact.surname     = $scope.surname;
+		$scope.contact.email       = $scope.email;
+		$scope.contact.active      = $scope.active;
+		$scope.contact.telephone   = $scope.telephone;
+		$scope.contact.entreprise  = $scope.entreprise;
+		$scope.contact.status      = $scope.status;
+		$scope.contact.rank        = $scope.rank;
+		$scope.contact.clientEmail = $scope.clientEmail;
+	};
+
+	$scope.openClient = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText != '-1')
+				{
+					var data = JSON.parse(httpCtx.responseText);
+					$scope.opts = 
+					{
+						backdrop : true,
+						backdropClick : true,
+						dialogFade : false,
+						keyboard : true,
+						templateUrl : "modalAddColl.html",
+						controller : "SelectData",
+						controllerAs : "$ctrl",
+						resolve : {
+									data       : function() {return data;},
+									showFields : function() {return showFields = ["name", "email", "telephone"];},
+									fields     : function() {return fields =
+												{
+													name      : {label: "Nom"},
+													email     : {label: "Email"},
+													telephone : {label: "Téléphone"}
+												};},
+									okText     : function() {return "Ajouter";},
+									title      : function() {return "Changement de client";}
+								  }
+					};
+
+					var modalInstance = $uibModal.open($scope.opts);
+					modalInstance.result.then(
+						function(client) //ok
+						{
+							$scope.clientEmail = client.email;
+							$scope.entreprise  = client.name;
+						},
+						function() //cancel
+						{
+						});
+				}
+			}
+		}
+
+		httpCtx.open('GET', "/AJAX/fetchClientsInfo.php", true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	};
 
 	$scope.reinitPwd = function()
 	{
@@ -75,15 +186,19 @@ myApp.controller("ContactCtrl", function($scope, $timeout, $uibModal)
 
 	$scope.cancel    = function()
 	{
-		$scope.name       = $scope.contact.name;
-		$scope.surname    = $scope.contact.surname;
-		$scope.email      = $scope.contact.email;
-        $scope.active     = $scope.contact.active;
-		$scope.telephone  = $scope.contact.telephone;
-		$scope.entreprise = $scope.contact.entreprise;
-		$scope.status     = $scope.contact.status;
-		$scope.rank       = $scope.contact.rank;
-		$scope.isContact  = $scope.rank == 2;
+		$scope.name        = $scope.contact.name;
+		$scope.surname     = $scope.contact.surname;
+		$scope.email       = $scope.contact.email;
+        $scope.active      = $scope.contact.active;
+		$scope.telephone   = $scope.contact.telephone;
+		$scope.entreprise  = $scope.contact.entreprise;
+		$scope.status      = $scope.contact.status;
+		$scope.rank        = $scope.contact.rank;
+		$scope.clientEmail = $scope.contact.clientEmail;
+		$scope.isContact   = $scope.rank == 2;
+
+		$scope.errorMsg      = "";
+		$scope.inModifyStats = false;
 	};
 
 	$scope.cancel();
@@ -134,5 +249,10 @@ myApp.controller("ContactCtrl", function($scope, $timeout, $uibModal)
         httpCtx.open('GET', "/AJAX/setActive.php?email="+encodeURIComponent(contactEmail)+"&active=true", true);
         httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         httpCtx.send(null);
+	};
+
+	$scope.changeRank = function(r)
+	{
+		$scope.rank = r;
 	};
 });	

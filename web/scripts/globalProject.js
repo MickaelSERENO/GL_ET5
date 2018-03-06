@@ -1,4 +1,7 @@
 var myApp = angular.module('myApp', ['angular-notification-icons', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+myApp.filter('encodeURIComponent', function() {
+    return window.encodeURIComponent;
+});
 
 myApp.controller("globalProjectCtrl", function($scope, $timeout)
 {

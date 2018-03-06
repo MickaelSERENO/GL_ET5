@@ -11,6 +11,7 @@
 
 	class Contact extends BasicContact
 	{
+		public $clientEmail;
 		public $telephone;
 		public $entreprise;
 		public $status;
@@ -62,14 +63,15 @@
 				$contact->rank       = $rank;
 			}
 			
-			$scriptEntreprise = "SELECT Client.name
+			$scriptEntreprise = "SELECT Client.name, Client.email
 						FROM Client, ClientContact WHERE '$email'=ClientContact.contactEmail AND Client.email=ClientContact.clientEmail;";
 			$resultScriptEntreprise = pg_query($this->_conn, $scriptEntreprise);
 			$rowEntreprise = pg_fetch_row($resultScriptEntreprise);
 			
 			if($rowEntreprise != null)
 			{
-				$contact->entreprise = $rowEntreprise[0];
+				$contact->entreprise  = $rowEntreprise[0];
+				$contact->clientEmail = $rowEntreprise[1];
 			}
 			else
 			{
@@ -118,6 +120,68 @@
 			$resultScript = pg_query($this->_conn, $script);
 
 			return true;
+		}
+
+		public function modifyClientContact($oldEmail, $newEmail, $name, $surname, $telephone, $clientEmail)
+		{
+			$pgName        = pg_escape_string($name);
+			$pgSurname     = pg_escape_string($surname);
+			$pgOldEmail    = pg_escape_string($oldEmail);
+			$pgNewEmail    = pg_escape_string($newEmail);
+			$pgTelephone   = pg_escape_string($telephone);
+			$pgClientEmail = pg_escape_string($clientEmail);
+
+			if($oldEmail != $newEmail)
+			{
+				$script  = "SELECT COUNT(*) FROM Contact, Client WHERE Contact.email = '$pgNewEmail' OR Client.email = '$pgNewEmail';";
+                $resultScript = pg_query($this->_conn, $script);
+                $row = pg_fetch_row($resultScript);
+                if($row[0] != 0)
+                {
+                    return 1;
+                }
+            }
+
+            $script = "UPDATE Contact SET name='$pgName', surname='$pgSurname', email='$pgNewEmail', telephone='$pgTelephone' WHERE email = '$pgOldEmail';
+                       UPDATE ClientContact SET clientEmail='$pgClientEmail' WHERE contactEmail = '$pgNewEmail';";
+            $resultScript = pg_query($this->_conn, $script);
+
+            return 0;
+		}
+
+		public function modifyEndUser($oldEmail, $newEmail, $name, $surname, $telephone, $newRank)
+		{
+			$pgName        = pg_escape_string($name);
+			$pgSurname     = pg_escape_string($surname);
+			$pgOldEmail    = pg_escape_string($oldEmail);
+			$pgNewEmail    = pg_escape_string($newEmail);
+			$pgTelephone   = pg_escape_string($telephone);
+
+			if($oldEmail != $newEmail)
+			{
+				$script  = "SELECT COUNT(*) FROM Contact, Client WHERE Contact.email = '$pgNewEmail' OR Client.email = '$pgNewEmail';";
+                $resultScript = pg_query($this->_conn, $script);
+                $row = pg_fetch_row($resultScript);
+                if($row[0] != 0)
+                {
+                    return 1;
+                }
+            }
+
+            $connect = new ConnectionRqst();
+            $oldRank = $connect->getRank($oldEmail);
+
+            if($oldRank == 0 && $newRank == 1)
+            {
+                $script = "BEGIN;DELETE FROM Collaborator WHERE userEmail='$oldEmail';
+                           INSERT INTO ProjectManager VALUES('$oldEmail');COMMIT;";
+                $resultScript = pg_query($this->_conn, $script);
+            }
+
+            $script = "UPDATE Contact SET name='$pgName', surname='$pgSurname', email='$pgNewEmail', telephone='$pgTelephone' WHERE email = '$pgOldEmail';";
+            $resultScript = pg_query($this->_conn, $script);
+
+            return 0;
 		}
 	}
 ?>

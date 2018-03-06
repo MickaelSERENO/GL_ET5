@@ -35,7 +35,7 @@ CREATE TABLE EndUser
 	password     VARCHAR(60) NOT NULL,
 	isActive     BOOLEAN      NOT NULL,
 	CHECK(character_length(password) = 60),
-	FOREIGN KEY(contactEmail) REFERENCES Contact(email),
+	FOREIGN KEY(contactEmail) REFERENCES Contact(email) ON UPDATE CASCADE,
 	PRIMARY KEY(contactEmail)
 );
 
@@ -53,8 +53,8 @@ CREATE TABLE ClientContact
 (
 	contactEmail VARCHAR(128) NOT NULL,
 	clientEmail  VARCHAR(128) NOT NULL,
-	FOREIGN KEY(contactEmail) REFERENCES Contact(email),
-	FOREIGN KEY(clientEmail)  REFERENCES Client(email),
+	FOREIGN KEY(contactEmail) REFERENCES Contact(email) ON UPDATE CASCADE,
+	FOREIGN KEY(clientEmail)  REFERENCES Client(email) ON UPDATE CASCADE,
 	PRIMARY KEY(contactEmail)
 );
 
@@ -64,21 +64,21 @@ CREATE TABLE ClientContact
 CREATE TABLE Collaborator
 (
 	userEmail VARCHAR(128) NOT NULL,
-	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail),
+	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail) ON UPDATE CASCADE,
 	PRIMARY KEY(userEmail)	
 );
 
 CREATE TABLE ProjectManager
 (
 	userEmail VARCHAR(128) NOT NULL,
-	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail),
+	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail) ON UPDATE CASCADE,
 	PRIMARY KEY(userEmail)	
 );
 
 CREATE TABLE Administrator
 (
 	userEmail VARCHAR(128) NOT NULL,
-	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail),
+	FOREIGN KEY(userEmail) REFERENCES EndUser(contactEmail) ON UPDATE CASCADE,
 	PRIMARY KEY(userEmail)	
 );
 
@@ -100,8 +100,8 @@ CREATE TABLE Sender
 	emailSender    VARCHAR(128),
 	emailReceiver  VARCHAR(128) NOT NULL,
 	FOREIGN KEY(idNotification) REFERENCES Notification(id),
-	FOREIGN KEY(emailSender)    REFERENCES EndUser(contactEmail),
-	FOREIGN KEY(emailReceiver)  REFERENCES EndUser(contactEmail),
+	FOREIGN KEY(emailSender)    REFERENCES EndUser(contactEmail) ON UPDATE CASCADE,
+	FOREIGN KEY(emailReceiver)  REFERENCES EndUser(contactEmail) ON UPDATE CASCADE,
 	--PRIMARY KEY(idNotification, emailSender, emailReceiver)
 	PRIMARY KEY(idNotification)
 );
@@ -123,8 +123,8 @@ CREATE TABLE Project
 	status       PROJECT_STATUS NOT NULL,
 	isLate       BOOLEAN DEFAULT FALSE,
 	CHECK (startDate < endDate),
-	FOREIGN KEY(managerEmail) REFERENCES ProjectManager(userEmail),
-	FOREIGN KEY(contactEmail) REFERENCES ClientContact(contactEmail)
+	FOREIGN KEY(managerEmail) REFERENCES ProjectManager(userEmail) ON UPDATE CASCADE,
+	FOREIGN KEY(contactEmail) REFERENCES ClientContact(contactEmail) ON UPDATE CASCADE
 );
 
 CREATE TABLE ProjectCollaborator
@@ -132,7 +132,7 @@ CREATE TABLE ProjectCollaborator
 	idProject         INTEGER,
 	collaboratorEmail VARCHAR(128) NOT NULL,
 	FOREIGN KEY(idProject)         REFERENCES Project(id),
-	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail),
+	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail) ON UPDATE CASCADE,
 	PRIMARY KEY(idProject, collaboratorEmail)
 );
 
@@ -187,7 +187,7 @@ CREATE TABLE Task
 	CHECK(advancement * computedCharge <= 100*chargeConsumed AND (advancement+1)*computedCharge >= 100*chargeConsumed),
 	CHECK(checkTaskDate(id, endDate) = TRUE),
 	FOREIGN KEY(id)                REFERENCES AbstractTask(id),
-	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail),
+	FOREIGN KEY(collaboratorEmail) REFERENCES EndUser(contactEmail) ON UPDATE CASCADE,
 	PRIMARY KEY(id)
 );
 

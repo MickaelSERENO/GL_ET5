@@ -94,7 +94,7 @@
 												<div class="col-md-6">
 													<div class="flexDiv">
 														<div> Contact client : </div>
-														<div> &nbsp; {{contactFirstName}} {{contactLastName}} </div>
+														<div> &nbsp; <a style="color:black;" ng-href="/Contact/infoContact.php?contactID={{contactEmail | encodeURIComponent}}">{{contactFirstName}} {{contactLastName}}</a></div>
 														<img ng-click="openClientContact()" class="settingImg" src="/CSS/img/settings.svg" alt="Modifier contact client" ng-show="inModifyStats">
 													</div>
 												</div>
@@ -102,7 +102,7 @@
 											<div class="row smallTopSpace">
 												<div class="col-md-12 flexDiv">
 													<div> Responsable de projet : </div>
-													<div> &nbsp; {{managerFirstName}} {{managerLastName}} </div>
+													<div> &nbsp; <a style="color:black;" ng-href="/Contact/infoContact.php?contactID={{managerEmail | encodeURIComponent}}">{{managerFirstName}} {{managerLastName}}</a></div>
 <?php if($rank == 2) : ?>
 													<img ng-click="openProjectManager()" class="settingImg" src="/CSS/img/settings.svg" alt="Modifier contact client" ng-show="inModifyStats">
 <?php endif; ?>
@@ -148,7 +148,8 @@
 											<div class="listCollabProject" ng-class="{'modifyColl' : inModifyStats}">
                                                 <div class="row" ng-repeat="coll in collaborators">
                                                     <div class="closeWrapper">
-                                                        <div>{{coll.name}} {{coll.surname}}</div>
+
+														<div> &nbsp; <a style="color:black;" ng-href="/Contact/infoContact.php?contactID={{coll.email | encodeURIComponent}}">{{coll.name}} {{coll.surname}}</a></div>
                                                         <span class="close" ng-click="delColl($index)" ng-show="inModifyStats && coll.email != managerEmail && !inCollaborator(coll.email)"></span>
                                                     </div>
                                                 </div>

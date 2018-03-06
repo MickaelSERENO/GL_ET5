@@ -38,6 +38,7 @@
 
 		<script type="text/javascript" src="/scripts/infoContact.js"></script>
 		<script type="text/javascript" src="/scripts/confirmModal.js"></script>
+		<script type="text/javascript" src="/scripts/projectModal.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="../scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="../CSS/style.css">
@@ -52,6 +53,7 @@
 		</header>
 
 		<?php include('../../Libraries/confirmModal.php'); ?>
+		<?php include('../../Libraries/ProjectModal.php'); ?>
 		
 		<div ng-controller="ContactCtrl" id="centralPart">
 			<div class="infoContact">
@@ -79,7 +81,9 @@
 							<div class="row smallTopSpace">
 								<div class="col-md-12">
 									<div class="flexDiv">
-										Adresse email : {{email}}
+										<div> Adresse email : &nbsp;</div>
+										<div ng-show="!inModifyStats">{{email}}</div>
+										<div> <input type="text" ng-model="email" ng-show="inModifyStats" ng-disabled="!inModifyStats"></input></div>
 									</div>
 								</div>
 							</div>
@@ -96,6 +100,7 @@
 									<div class="flexDiv">
 										<div> Société : &nbsp;</div>
 										<div> {{entreprise}} </div>
+										<img ng-click="openClient()" class="settingImg" src="/CSS/img/settings.svg" alt="Modifier client" ng-show="inModifyStats">
 									</div>
 								</div>
 							</div>
@@ -104,7 +109,7 @@
 									<div class="flexDiv">
 										<div> Statut : &nbsp;</div>
 										<div class="btn-group sortList" uib-dropdown dropdown-append-to-body ng-show="rank != 2">
-											<button type="button" class="btn btn-primary" uib-dropdown-toggle ng-disabled="!inModifyStats">
+											<button type="button" class="btn btn-primary" uib-dropdown-toggle ng-disabled="!inModifyStats || contact.rank==1">
 												{{listStatus[rank]}}<span class="caret sortList"></span>
 											</button>
 											<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body">
