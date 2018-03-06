@@ -219,6 +219,11 @@ myApp.controller("ClientsCtrl", function($scope, $timeout, $uibModal)
 		}
 	};
 
+	$scope.goToContact = function(index)
+	{
+		window.location = "/Contact/infoContact.php?contactID="+encodeURIComponent($scope.clientContacts[index].email);
+	};
+
 	//Load clients
 	var httpCtx = new XMLHttpRequest();
 	httpCtx.onreadystatechange= function()

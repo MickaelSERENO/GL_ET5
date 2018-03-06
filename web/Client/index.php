@@ -189,7 +189,7 @@
 												</tr>
 											</thead>
 											<tbody>
-												<tr ng-repeat="contact in clientContacts">
+												<tr ng-click="goToContact($index)" ng-repeat="contact in clientContacts">
 													<td> {{ contact.name }}</td>
 													<td> {{ contact.surname }}</td>
 													<td> {{ contact.email }}</td>
