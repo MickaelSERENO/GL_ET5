@@ -62,7 +62,6 @@ myApp.controller("ContactCtrl", function($scope, $timeout, $uibModal)
 				}
 			};
 			httpCtx.open('GET', "/AJAX/modifyClientContact.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&clientEmail="+encodeURIComponent($scope.clientEmail)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname), true);
-			console.log("/AJAX/modifyClientContact.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&clientEmail="+encodeURIComponent($scope.clientEmail)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname));
 			httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			httpCtx.send(null);
 		}
@@ -84,7 +83,6 @@ myApp.controller("ContactCtrl", function($scope, $timeout, $uibModal)
 				}
 			};
 			httpCtx.open('GET', "/AJAX/modifyEndUser.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname)+"&rank="+$scope.rank, true);
-			console.log("/AJAX/modifyClientContact.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.contact.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&clientEmail="+encodeURIComponent($scope.clientEmail)+"&name="+encodeURIComponent($scope.name)+"&surname="+encodeURIComponent($scope.surname));
 			httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			httpCtx.send(null);
 		}

@@ -108,7 +108,7 @@ if(!isset($_SESSION["email"]))
         <div style="margin: 10px">
             <div style="margin: 10px 10px">
                 <label>
-                    <input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Recherche ... " name="Recherche"  maxlength="10">
+                    <input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Recherche ... " name="Recherche"  maxlength="100">
                 </label>
                 <img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Recherche">
                 <img ng-click="showSearchSetting = !showSearchSetting" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/settings.svg" alt="Paramètre de recherche">

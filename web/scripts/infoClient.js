@@ -35,37 +35,21 @@ class Contact
 
 myApp.controller("ClientsCtrl", function($scope, $timeout, $uibModal)
 {		
+	$scope.inModifyStats = false;
+	$scope.errorMsg      = "";
+	$scope.name          = "";
+	$scope.telephone     = "";
+	$scope.description   = "";
+	$scope.email         = "";
+
+
+	$scope.rank          = rank;
+	$scope.searchText    = "";
+
+	$scope.displayedClient = [];
+
 	//Variables
 	$scope.clients=[];
-	
-	//Load clients
-	var httpCtx = new XMLHttpRequest();
-	httpCtx.onreadystatechange= function()
-	{
-		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
-		{
-			$scope.$apply(function()
-			{
-				console.log(httpCtx.responseText)
-				
-				var clients = JSON.parse(httpCtx.responseText);
-				for(var i in clients)
-				{
-					// console.log(clients[i]);
-					currentClient = new ClientInfo(clients[i]);
-					// console.log(currentClient);
-					$scope.clients.push(currentClient);
-				}
-			});				
-		}			
-	}
-	httpCtx.open('GET', "/AJAX/fetchClientsInfo.php",true);
-	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	httpCtx.send(null);
-	// console.log($scope.clients);
-
-	
-	
 	
 	//RECUPERE LES INFO D'UN CLIENT CHOISI PARMI LA LISTE
 	$scope.getClientInfo= function(client){
@@ -74,13 +58,14 @@ myApp.controller("ClientsCtrl", function($scope, $timeout, $uibModal)
 		clients = $scope.clients
 		for(var i in clients)
 		{
-			// console.log(clients[i].name)
-			// console.log(i)
-			if(client.name==clients[i].name)
+			if(client.email==clients[i].email)
 			{
-				$scope.selectedClient=new ClientInfo(clients[i]);
+				$scope.selectedClient=clients[i];
+				break;
 			}
 		}
+
+		$scope.cancel();
 		
 		//RECUPERE LES PROJETS DU CLIENT
 		$scope.clientProjects=[];
@@ -158,6 +143,110 @@ myApp.controller("ClientsCtrl", function($scope, $timeout, $uibModal)
 	};
 
     $scope.rank = rank;
+
+	$scope.goSearch = function()
+	{
+		$scope.displayedClient = [];
+		for(var i = 0; i < $scope.clients.length; i++)
+			if($scope.searchText == "" || $scope.clients[i].name.toLowerCase().includes($scope.searchText.toLowerCase()))
+			{
+				console.log("ok");
+				$scope.displayedClient.push($scope.clients[i]);
+			}
+	};
+
+    $scope.keyPressSearch = function(keyEvent) {
+        switch (keyEvent.which) {
+            case 13:
+                $scope.goSearch();
+                break;
+            case 0:
+                $scope.searchText = "";
+                $scope.goSearch();
+                break;
+            default:
+                break;
+        }
+    };
+
+	$scope.modify = function()
+	{
+		if($scope.selectedClient != null)
+		{
+			$scope.inModifyStats = true;
+		}
+	}
+
+	$scope.validate = function()
+	{
+		var httpCtx = new XMLHttpRequest();
+		httpCtx.onreadystatechange = function()
+		{
+			if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+			{
+				if(httpCtx.responseText == '0')
+				{
+					$scope.$apply(function()
+					{
+						$scope.selectedClient.name        = $scope.name;
+						$scope.selectedClient.description = $scope.description;
+						$scope.selectedClient.email       = $scope.email;
+						$scope.selectedClient.telephone   = $scope.telephone;
+						$scope.inModifyStats              = false;
+					});
+				}
+				else if(httpCtx.responseText == '1')
+				{
+					$scope.errorMsg = "Cet email existe déjà";
+				}
+			}
+		};
+		httpCtx.open('GET', "/AJAX/modifyClient.php?newEmail="+encodeURIComponent($scope.email)+"&oldEmail="+encodeURIComponent($scope.selectedClient.email)+"&telephone="+encodeURIComponent($scope.telephone)+"&name="+encodeURIComponent($scope.name)+"&description="+encodeURIComponent($scope.description), true);
+		httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpCtx.send(null);
+	};
+
+	$scope.cancel = function()
+	{
+		if($scope.selectedClient != null)
+		{
+			$scope.name          = $scope.selectedClient.name;
+			$scope.description   = $scope.selectedClient.description;
+			$scope.telephone     = $scope.selectedClient.telephone;
+			$scope.email         = $scope.selectedClient.email;
+			$scope.inModifyStats = false;
+			$scope.errorMsg      = "";
+		}
+	};
+
+	//Load clients
+	var httpCtx = new XMLHttpRequest();
+	httpCtx.onreadystatechange= function()
+	{
+		if(httpCtx.readyState == 4 && (httpCtx.status == 200 || httpCtx.status == 0))
+		{
+			$scope.$apply(function()
+			{
+				console.log(httpCtx.responseText)
+				
+				var clients = JSON.parse(httpCtx.responseText);
+				for(var i in clients)
+				{
+					// console.log(clients[i]);
+					currentClient = new ClientInfo(clients[i]);
+					// console.log(currentClient);
+					$scope.clients.push(currentClient);
+				}
+				$scope.goSearch();
+				$scope.cancel();
+			});				
+		}			
+	}
+	httpCtx.open('GET', "/AJAX/fetchClientsInfo.php",true);
+	httpCtx.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	httpCtx.send(null);
+	// console.log($scope.clients);
+	
 });
 
 myApp.controller("AddClient", function($scope, $timeout, $uibModalInstance)

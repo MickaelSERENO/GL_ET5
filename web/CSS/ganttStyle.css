@@ -196,7 +196,7 @@
 textarea[disabled]
 {
 	outline:none;
-	background-color:white;
+	background:none;
 	border:none;
 }
 
@@ -204,7 +204,7 @@ input[type="text"][disabled]
 {
 	border:none;
 	outline:none;
-	background-color:white;
+	background:none;
 }
   
 .settingImg

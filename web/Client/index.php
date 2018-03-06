@@ -28,7 +28,7 @@
 
 		<link rel="stylesheet" type="text/css" href="/scripts/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="/CSS/style.css">
-				
+		<link rel="stylesheet" type="text/css" href="/CSS/ganttStyle.css">
 	</head>
 
 	<body ng-app="myApp">
@@ -76,6 +76,13 @@
 				<!-- <h1 class="mainTitle">Clients</h1> -->
 				<div ng-controller="ClientsCtrl">
 					<div class="container-fluid">
+						<div style="margin: 10px 10px">
+							<label>
+								<input ng-model="searchText" ng-keypress="keyPressSearch($event)" style="height: 50%;color: #989898;border-radius: 10px 10px" type="text" placeholder=" Recherche ... " name="Recherche"  maxlength="100">
+							</label>
+							<img ng-click="goSearch()" style="cursor:pointer;height: 30px;margin:0px 0px 5px 0px" src="/CSS/img/search.svg" alt="Recherche">
+						</div>
+
 						<div class="row">
 							<div class="col-md-4" id="listClients" >
 								<table class="table tableList">
@@ -88,26 +95,54 @@
 										</tr>
 									</thead>
 									<tbody>
-										<tr ng-repeat="client in clients">
+										<tr ng-repeat="client in displayedClient">
 											<td ng-click="getClientInfo(client)">{{ client.name }}</td>
 										</tr>
 									</tbody>
 								</table>
+
+								<div class="buttonInfo" ng-show="rank == 2 && selectedClient != null">
+									<div class="centerItem">
+										<ul class="list-inline text-center">
+											<div class="row errorMsg" ng-show="errorMsg != ''"><div class="col-md-12">{{errorMsg}}</div></div>
+											<div class="row">
+												<div class="col-md-2"> </div>
+												<div class="col-md-4" ng-show="!inModifyStats">
+													<li class="list-inline-item"> <div class="buttonItem" ng-click="modify()"> Modifier </div></li>
+												</div>
+												<div class="col-md-4" ng-show="inModifyStats">
+													<li class="list-inline-item"> <div class="buttonItem" ng-click="validate()"> Valider </div></li>
+												</div>
+												<div class="col-md-4" ng-show="inModifyStats">
+													<li class="list-inline-item"> <div class="buttonItem" ng-click="cancel()"> Annuler </div></li>
+												</div>
+												<div class="col-md-4" ng-show="inModifyStats==false">
+													<li class="list-inline-item"> <div class="buttonItem" ng-click="delete()"> Rendre inactif </div></li>
+												</div>
+												<div class="col-md-2"> </div>
+											</div>
+										</ul>
+									</div>
+								</div>
 							</div>
 							
 							<div class="col-md-8" id="infosClient" ng-show="selectedClient!=null">
 								<div class="row" id="descriptionClient">
 									<div class="row">
-										<h2> {{selectedClient.name}} </h2>
+										<h2> <span ng-show="!inModifyStats">{{selectedClient.name}}</span><input ng-show="inModifyStats" type="text" ng-model="name" class="darkBlue"></input></span></h2>
 									</div>
 									<div class="row">
-										<span> Description : {{ selectedClient.description }} </span>
+										Description :
 									</div>
 									<div class="row">
-										<span> Adresse email : {{ selectedClient.email}} </span>
+										 <textarea style="width:100%" ng-model="description" ng-class="{'darkBlue' : inModifyStats}" ng-disabled="!inModifyStats"></textarea>
 									</div>
 									<div class="row">
-										<span> Telephone : {{ selectedClient.telephone}} </span>
+										<span> Adresse email : <span ng-show="!inModifyStats">{{selectedClient.email}}</span><input ng-show="inModifyStats" type="text" ng-model="email" class="darkBlue"></input></span>
+
+									</div>
+									<div class="row">
+										<span> Telephone : <span ng-show="!inModifyStats">{{selectedClient.telephone}}</span><input ng-show="inModifyStats" type="text" ng-model="telephone" class="darkBlue"></input></span>
 									</div>
 								</div>
 								
